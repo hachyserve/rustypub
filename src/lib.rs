@@ -1,4 +1,4 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use serde_tuple::*;
 
 #[derive(Serialize_tuple, Deserialize_tuple, Debug)]
@@ -20,12 +20,16 @@ pub struct ActivityStream {
     pub context: ActivityStreamContext,
 }
 
-
 impl ActivityStream {
     pub const NAMESPACE: &'static str = "https://www.w3.org/ns/activitystreams";
     pub fn new() -> Self {
         return ActivityStream {
-            context: ActivityStreamContext { namespace: String::from("https://www.w3.org/ns/activitystreams"), lang: ActivityStreamContextLanguage { language: String::from("en") } }
+            context: ActivityStreamContext {
+                namespace: String::from("https://www.w3.org/ns/activitystreams"),
+                lang: ActivityStreamContextLanguage {
+                    language: String::from("en"),
+                },
+            },
         };
     }
 
@@ -102,14 +106,18 @@ mod tests {
     #[test]
     fn create_activity_stream_object() {
         let actual = ActivityStream::new();
-        let expected = String::from(r#"{"@context":["https://www.w3.org/ns/activitystreams",{"@language":"en"}]}"#);
+        let expected = String::from(
+            r#"{"@context":["https://www.w3.org/ns/activitystreams",{"@language":"en"}]}"#,
+        );
         assert_eq!(actual.json(), expected)
     }
 
     #[test]
     fn create_actor_object() {
         let actual = Actor::new();
-        let expected = String::from(r#"{"@context":["https://www.w3.org/ns/activitystreams",{"@language":"en"}],"type":"Person","id":"https://example.com/person/1234","name":"name"}"#);
+        let expected = String::from(
+            r#"{"@context":["https://www.w3.org/ns/activitystreams",{"@language":"en"}],"type":"Person","id":"https://example.com/person/1234","name":"name"}"#,
+        );
         assert_eq!(actual.json(), expected)
     }
 }
