@@ -18,12 +18,14 @@ pub struct ActivityStreamContextLanguage {
 pub struct ActivityStreamsObject {
     #[serde(rename = "@context")]
     pub context: ActivityStreamContext,
+    pub id: String,
+    pub name: String,
 }
 
 impl ActivityStreamsObject {
     pub const NAMESPACE: &'static str = "https://www.w3.org/ns/activitystreams";
     pub const TYPE: &'static str = "Object";
-    pub fn new() -> Self {
+    pub fn new(id: String, name: String) -> Self {
         return ActivityStreamsObject {
             context: ActivityStreamContext {
                 namespace: Self::NAMESPACE.to_string() + "#" + &*Self::TYPE.to_string(),
@@ -31,6 +33,8 @@ impl ActivityStreamsObject {
                     language: "en".to_string(),
                 },
             },
+            id,
+            name,
         };
     }
 
@@ -49,9 +53,6 @@ pub struct Actor {
 
     #[serde(rename = "type")]
     pub actor_type: String,
-    pub id: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub name: Option<String>,
     #[serde(rename = "preferredUsername")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub preferred_username: Option<String>,
@@ -70,12 +71,10 @@ pub struct Actor {
 }
 
 impl Actor {
-    pub fn new() -> Self {
+    pub fn new(id: String, name: String) -> Self {
         return Actor {
-            root: ActivityStreamsObject::new(),
+            root: ActivityStreamsObject::new(id, name),
             actor_type: "Person".to_string(),
-            id: "https://example.com/person/1234".to_string(),
-            name: Option::from("name".to_string()),
             preferred_username: None,
             summary: None,
             inbox: None,
@@ -106,18 +105,21 @@ mod tests {
 
     #[test]
     fn create_activity_stream_object() {
-        let actual = ActivityStreamsObject::new();
+        let actual = ActivityStreamsObject::new("id".to_string(), "name".to_string());
         let expected = String::from(
-            r#"{"@context":["https://www.w3.org/ns/activitystreams#Object",{"@language":"en"}]}"#,
+            r#"{"@context":["https://www.w3.org/ns/activitystreams#Object",{"@language":"en"}],"id":"id","name":"name"}"#,
         );
         assert_eq!(actual.json(), expected)
     }
 
     #[test]
     fn create_actor_object() {
-        let actual = Actor::new();
+        let actual = Actor::new(
+            "https://example.com/person/1234".to_string(),
+            "name".to_string(),
+        );
         let expected = String::from(
-            r#"{"@context":["https://www.w3.org/ns/activitystreams#Object",{"@language":"en"}],"type":"Person","id":"https://example.com/person/1234","name":"name"}"#,
+            r#"{"@context":["https://www.w3.org/ns/activitystreams#Object",{"@language":"en"}],"id":"https://example.com/person/1234","name":"name","type":"Person"}"#,
         );
         assert_eq!(actual.json(), expected)
     }
