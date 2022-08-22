@@ -1,3 +1,4 @@
+use http::Uri;
 use serde::{Deserialize, Serialize};
 use serde_tuple::*;
 
@@ -49,19 +50,18 @@ impl ActivityStreamsObject {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct ActivityStreamsUrl {
-    pub href: String,
+pub struct ActivityStreamsUri {
+    href: String,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "mediaType")]
     pub media_type: Option<String>,
 }
 
-impl ActivityStreamsUrl {
-    pub fn new(url: String /* URL type */) -> Self {
-        // TODO: parse url
-        return ActivityStreamsUrl {
-            href: url,
+impl ActivityStreamsUri {
+    pub fn new(uri: Uri) -> Self {
+        return ActivityStreamsUri {
+            href: uri.to_string(),
             media_type: None,
         };
     }
@@ -84,7 +84,7 @@ pub struct ActivityStreamsPreview {
     pub duration: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub url: Option<ActivityStreamsUrl>,
+    pub url: Option<ActivityStreamsUri>,
 }
 
 impl ActivityStreamsPreview {
@@ -138,7 +138,7 @@ pub struct ActivityStreamsLink {
     pub context: ActivityStreamContext,
 
     #[serde(flatten)]
-    url: ActivityStreamsUrl,
+    uri: ActivityStreamsUri,
 
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub rel: Vec<String>, // TODO: RFC5988 validation
@@ -161,13 +161,13 @@ pub struct ActivityStreamsLink {
 impl ActivityStreamsLink {
     pub const NAMESPACE: &'static str = "https://www.w3.org/ns/activitystreams";
     pub const TYPE: &'static str = "Link";
-    pub fn new(url: String, name: String) -> Self {
+    pub fn new(uri: Uri, name: String) -> Self {
         return ActivityStreamsLink {
             context: ActivityStreamContext {
                 namespace: Self::NAMESPACE.to_string() + "#" + Self::TYPE,
                 lang: None,
             },
-            url: ActivityStreamsUrl::new(url),
+            uri: ActivityStreamsUri::new(uri),
             rel: Vec::new(),
             name,
             hreflang: None,
@@ -187,6 +187,7 @@ impl ActivityStreamsLink {
 #[cfg(test)]
 mod tests {
     use crate::core::{ActivityStreamsLink, ActivityStreamsObject};
+    use http::Uri;
 
     #[test]
     fn create_activity_stream_object() {
@@ -200,7 +201,7 @@ mod tests {
     #[test]
     fn create_link() {
         let actual = ActivityStreamsLink::new(
-            "http://example.org/abc".to_string(),
+            "http://example.org/abc".parse::<Uri>().unwrap(),
             "An example link".to_string(),
         );
         let expected = String::from(
