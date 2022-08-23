@@ -259,7 +259,10 @@ impl ActivityStreamsLinkBuilder {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::{ActivityStreamsLinkBuilder, ActivityStreamsObject};
+    use crate::core::{
+        ActivityStreamsLinkBuilder, ActivityStreamsObject, ActivityStreamsPreviewBuilder,
+        ActivityStreamsUriBuilder,
+    };
     use http::Uri;
 
     #[test]
@@ -283,5 +286,23 @@ mod tests {
             r#"{"@context":["https://www.w3.org/ns/activitystreams#Link"],"href":"http://example.org/abc","name":"An example link","hreflang":"en"}"#,
         );
         assert_eq!(actual.to_json(), expected)
+    }
+
+    #[test]
+    fn create_preview() {
+        let actual = ActivityStreamsPreviewBuilder::new("Video".to_string(), "Trailer".to_string())
+            .duration("PT1M".to_string())
+            .url(
+                ActivityStreamsUriBuilder::new(
+                    "http://example.org/trailer.mkv".parse::<Uri>().unwrap(),
+                )
+                .media_type("video/mkv".to_string())
+                .build(),
+            )
+            .build();
+        let expected = String::from(
+            r#"{"type":"Video","name":"Trailer","duration":"PT1M","url":{"href":"http://example.org/trailer.mkv","mediaType":"video/mkv"}}"#,
+        );
+        assert_eq!(actual.to_json(), expected);
     }
 }
