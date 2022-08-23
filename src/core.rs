@@ -88,19 +88,47 @@ pub struct ActivityStreamsPreview {
 }
 
 impl ActivityStreamsPreview {
-    pub fn new(preview_type: String, name: String) -> Self {
-        return ActivityStreamsPreview {
-            preview_type,
-            name,
-            duration: None,
-            url: None,
-        };
-    }
-
     pub fn to_json(&self) -> String {
         let serialized = serde_json::to_string(&self).unwrap();
         println!("serialized = {}", serialized);
         return serialized;
+    }
+}
+
+pub struct ActivityStreamsPreviewBuilder {
+    preview_type: String,
+    name: String,
+    duration: Option<String>,
+    url: Option<ActivityStreamsUrl>,
+}
+
+impl ActivityStreamsPreviewBuilder {
+    pub fn new(preview_type: String, name: String) -> Self {
+        ActivityStreamsPreviewBuilder {
+            preview_type,
+            name,
+            duration: None,
+            url: None,
+        }
+    }
+
+    pub fn duration(mut self, dur: String) -> Self {
+        self.duration = Some(dur);
+        self
+    }
+
+    pub fn url(mut self, url: ActivityStreamsUrl) -> Self {
+        self.url = Some(url);
+        self
+    }
+
+    pub fn build(self) -> ActivityStreamsPreview {
+        ActivityStreamsPreview {
+            preview_type: self.preview_type,
+            name: self.name,
+            duration: self.duration,
+            url: self.url,
+        }
     }
 }
 
