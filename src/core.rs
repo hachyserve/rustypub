@@ -2,6 +2,19 @@ use http::Uri;
 use serde::{Deserialize, Serialize};
 use serde_tuple::*;
 
+trait ActivityStreamsSerialize
+where
+    Self: Serialize,
+{
+    fn to_json(&self) -> String {
+        let serialized = serde_json::to_string(&self).unwrap();
+        println!("serialized = {}", serialized);
+        serialized
+    }
+
+    fn from_json(json: String) -> Self;
+}
+
 #[derive(Serialize_tuple, Deserialize_tuple, Debug)]
 pub struct ActivityStreamsContext {
     pub namespace: String,
@@ -39,13 +52,11 @@ impl ActivityStreamsObject {
             name,
         };
     }
+}
 
-    // TODO: make this a trait
-    pub fn to_json(&self) -> String {
-        let serialized = serde_json::to_string(&self).unwrap();
-        println!("serialized = {}", serialized);
-
-        return serialized;
+impl ActivityStreamsSerialize for ActivityStreamsObject {
+    fn from_json(json: String) -> Self {
+        ActivityStreamsObject::new("todo".to_string(), "unimplemented".to_string())
     }
 }
 
@@ -58,11 +69,12 @@ pub struct ActivityStreamsUri {
     media_type: Option<String>,
 }
 
-impl ActivityStreamsUri {
-    pub fn to_json(&self) -> String {
-        let serialized = serde_json::to_string(&self).unwrap();
-        println!("serialized = {}", serialized);
-        return serialized;
+impl ActivityStreamsSerialize for ActivityStreamsUri {
+    fn from_json(json: String) -> Self {
+        ActivityStreamsUri {
+            href: "todo".to_string(),
+            media_type: None,
+        }
     }
 }
 
@@ -106,11 +118,9 @@ pub struct ActivityStreamsPreview {
     url: Option<ActivityStreamsUri>,
 }
 
-impl ActivityStreamsPreview {
-    pub fn to_json(&self) -> String {
-        let serialized = serde_json::to_string(&self).unwrap();
-        println!("serialized = {}", serialized);
-        return serialized;
+impl ActivityStreamsSerialize for ActivityStreamsPreview {
+    fn from_json(json: String) -> Self {
+        ActivityStreamsPreviewBuilder::new("todo".to_string(), "unimplemented".to_string()).build()
     }
 }
 
@@ -180,11 +190,12 @@ pub struct ActivityStreamsLink {
 impl ActivityStreamsLink {
     pub const NAMESPACE: &'static str = "https://www.w3.org/ns/activitystreams";
     pub const TYPE: &'static str = "Link";
+}
 
-    pub fn to_json(&self) -> String {
-        let serialized = serde_json::to_string(&self).unwrap();
-        println!("serialized = {}", serialized);
-        return serialized;
+impl ActivityStreamsSerialize for ActivityStreamsLink {
+    fn from_json(json: String) -> Self {
+        ActivityStreamsLinkBuilder::new("todo".parse::<Uri>().unwrap(), "unimplemented".to_string())
+            .build()
     }
 }
 
@@ -261,7 +272,7 @@ impl ActivityStreamsLinkBuilder {
 mod tests {
     use crate::core::{
         ActivityStreamsLinkBuilder, ActivityStreamsObject, ActivityStreamsPreviewBuilder,
-        ActivityStreamsUriBuilder,
+        ActivityStreamsSerialize, ActivityStreamsUriBuilder,
     };
     use http::Uri;
 
