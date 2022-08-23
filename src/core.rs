@@ -2,6 +2,10 @@ use http::Uri;
 use serde::{Deserialize, Serialize};
 use serde_tuple::*;
 
+use crate::extended::Actor;
+
+const NAMESPACE: &str = "https://www.w3.org/ns/activitystreams";
+
 trait ActivityStreamsSerialize
 where
     Self: Serialize,
@@ -17,40 +21,62 @@ where
 
 #[derive(Serialize_tuple, Deserialize_tuple, Debug)]
 pub struct ActivityStreamsContext {
-    pub namespace: String,
+    namespace: String,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub lang: Option<ActivityStreamsContextLanguage>,
+    language: Option<ActivityStreamsContextLanguage>,
+}
+
+impl ActivityStreamsContext {
+    pub fn new() -> Self {
+        ActivityStreamsContext {
+            namespace: NAMESPACE.to_string(),
+            language: None,
+        }
+    }
+
+    pub fn language(mut self, language: ActivityStreamsContextLanguage) -> Self {
+        self.language = Some(language);
+        self
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ActivityStreamsContextLanguage {
     #[serde(rename = "@language")]
-    pub language: String,
+    language: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ActivityStreamsObject {
     #[serde(rename = "@context")]
-    pub context: ActivityStreamsContext,
-    pub id: String,
-    pub name: String,
+    context: ActivityStreamsContext,
+    #[serde(rename = "type")]
+    object_type: String,
+    id: String,
+    name: String,
 }
 
 impl ActivityStreamsObject {
-    pub const NAMESPACE: &'static str = "https://www.w3.org/ns/activitystreams";
-    pub const TYPE: &'static str = "Object";
     pub fn new(id: String, name: String) -> Self {
-        return ActivityStreamsObject {
-            context: ActivityStreamsContext {
-                namespace: Self::NAMESPACE.to_string() + "#" + Self::TYPE,
-                lang: Some(ActivityStreamsContextLanguage {
-                    language: "en".to_string(),
-                }),
-            },
+        ActivityStreamsObject {
+            context: ActivityStreamsContext::new(),
+            object_type: "Object".to_string(),
             id,
             name,
-        };
+        }
+    }
+
+    pub fn language(mut self, lang: String) -> Self {
+        self.context = self
+            .context
+            .language(ActivityStreamsContextLanguage { language: lang });
+        self
+    }
+
+    pub fn object_type(mut self, object_type: String) -> Self {
+        self.object_type = object_type;
+        self
     }
 }
 
@@ -106,10 +132,8 @@ impl ActivityStreamsUriBuilder {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ActivityStreamsPreview {
-    #[serde(rename = "type")]
-    preview_type: String,
-
-    name: String,
+    #[serde(flatten)]
+    base: ActivityStreamsObject,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     duration: Option<String>,
@@ -125,8 +149,7 @@ impl ActivityStreamsSerialize for ActivityStreamsPreview {
 }
 
 pub struct ActivityStreamsPreviewBuilder {
-    preview_type: String,
-    name: String,
+    base: ActivityStreamsObject,
     duration: Option<String>,
     url: Option<ActivityStreamsUri>,
 }
@@ -134,8 +157,7 @@ pub struct ActivityStreamsPreviewBuilder {
 impl ActivityStreamsPreviewBuilder {
     pub fn new(preview_type: String, name: String) -> Self {
         ActivityStreamsPreviewBuilder {
-            preview_type,
-            name,
+            base: ActivityStreamsObject::new("todo_id".to_string(), name).object_type(preview_type),
             duration: None,
             url: None,
         }
@@ -153,8 +175,7 @@ impl ActivityStreamsPreviewBuilder {
 
     pub fn build(self) -> ActivityStreamsPreview {
         ActivityStreamsPreview {
-            preview_type: self.preview_type,
-            name: self.name,
+            base: self.base,
             duration: self.duration,
             url: self.url,
         }
@@ -165,6 +186,9 @@ impl ActivityStreamsPreviewBuilder {
 pub struct ActivityStreamsLink {
     #[serde(rename = "@context")]
     context: ActivityStreamsContext,
+
+    #[serde(rename = "type")]
+    link_type: String,
 
     #[serde(flatten)]
     url: ActivityStreamsUri,
@@ -188,7 +212,6 @@ pub struct ActivityStreamsLink {
 }
 
 impl ActivityStreamsLink {
-    pub const NAMESPACE: &'static str = "https://www.w3.org/ns/activitystreams";
     pub const TYPE: &'static str = "Link";
 }
 
@@ -213,12 +236,7 @@ pub struct ActivityStreamsLinkBuilder {
 impl ActivityStreamsLinkBuilder {
     pub fn new(url: Uri, name: String) -> Self {
         ActivityStreamsLinkBuilder {
-            context: ActivityStreamsContext {
-                namespace: ActivityStreamsLink::NAMESPACE.to_string()
-                    + "#"
-                    + ActivityStreamsLink::TYPE,
-                lang: None,
-            },
+            context: ActivityStreamsContext::new(),
             url: ActivityStreamsUriBuilder::new(url).build(),
             rel: Vec::new(),
             name,
@@ -257,6 +275,7 @@ impl ActivityStreamsLinkBuilder {
     pub fn build(self) -> ActivityStreamsLink {
         ActivityStreamsLink {
             context: self.context,
+            link_type: ActivityStreamsLink::TYPE.to_string(),
             url: self.url,
             rel: self.rel,
             name: self.name,
@@ -269,39 +288,131 @@ impl ActivityStreamsLinkBuilder {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct ActivityStreamsActivity {}
+pub struct ActivityStreamsActivity {
+    #[serde(flatten)]
+    base: ActivityStreamsObject,
+
+    summary: String,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    actor: Option<Actor>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    object: Option<ActivityStreamsObject>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    target: Option<String>, // TODO: ActivityStreamsTarget
+    #[serde(skip_serializing_if = "Option::is_none")]
+    result: Option<String>, // TODO: ActivityStreamsResult
+    #[serde(skip_serializing_if = "Option::is_none")]
+    origin: Option<String>, // TODO: ActivityStreamsOrigin
+    #[serde(skip_serializing_if = "Option::is_none")]
+    instrument: Option<String>, // TODO: ActivityStreamsInstrument
+}
+
+impl ActivityStreamsActivity {
+    pub const TYPE: &'static str = "Activity";
+}
 
 impl ActivityStreamsSerialize for ActivityStreamsActivity {
     fn from_json(json: String) -> Self {
-        ActivityStreamsActivity {}
+        ActivityStreamsActivityBuilder::new(
+            ActivityStreamsObject::new("todo".to_string(), "unimplemented".to_string())
+                .object_type(ActivityStreamsActivity::TYPE.to_string()),
+            "not implemented yet".to_string(),
+        )
+        .build()
     }
 }
 
-pub struct ActivityStreamsActivityBuilder {}
+pub struct ActivityStreamsActivityBuilder {
+    base: ActivityStreamsObject,
+    summary: String,
+    actor: Option<Actor>,
+    object: Option<ActivityStreamsObject>,
+    target: Option<String>,
+    result: Option<String>,
+    origin: Option<String>,
+    instrument: Option<String>,
+}
 
 impl ActivityStreamsActivityBuilder {
-    pub fn new() -> Self {
-        ActivityStreamsActivityBuilder {}
+    pub fn new(base: ActivityStreamsObject, summary: String) -> Self {
+        ActivityStreamsActivityBuilder {
+            base,
+            summary,
+            actor: None,
+            object: None,
+            target: None,
+            result: None,
+            origin: None,
+            instrument: None,
+        }
     }
 
-    pub fn build() -> ActivityStreamsActivity {
-        ActivityStreamsActivity {}
+    pub fn actor(mut self, actor: Actor) -> Self {
+        self.actor = Some(actor);
+        self
+    }
+
+    pub fn object(mut self, object: ActivityStreamsObject) -> Self {
+        self.object = Some(object);
+        self
+    }
+
+    pub fn target(mut self, target: String) -> Self {
+        self.target = Some(target);
+        self
+    }
+
+    pub fn result(mut self, result: String) -> Self {
+        self.result = Some(result);
+        self
+    }
+
+    pub fn origin(mut self, origin: String) -> Self {
+        self.origin = Some(origin);
+        self
+    }
+
+    pub fn instrument(mut self, instrument: String) -> Self {
+        self.instrument = Some(instrument);
+        self
+    }
+
+    pub fn build(self) -> ActivityStreamsActivity {
+        ActivityStreamsActivity {
+            base: self
+                .base
+                .object_type(ActivityStreamsActivity::TYPE.to_string()),
+            summary: self.summary,
+            actor: self.actor,
+            object: self.object,
+            target: self.target,
+            result: self.result,
+            origin: self.origin,
+            instrument: self.instrument,
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::core::{
-        ActivityStreamsLinkBuilder, ActivityStreamsObject, ActivityStreamsPreviewBuilder,
-        ActivityStreamsSerialize, ActivityStreamsUriBuilder,
+    use crate::{
+        core::{
+            ActivityStreamsLinkBuilder, ActivityStreamsObject, ActivityStreamsPreviewBuilder,
+            ActivityStreamsSerialize, ActivityStreamsUriBuilder,
+        },
+        extended::ActorBuilder,
     };
     use http::Uri;
 
+    use super::ActivityStreamsActivityBuilder;
+
     #[test]
     fn create_activity_stream_object() {
-        let actual = ActivityStreamsObject::new("id".to_string(), "name".to_string());
+        let actual = ActivityStreamsObject::new("id".to_string(), "name".to_string())
+            .language("en".to_string());
         let expected = String::from(
-            r#"{"@context":["https://www.w3.org/ns/activitystreams#Object",{"@language":"en"}],"id":"id","name":"name"}"#,
+            r#"{"@context":["https://www.w3.org/ns/activitystreams",{"@language":"en"}],"type":"Object","id":"id","name":"name"}"#,
         );
         assert_eq!(actual.to_json(), expected)
     }
@@ -315,7 +426,7 @@ mod tests {
         .hreflang("en".to_string())
         .build();
         let expected = String::from(
-            r#"{"@context":["https://www.w3.org/ns/activitystreams#Link"],"href":"http://example.org/abc","name":"An example link","hreflang":"en"}"#,
+            r#"{"@context":["https://www.w3.org/ns/activitystreams"],"type":"Link","href":"http://example.org/abc","name":"An example link","hreflang":"en"}"#,
         );
         assert_eq!(actual.to_json(), expected)
     }
@@ -333,7 +444,33 @@ mod tests {
             )
             .build();
         let expected = String::from(
-            r#"{"type":"Video","name":"Trailer","duration":"PT1M","url":{"href":"http://example.org/trailer.mkv","mediaType":"video/mkv"}}"#,
+            r#"{"@context":["https://www.w3.org/ns/activitystreams"],"type":"Video","id":"todo_id","name":"Trailer","duration":"PT1M","url":{"href":"http://example.org/trailer.mkv","mediaType":"video/mkv"}}"#,
+        );
+        assert_eq!(actual.to_json(), expected);
+    }
+
+    #[test]
+    fn create_activity() {
+        let actual = ActivityStreamsActivityBuilder::new(
+            ActivityStreamsObject::new("id".to_string(), "name".to_string()),
+            "Sally did something to a note".to_string(),
+        )
+        .actor(
+            ActorBuilder::new(
+                "Person".to_string(),
+                "sally".to_string(),
+                "Sally".to_string(),
+            )
+            .build(),
+        )
+        .object(
+            ActivityStreamsObject::new("note".to_string(), "A Note".to_string())
+                .object_type("Note".to_string()),
+        )
+        .build();
+
+        let expected = String::from(
+            r#"{"@context":["https://www.w3.org/ns/activitystreams"],"type":"Activity","id":"id","name":"name","summary":"Sally did something to a note","actor":{"@context":["https://www.w3.org/ns/activitystreams"],"type":"Person","id":"sally","name":"Sally"},"object":{"@context":["https://www.w3.org/ns/activitystreams"],"type":"Note","id":"note","name":"A Note"}}"#,
         );
         assert_eq!(actual.to_json(), expected);
     }
