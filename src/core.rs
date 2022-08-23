@@ -30,7 +30,7 @@ impl ActivityStreamsObject {
     pub fn new(id: String, name: String) -> Self {
         return ActivityStreamsObject {
             context: ActivityStreamContext {
-                namespace: Self::NAMESPACE.to_string() + "#" + &*Self::TYPE.to_string(),
+                namespace: Self::NAMESPACE.to_string() + "#" + Self::TYPE,
                 lang: Some(ActivityStreamContextLanguage {
                     language: "en".to_string(),
                 }),
