@@ -268,6 +268,27 @@ impl ActivityStreamsLinkBuilder {
     }
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ActivityStreamsActivity {}
+
+impl ActivityStreamsSerialize for ActivityStreamsActivity {
+    fn from_json(json: String) -> Self {
+        ActivityStreamsActivity {}
+    }
+}
+
+pub struct ActivityStreamsActivityBuilder {}
+
+impl ActivityStreamsActivityBuilder {
+    pub fn new() -> Self {
+        ActivityStreamsActivityBuilder {}
+    }
+
+    pub fn build() -> ActivityStreamsActivity {
+        ActivityStreamsActivity {}
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::core::{
