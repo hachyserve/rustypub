@@ -171,7 +171,7 @@ mod tests {
     }
 
     #[test]
-    fn create_list() {
+    fn create_link() {
         let actual = ActivityStreamsLink::new(
             "http://example.org/abc".parse::<Uri>().unwrap(),
             "An example link".to_string(),
