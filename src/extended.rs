@@ -1,4 +1,4 @@
-use crate::core::ActivityStreamsObject;
+use crate::core::{ActivityStreamsObject, ActivityStreamsSerialize};
 
 use serde::{Deserialize, Serialize};
 
@@ -26,12 +26,9 @@ pub struct Actor {
     liked: Option<String>,
 }
 
-impl Actor {
-    pub fn to_json(&self) -> String {
-        let serialized = serde_json::to_string(&self).unwrap();
-        println!("serialized = {}", serialized);
-
-        return serialized;
+impl ActivityStreamsSerialize for Actor {
+    fn from_json(json: String) -> Self {
+        ActorBuilder::new("todo".to_string(), "unimplemented".to_string()).build()
     }
 }
 
@@ -116,6 +113,7 @@ impl ActorBuilder {
 
 #[cfg(test)]
 mod tests {
+    use crate::core::ActivityStreamsSerialize;
     use crate::extended::ActorBuilder;
 
     #[test]
