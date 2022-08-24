@@ -6,7 +6,7 @@ use crate::extended::Actor;
 
 const NAMESPACE: &str = "https://www.w3.org/ns/activitystreams";
 
-trait ActivityStreamsSerialize
+pub trait ActivityStreamsSerialize
 where
     Self: Serialize,
 {
