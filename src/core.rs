@@ -2,7 +2,7 @@ use http::Uri;
 use serde::{Deserialize, Serialize};
 use serde_tuple::*;
 
-trait ActivityStreamsSerialize
+pub trait ActivityStreamsSerialize
 where
     Self: Serialize,
 {
