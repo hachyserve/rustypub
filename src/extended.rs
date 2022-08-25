@@ -1,4 +1,4 @@
-use crate::core::{ActivityStreamsObject, ActivityStreamsSerialize};
+use crate::core::{ActivityStreamsObject, ActivityStreamsObjectBuilder, ActivityStreamsSerialize};
 
 use serde::{Deserialize, Serialize};
 
@@ -50,7 +50,10 @@ pub struct ActorBuilder {
 impl ActorBuilder {
     pub fn new(actor_type: String, id: String, name: String) -> Self {
         ActorBuilder {
-            base: ActivityStreamsObject::new(actor_type).id(id).name(name),
+            base: ActivityStreamsObjectBuilder::new(actor_type)
+                .id(id)
+                .name(name)
+                .build(),
             preferred_username: None,
             summary: None,
             inbox: None,

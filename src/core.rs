@@ -41,8 +41,8 @@ impl ActivityStreamsContext {
         }
     }
 
-    pub fn language(mut self, language: ActivityStreamsContextLanguage) -> Self {
-        self.language = Some(language);
+    pub fn language(mut self, language: String) -> Self {
+        self.language = Some(ActivityStreamsContextLanguage { language });
         self
     }
 }
@@ -65,14 +65,26 @@ pub struct ActivityStreamsObject {
     name: Option<String>,
 }
 
-impl ActivityStreamsObject {
+pub struct ActivityStreamsObjectBuilder {
+    context: ActivityStreamsContext,
+    object_type: String,
+    id: Option<String>,
+    name: Option<String>,
+    // TODO: more fields
+}
+
+impl ActivityStreamsObjectBuilder {
     pub fn new(object_type: String) -> Self {
-        ActivityStreamsObject {
+        ActivityStreamsObjectBuilder {
             context: ActivityStreamsContext::new(),
             object_type,
             id: None,
             name: None,
         }
+    }
+
+    pub fn context<'a>(&'a mut self) -> &'a mut ActivityStreamsContext {
+        &mut self.context
     }
 
     pub fn id(mut self, id: String) -> Self {
@@ -85,17 +97,19 @@ impl ActivityStreamsObject {
         self
     }
 
-    pub fn language(mut self, lang: String) -> Self {
-        self.context = self
-            .context
-            .language(ActivityStreamsContextLanguage { language: lang });
-        self
+    pub fn build(self) -> ActivityStreamsObject {
+        ActivityStreamsObject {
+            context: self.context,
+            object_type: self.object_type,
+            id: self.id,
+            name: self.name,
+        }
     }
 }
 
 impl ActivityStreamsSerialize for ActivityStreamsObject {
     fn from_json(json: String) -> Self {
-        ActivityStreamsObject::new("Object".to_string())
+        ActivityStreamsObjectBuilder::new("Object".to_string()).build()
     }
 }
 
@@ -170,7 +184,9 @@ pub struct ActivityStreamsPreviewBuilder {
 impl ActivityStreamsPreviewBuilder {
     pub fn new(preview_type: String, name: String) -> Self {
         ActivityStreamsPreviewBuilder {
-            base: ActivityStreamsObject::new(preview_type).name(name),
+            base: ActivityStreamsObjectBuilder::new(preview_type)
+                .name(name)
+                .build(),
             duration: None,
             url: None,
         }
@@ -345,7 +361,8 @@ pub struct ActivityStreamsActivityBuilder {
 impl ActivityStreamsActivityBuilder {
     pub fn new(summary: String) -> Self {
         ActivityStreamsActivityBuilder {
-            base: ActivityStreamsObject::new(ActivityStreamsActivity::TYPE.to_string()),
+            base: ActivityStreamsObjectBuilder::new(ActivityStreamsActivity::TYPE.to_string())
+                .build(),
             summary,
             actor: None,
             object: None,
@@ -404,8 +421,8 @@ impl ActivityStreamsActivityBuilder {
 mod tests {
     use crate::{
         core::{
-            ActivityStreamsLinkBuilder, ActivityStreamsObject, ActivityStreamsPreviewBuilder,
-            ActivityStreamsSerialize, ActivityStreamsUriBuilder,
+            ActivityStreamsLinkBuilder, ActivityStreamsObjectBuilder,
+            ActivityStreamsPreviewBuilder, ActivityStreamsSerialize, ActivityStreamsUriBuilder,
         },
         extended::ActorBuilder,
     };
@@ -415,10 +432,11 @@ mod tests {
 
     #[test]
     fn create_activity_stream_object() {
-        let actual = ActivityStreamsObject::new("Object".to_string())
+        let mut builder = ActivityStreamsObjectBuilder::new("Object".to_string())
             .id("id".to_string())
-            .name("name".to_string())
-            .language("en".to_string());
+            .name("name".to_string());
+        builder.context().language("en".to_string());
+        let actual = builder.build();
         let expected = String::from(
             r#"{
   "@context": [
@@ -499,9 +517,10 @@ mod tests {
                     .build(),
                 )
                 .object(
-                    ActivityStreamsObject::new("Note".to_string())
+                    ActivityStreamsObjectBuilder::new("Note".to_string())
                         .id("note".to_string())
-                        .name("A Note".to_string()),
+                        .name("A Note".to_string())
+                        .build(),
                 )
                 .build();
 
