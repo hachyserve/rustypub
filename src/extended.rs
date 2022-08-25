@@ -45,7 +45,7 @@ pub struct ActorBuilder {
 impl ActorBuilder {
     pub fn new(base: ActivityStreamsObject) -> Self {
         ActorBuilder {
-            base: base,
+            base: ActivityStreamsObject::new(actor_type).id(id).name(name),
             preferred_username: None,
             summary: None,
             inbox: None,

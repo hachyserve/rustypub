@@ -135,6 +135,10 @@ impl ActivityStreamsObjectBuilder {
     pub fn object_type(mut self, object_type: String) -> Self {
         self.object_type = Some(object_type);
         self
+=======
+    pub fn id(mut self, id: String) -> Self {
+        self.id = Some(id);
+        self
     }
 
     pub fn id(mut self, id: Uri) -> Self {
