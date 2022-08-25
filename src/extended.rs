@@ -126,8 +126,16 @@ mod tests {
         .preferred_username("dma".to_string())
         .build();
         let expected = String::from(
-            r#"{"@context":["https://www.w3.org/ns/activitystreams"],"type":"Person","id":"https://example.com/person/1234","name":"name","preferredUsername":"dma"}"#,
+            r#"{
+  "@context": [
+    "https://www.w3.org/ns/activitystreams"
+  ],
+  "type": "Person",
+  "id": "https://example.com/person/1234",
+  "name": "name",
+  "preferredUsername": "dma"
+}"#,
         );
-        assert_eq!(actual.to_json(), expected)
+        assert_eq!(actual.to_json_pretty(), expected)
     }
 }

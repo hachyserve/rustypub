@@ -16,6 +16,12 @@ where
         serialized
     }
 
+    fn to_json_pretty(&self) -> String {
+        let serialized = serde_json::to_string_pretty(&self).unwrap();
+        println!("serialized = {}", serialized);
+        serialized
+    }
+
     fn from_json(json: String) -> Self;
 }
 
@@ -412,9 +418,19 @@ mod tests {
         let actual = ActivityStreamsObject::new("id".to_string(), "name".to_string())
             .language("en".to_string());
         let expected = String::from(
-            r#"{"@context":["https://www.w3.org/ns/activitystreams",{"@language":"en"}],"type":"Object","id":"id","name":"name"}"#,
+            r#"{
+  "@context": [
+    "https://www.w3.org/ns/activitystreams",
+    {
+      "@language": "en"
+    }
+  ],
+  "type": "Object",
+  "id": "id",
+  "name": "name"
+}"#,
         );
-        assert_eq!(actual.to_json(), expected)
+        assert_eq!(actual.to_json_pretty(), expected)
     }
 
     #[test]
@@ -426,9 +442,17 @@ mod tests {
         .hreflang("en".to_string())
         .build();
         let expected = String::from(
-            r#"{"@context":["https://www.w3.org/ns/activitystreams"],"type":"Link","href":"http://example.org/abc","name":"An example link","hreflang":"en"}"#,
+            r#"{
+  "@context": [
+    "https://www.w3.org/ns/activitystreams"
+  ],
+  "type": "Link",
+  "href": "http://example.org/abc",
+  "name": "An example link",
+  "hreflang": "en"
+}"#,
         );
-        assert_eq!(actual.to_json(), expected)
+        assert_eq!(actual.to_json_pretty(), expected)
     }
 
     #[test]
@@ -444,9 +468,21 @@ mod tests {
             )
             .build();
         let expected = String::from(
-            r#"{"@context":["https://www.w3.org/ns/activitystreams"],"type":"Video","id":"todo_id","name":"Trailer","duration":"PT1M","url":{"href":"http://example.org/trailer.mkv","mediaType":"video/mkv"}}"#,
+            r#"{
+  "@context": [
+    "https://www.w3.org/ns/activitystreams"
+  ],
+  "type": "Video",
+  "id": "todo_id",
+  "name": "Trailer",
+  "duration": "PT1M",
+  "url": {
+    "href": "http://example.org/trailer.mkv",
+    "mediaType": "video/mkv"
+  }
+}"#,
         );
-        assert_eq!(actual.to_json(), expected);
+        assert_eq!(actual.to_json_pretty(), expected);
     }
 
     #[test]
@@ -470,8 +506,32 @@ mod tests {
         .build();
 
         let expected = String::from(
-            r#"{"@context":["https://www.w3.org/ns/activitystreams"],"type":"Activity","id":"id","name":"name","summary":"Sally did something to a note","actor":{"@context":["https://www.w3.org/ns/activitystreams"],"type":"Person","id":"sally","name":"Sally"},"object":{"@context":["https://www.w3.org/ns/activitystreams"],"type":"Note","id":"note","name":"A Note"}}"#,
+            r#"{
+  "@context": [
+    "https://www.w3.org/ns/activitystreams"
+  ],
+  "type": "Activity",
+  "id": "id",
+  "name": "name",
+  "summary": "Sally did something to a note",
+  "actor": {
+    "@context": [
+      "https://www.w3.org/ns/activitystreams"
+    ],
+    "type": "Person",
+    "id": "sally",
+    "name": "Sally"
+  },
+  "object": {
+    "@context": [
+      "https://www.w3.org/ns/activitystreams"
+    ],
+    "type": "Note",
+    "id": "note",
+    "name": "A Note"
+  }
+}"#,
         );
-        assert_eq!(actual.to_json(), expected);
+        assert_eq!(actual.to_json_pretty(), expected);
     }
 }
