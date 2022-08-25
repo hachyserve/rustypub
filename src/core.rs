@@ -442,9 +442,17 @@ mod tests {
         .hreflang("en".to_string())
         .build();
         let expected = String::from(
-            r#"{"@context":["https://www.w3.org/ns/activitystreams"],"type":"Link","href":"http://example.org/abc","name":"An example link","hreflang":"en"}"#,
+            r#"{
+  "@context": [
+    "https://www.w3.org/ns/activitystreams"
+  ],
+  "type": "Link",
+  "href": "http://example.org/abc",
+  "name": "An example link",
+  "hreflang": "en"
+}"#,
         );
-        assert_eq!(actual.to_json(), expected)
+        assert_eq!(actual.to_json_pretty(), expected)
     }
 
     #[test]
@@ -460,9 +468,21 @@ mod tests {
             )
             .build();
         let expected = String::from(
-            r#"{"@context":["https://www.w3.org/ns/activitystreams"],"type":"Video","id":"todo_id","name":"Trailer","duration":"PT1M","url":{"href":"http://example.org/trailer.mkv","mediaType":"video/mkv"}}"#,
+            r#"{
+  "@context": [
+    "https://www.w3.org/ns/activitystreams"
+  ],
+  "type": "Video",
+  "id": "todo_id",
+  "name": "Trailer",
+  "duration": "PT1M",
+  "url": {
+    "href": "http://example.org/trailer.mkv",
+    "mediaType": "video/mkv"
+  }
+}"#,
         );
-        assert_eq!(actual.to_json(), expected);
+        assert_eq!(actual.to_json_pretty(), expected);
     }
 
     #[test]
@@ -486,8 +506,32 @@ mod tests {
         .build();
 
         let expected = String::from(
-            r#"{"@context":["https://www.w3.org/ns/activitystreams"],"type":"Activity","id":"id","name":"name","summary":"Sally did something to a note","actor":{"@context":["https://www.w3.org/ns/activitystreams"],"type":"Person","id":"sally","name":"Sally"},"object":{"@context":["https://www.w3.org/ns/activitystreams"],"type":"Note","id":"note","name":"A Note"}}"#,
+            r#"{
+  "@context": [
+    "https://www.w3.org/ns/activitystreams"
+  ],
+  "type": "Activity",
+  "id": "id",
+  "name": "name",
+  "summary": "Sally did something to a note",
+  "actor": {
+    "@context": [
+      "https://www.w3.org/ns/activitystreams"
+    ],
+    "type": "Person",
+    "id": "sally",
+    "name": "Sally"
+  },
+  "object": {
+    "@context": [
+      "https://www.w3.org/ns/activitystreams"
+    ],
+    "type": "Note",
+    "id": "note",
+    "name": "A Note"
+  }
+}"#,
         );
-        assert_eq!(actual.to_json(), expected);
+        assert_eq!(actual.to_json_pretty(), expected);
     }
 }
