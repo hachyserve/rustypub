@@ -1,5 +1,5 @@
 use crate::core::{ActivityStreamsObject, ActivityStreamsObjectBuilder, ActivityStreamsSerialize};
-
+use http::Uri;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -26,12 +26,7 @@ pub struct Actor {
 
 impl ActivityStreamsSerialize for Actor {
     fn from_json(json: String) -> Self {
-        ActorBuilder::new(
-            "Actor".to_string(),
-            "todo".to_string(),
-            "unimplemented".to_string(),
-        )
-        .build()
+        ActorBuilder::new(ActivityStreamsObjectBuilder::new().build()).build()
     }
 }
 
@@ -48,12 +43,9 @@ pub struct ActorBuilder {
 }
 
 impl ActorBuilder {
-    pub fn new(actor_type: String, id: String, name: String) -> Self {
+    pub fn new(base: ActivityStreamsObject) -> Self {
         ActorBuilder {
-            base: ActivityStreamsObjectBuilder::new(actor_type)
-                .id(id)
-                .name(name)
-                .build(),
+            base: base,
             preferred_username: None,
             summary: None,
             inbox: None,
@@ -116,15 +108,18 @@ impl ActorBuilder {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::ActivityStreamsSerialize;
+    use crate::core::{ActivityStreamsObjectBuilder, ActivityStreamsSerialize};
     use crate::extended::ActorBuilder;
+    use http::Uri;
 
     #[test]
     fn create_actor_object() {
         let actual = ActorBuilder::new(
-            "Person".to_string(),
-            "https://example.com/person/1234".to_string(),
-            "name".to_string(),
+            ActivityStreamsObjectBuilder::new()
+                .object_type("Person".to_string())
+                .id("https://example.com/person/1234".parse::<Uri>().unwrap())
+                .name("name".to_string())
+                .build(),
         )
         .preferred_username("dma".to_string())
         .build();
