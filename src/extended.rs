@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Actor {
     #[serde(flatten)]
-    root: ActivityStreamsObject,
+    base: ActivityStreamsObject,
 
     #[serde(rename = "preferredUsername")]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -36,7 +36,7 @@ impl ActivityStreamsSerialize for Actor {
 }
 
 pub struct ActorBuilder {
-    root: ActivityStreamsObject,
+    base: ActivityStreamsObject,
 
     preferred_username: Option<String>,
     summary: Option<String>,
@@ -50,7 +50,7 @@ pub struct ActorBuilder {
 impl ActorBuilder {
     pub fn new(actor_type: String, id: String, name: String) -> Self {
         ActorBuilder {
-            root: ActivityStreamsObject::new(id, name).object_type(actor_type),
+            base: ActivityStreamsObject::new(actor_type).id(id).name(name),
             preferred_username: None,
             summary: None,
             inbox: None,
@@ -98,7 +98,7 @@ impl ActorBuilder {
 
     pub fn build(self) -> Actor {
         Actor {
-            root: self.root,
+            base: self.base,
 
             preferred_username: self.preferred_username,
             summary: self.summary,

@@ -59,18 +59,30 @@ pub struct ActivityStreamsObject {
     context: ActivityStreamsContext,
     #[serde(rename = "type")]
     object_type: String,
-    id: String,
-    name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    name: Option<String>,
 }
 
 impl ActivityStreamsObject {
-    pub fn new(id: String, name: String) -> Self {
+    pub fn new(object_type: String) -> Self {
         ActivityStreamsObject {
             context: ActivityStreamsContext::new(),
-            object_type: "Object".to_string(),
-            id,
-            name,
+            object_type,
+            id: None,
+            name: None,
         }
+    }
+
+    pub fn id(mut self, id: String) -> Self {
+        self.id = Some(id);
+        self
+    }
+
+    pub fn name(mut self, name: String) -> Self {
+        self.name = Some(name);
+        self
     }
 
     pub fn language(mut self, lang: String) -> Self {
@@ -79,16 +91,11 @@ impl ActivityStreamsObject {
             .language(ActivityStreamsContextLanguage { language: lang });
         self
     }
-
-    pub fn object_type(mut self, object_type: String) -> Self {
-        self.object_type = object_type;
-        self
-    }
 }
 
 impl ActivityStreamsSerialize for ActivityStreamsObject {
     fn from_json(json: String) -> Self {
-        ActivityStreamsObject::new("todo".to_string(), "unimplemented".to_string())
+        ActivityStreamsObject::new("Object".to_string())
     }
 }
 
@@ -163,7 +170,7 @@ pub struct ActivityStreamsPreviewBuilder {
 impl ActivityStreamsPreviewBuilder {
     pub fn new(preview_type: String, name: String) -> Self {
         ActivityStreamsPreviewBuilder {
-            base: ActivityStreamsObject::new("todo_id".to_string(), name).object_type(preview_type),
+            base: ActivityStreamsObject::new(preview_type).name(name),
             duration: None,
             url: None,
         }
@@ -320,12 +327,7 @@ impl ActivityStreamsActivity {
 
 impl ActivityStreamsSerialize for ActivityStreamsActivity {
     fn from_json(json: String) -> Self {
-        ActivityStreamsActivityBuilder::new(
-            ActivityStreamsObject::new("todo".to_string(), "unimplemented".to_string())
-                .object_type(ActivityStreamsActivity::TYPE.to_string()),
-            "not implemented yet".to_string(),
-        )
-        .build()
+        ActivityStreamsActivityBuilder::new("unimplemented".to_string()).build()
     }
 }
 
@@ -341,9 +343,9 @@ pub struct ActivityStreamsActivityBuilder {
 }
 
 impl ActivityStreamsActivityBuilder {
-    pub fn new(base: ActivityStreamsObject, summary: String) -> Self {
+    pub fn new(summary: String) -> Self {
         ActivityStreamsActivityBuilder {
-            base,
+            base: ActivityStreamsObject::new(ActivityStreamsActivity::TYPE.to_string()),
             summary,
             actor: None,
             object: None,
@@ -386,9 +388,7 @@ impl ActivityStreamsActivityBuilder {
 
     pub fn build(self) -> ActivityStreamsActivity {
         ActivityStreamsActivity {
-            base: self
-                .base
-                .object_type(ActivityStreamsActivity::TYPE.to_string()),
+            base: self.base,
             summary: self.summary,
             actor: self.actor,
             object: self.object,
@@ -415,7 +415,9 @@ mod tests {
 
     #[test]
     fn create_activity_stream_object() {
-        let actual = ActivityStreamsObject::new("id".to_string(), "name".to_string())
+        let actual = ActivityStreamsObject::new("Object".to_string())
+            .id("id".to_string())
+            .name("name".to_string())
             .language("en".to_string());
         let expected = String::from(
             r#"{
@@ -473,7 +475,6 @@ mod tests {
     "https://www.w3.org/ns/activitystreams"
   ],
   "type": "Video",
-  "id": "todo_id",
   "name": "Trailer",
   "duration": "PT1M",
   "url": {
@@ -487,23 +488,22 @@ mod tests {
 
     #[test]
     fn create_activity() {
-        let actual = ActivityStreamsActivityBuilder::new(
-            ActivityStreamsObject::new("id".to_string(), "name".to_string()),
-            "Sally did something to a note".to_string(),
-        )
-        .actor(
-            ActorBuilder::new(
-                "Person".to_string(),
-                "sally".to_string(),
-                "Sally".to_string(),
-            )
-            .build(),
-        )
-        .object(
-            ActivityStreamsObject::new("note".to_string(), "A Note".to_string())
-                .object_type("Note".to_string()),
-        )
-        .build();
+        let actual =
+            ActivityStreamsActivityBuilder::new("Sally did something to a note".to_string())
+                .actor(
+                    ActorBuilder::new(
+                        "Person".to_string(),
+                        "sally".to_string(),
+                        "Sally".to_string(),
+                    )
+                    .build(),
+                )
+                .object(
+                    ActivityStreamsObject::new("Note".to_string())
+                        .id("note".to_string())
+                        .name("A Note".to_string()),
+                )
+                .build();
 
         let expected = String::from(
             r#"{
@@ -511,8 +511,6 @@ mod tests {
     "https://www.w3.org/ns/activitystreams"
   ],
   "type": "Activity",
-  "id": "id",
-  "name": "name",
   "summary": "Sally did something to a note",
   "actor": {
     "@context": [
