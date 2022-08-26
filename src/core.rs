@@ -233,7 +233,7 @@ impl ActivityStreamsSerialize for ActivityStreamsPreview {
 }
 
 pub struct ActivityStreamsPreviewBuilder {
-    base: ActivityStreamsObject,
+    base: ActivityStreamsObjectBuilder,
     duration: Option<String>,
     url: Option<ActivityStreamsUri>,
 }
@@ -262,7 +262,7 @@ impl ActivityStreamsPreviewBuilder {
 
     pub fn build(self) -> ActivityStreamsPreview {
         ActivityStreamsPreview {
-            base: self.base,
+            base: self.base.build(),
             duration: self.duration,
             url: self.url,
         }
@@ -395,18 +395,15 @@ pub struct ActivityStreamsActivity {
     instrument: Option<String>, // TODO: ActivityStreamsInstrument
 }
 
-impl ActivityStreamsActivity {
-    pub const TYPE: &'static str = "Activity";
-}
-
 impl ActivityStreamsSerialize for ActivityStreamsActivity {
     fn from_json(json: String) -> Self {
-        ActivityStreamsActivityBuilder::new("unimplemented".to_string()).build()
+        ActivityStreamsActivityBuilder::new("unknown".to_string(), "unimplemented".to_string())
+            .build()
     }
 }
 
 pub struct ActivityStreamsActivityBuilder {
-    base: ActivityStreamsObject,
+    base: ActivityStreamsObjectBuilder,
     summary: String,
     actor: Option<Actor>,
     object: Option<ActivityStreamsObject>,
@@ -417,7 +414,7 @@ pub struct ActivityStreamsActivityBuilder {
 }
 
 impl ActivityStreamsActivityBuilder {
-    pub fn new(summary: String) -> Self {
+    pub fn new(activity_type: String, summary: String) -> Self {
         ActivityStreamsActivityBuilder {
             base: ActivityStreamsObjectBuilder::new()
                 .object_type(ActivityStreamsActivity::TYPE.to_string())
@@ -464,7 +461,7 @@ impl ActivityStreamsActivityBuilder {
 
     pub fn build(self) -> ActivityStreamsActivity {
         ActivityStreamsActivity {
-            base: self.base,
+            base: self.base.build(),
             summary: self.summary,
             actor: self.actor,
             object: self.object,
