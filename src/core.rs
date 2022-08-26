@@ -1,8 +1,9 @@
+use chrono::NaiveDateTime;
 use http::Uri;
 use serde::{Deserialize, Serialize};
 use serde_tuple::*;
 
-use crate::extended::Actor;
+use crate::extended::{Actor, ActorBuilder};
 
 pub trait ActivityStreamsSerialize
 where
@@ -32,7 +33,7 @@ where
 /// alternative URL "http://www.w3.org/ns/activitystreams" instead. This can be
 /// done using a string, object, or array.
 /// https://www.w3.org/TR/activitystreams-core/#jsonld
-#[derive(Serialize_tuple, Deserialize_tuple, Debug)]
+#[derive(Serialize_tuple, Deserialize_tuple, Debug, Clone)]
 pub struct ActivityStreamsContext {
     namespace: String,
 
@@ -70,7 +71,7 @@ impl ActivityStreamsContextBuilder {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ActivityStreamsContextLanguage {
     #[serde(rename = "@language")]
     language: String,
@@ -100,14 +101,23 @@ pub struct ActivityStreamsObject {
 
     #[serde(skip_serializing_if = "Option::is_none")]
     name: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    url: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    published: Option<NaiveDateTime>,
 }
 
+#[derive(Clone)]
 pub struct ActivityStreamsObjectBuilder {
     context: ActivityStreamsContext,
     object_type: Option<String>,
     // TODO: actually an IRI: consider https://docs.rs/iref/latest/iref/
     id: Option<Uri>,
     name: Option<String>,
+    url: Option<Uri>,
+    published: Option<NaiveDateTime>,
     // TODO: more fields
 }
 
@@ -118,6 +128,8 @@ impl ActivityStreamsObjectBuilder {
             object_type: None,
             id: None,
             name: None,
+            url: None,
+            published: None,
         }
     }
 
@@ -129,43 +141,56 @@ impl ActivityStreamsObjectBuilder {
             object_type: None,
             id: None,
             name: None,
+            url: None,
+            published: None,
         }
     }
 
     pub fn object_type(mut self, object_type: String) -> Self {
         self.object_type = Some(object_type);
         self
-=======
-    pub fn id(mut self, id: String) -> Self {
-        self.id = Some(id);
-        self
     }
 
-    pub fn id(mut self, id: Uri) -> Self {
+    pub fn id(&mut self, id: Uri) -> Self {
         self.id = Some(id);
-        self
+        self.clone()
     }
 
-    pub fn name(mut self, name: String) -> Self {
+    pub fn name(&mut self, name: String) -> Self {
         self.name = Some(name);
-        self
+        self.clone()
+    }
+
+    pub fn url(&mut self, url: Uri) -> Self {
+        self.url = Some(url);
+        self.clone()
+    }
+
+    pub fn published(&mut self, datetime: NaiveDateTime) -> Self {
+        self.published = Some(datetime);
+        self.clone()
     }
 
     pub fn build(self) -> ActivityStreamsObject {
         ActivityStreamsObject {
             context: self.context,
             object_type: self.object_type,
-            name: self.name,
             id: match self.id {
                 None => None,
                 uri => Some(uri.unwrap().to_string()),
             },
+            name: self.name,
+            url: match self.url {
+                None => None,
+                uri => Some(uri.unwrap().to_string()),
+            },
+            published: self.published,
         }
     }
 }
 
 impl ActivityStreamsSerialize for ActivityStreamsObject {
-    fn from_json(json: String) -> Self {
+    fn from_json(_json: String) -> Self {
         ActivityStreamsObjectBuilder::new().build()
     }
 }
@@ -180,7 +205,7 @@ pub struct ActivityStreamsUri {
 }
 
 impl ActivityStreamsSerialize for ActivityStreamsUri {
-    fn from_json(json: String) -> Self {
+    fn from_json(_json: String) -> Self {
         ActivityStreamsUri {
             href: "todo".to_string(),
             media_type: None,
@@ -227,7 +252,7 @@ pub struct ActivityStreamsPreview {
 }
 
 impl ActivityStreamsSerialize for ActivityStreamsPreview {
-    fn from_json(json: String) -> Self {
+    fn from_json(_json: String) -> Self {
         ActivityStreamsPreviewBuilder::new("todo".to_string(), "unimplemented".to_string()).build()
     }
 }
@@ -243,8 +268,7 @@ impl ActivityStreamsPreviewBuilder {
         ActivityStreamsPreviewBuilder {
             base: ActivityStreamsObjectBuilder::new()
                 .object_type(preview_type)
-                .name(name)
-                .build(),
+                .name(name),
             duration: None,
             url: None,
         }
@@ -277,8 +301,7 @@ pub struct ActivityStreamsLink {
     #[serde(rename = "type")]
     link_type: String,
 
-    #[serde(flatten)]
-    url: ActivityStreamsUri,
+    href: String,
 
     #[serde(skip_serializing_if = "Vec::is_empty")]
     rel: Vec<String>, // TODO: RFC5988 validation
@@ -303,15 +326,15 @@ impl ActivityStreamsLink {
 }
 
 impl ActivityStreamsSerialize for ActivityStreamsLink {
-    fn from_json(json: String) -> Self {
+    fn from_json(_json: String) -> Self {
         ActivityStreamsLinkBuilder::new("todo".parse::<Uri>().unwrap(), "unimplemented".to_string())
             .build()
     }
 }
 
 pub struct ActivityStreamsLinkBuilder {
-    context: ActivityStreamsContext,
-    url: ActivityStreamsUri,
+    context: ActivityStreamsContextBuilder,
+    href: Uri,
     rel: Vec<String>, // TODO: RFC5988 validation
     name: String,
     hreflang: Option<String>, // TODO: BCP47 language tag
@@ -321,10 +344,10 @@ pub struct ActivityStreamsLinkBuilder {
 }
 
 impl ActivityStreamsLinkBuilder {
-    pub fn new(url: Uri, name: String) -> Self {
+    pub fn new(href: Uri, name: String) -> Self {
         ActivityStreamsLinkBuilder {
-            context: ActivityStreamsContextBuilder::new().build(),
-            url: ActivityStreamsUriBuilder::new(url).build(),
+            context: ActivityStreamsContextBuilder::new(),
+            href,
             rel: Vec::new(),
             name,
             hreflang: None,
@@ -361,9 +384,9 @@ impl ActivityStreamsLinkBuilder {
 
     pub fn build(self) -> ActivityStreamsLink {
         ActivityStreamsLink {
-            context: self.context,
+            context: self.context.build(),
             link_type: ActivityStreamsLink::TYPE.to_string(),
-            url: self.url,
+            href: self.href.to_string(),
             rel: self.rel,
             name: self.name,
             hreflang: self.hreflang,
@@ -386,7 +409,7 @@ pub struct ActivityStreamsActivity {
     #[serde(skip_serializing_if = "Option::is_none")]
     object: Option<ActivityStreamsObject>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    target: Option<String>, // TODO: ActivityStreamsTarget
+    target: Option<ActivityStreamsObject>, // TODO: ActivityStreamsTarget
     #[serde(skip_serializing_if = "Option::is_none")]
     result: Option<String>, // TODO: ActivityStreamsResult
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -396,7 +419,7 @@ pub struct ActivityStreamsActivity {
 }
 
 impl ActivityStreamsSerialize for ActivityStreamsActivity {
-    fn from_json(json: String) -> Self {
+    fn from_json(_json: String) -> Self {
         ActivityStreamsActivityBuilder::new("unknown".to_string(), "unimplemented".to_string())
             .build()
     }
@@ -405,9 +428,9 @@ impl ActivityStreamsSerialize for ActivityStreamsActivity {
 pub struct ActivityStreamsActivityBuilder {
     base: ActivityStreamsObjectBuilder,
     summary: String,
-    actor: Option<Actor>,
-    object: Option<ActivityStreamsObject>,
-    target: Option<String>,
+    actor: Option<ActorBuilder>,
+    object: Option<ActivityStreamsObjectBuilder>,
+    target: Option<ActivityStreamsObjectBuilder>,
     result: Option<String>,
     origin: Option<String>,
     instrument: Option<String>,
@@ -416,9 +439,7 @@ pub struct ActivityStreamsActivityBuilder {
 impl ActivityStreamsActivityBuilder {
     pub fn new(activity_type: String, summary: String) -> Self {
         ActivityStreamsActivityBuilder {
-            base: ActivityStreamsObjectBuilder::new()
-                .object_type(ActivityStreamsActivity::TYPE.to_string())
-                .build(),
+            base: ActivityStreamsObjectBuilder::new().object_type(activity_type),
             summary,
             actor: None,
             object: None,
@@ -429,17 +450,17 @@ impl ActivityStreamsActivityBuilder {
         }
     }
 
-    pub fn actor(mut self, actor: Actor) -> Self {
+    pub fn actor(mut self, actor: ActorBuilder) -> Self {
         self.actor = Some(actor);
         self
     }
 
-    pub fn object(mut self, object: ActivityStreamsObject) -> Self {
+    pub fn object(mut self, object: ActivityStreamsObjectBuilder) -> Self {
         self.object = Some(object);
         self
     }
 
-    pub fn target(mut self, target: String) -> Self {
+    pub fn target(mut self, target: ActivityStreamsObjectBuilder) -> Self {
         self.target = Some(target);
         self
     }
@@ -463,9 +484,18 @@ impl ActivityStreamsActivityBuilder {
         ActivityStreamsActivity {
             base: self.base.build(),
             summary: self.summary,
-            actor: self.actor,
-            object: self.object,
-            target: self.target,
+            actor: match self.actor {
+                None => None,
+                a => Some(a.unwrap().build()),
+            },
+            object: match self.object {
+                None => None,
+                o => Some(o.unwrap().build()),
+            },
+            target: match self.target {
+                None => None,
+                t => Some(t.unwrap().build()),
+            },
             result: self.result,
             origin: self.origin,
             instrument: self.instrument,
@@ -477,7 +507,7 @@ impl ActivityStreamsActivityBuilder {
 mod tests {
     use crate::{
         core::{
-            ActivityStreamsLinkBuilder, ActivityStreamsObject, ActivityStreamsObjectBuilder,
+            ActivityStreamsLinkBuilder, ActivityStreamsObjectBuilder,
             ActivityStreamsPreviewBuilder, ActivityStreamsSerialize, ActivityStreamsUriBuilder,
         },
         extended::ActorBuilder,
@@ -558,24 +588,17 @@ mod tests {
 
     #[test]
     fn create_activity() {
-        let actual =
-            ActivityStreamsActivityBuilder::new("Sally did something to a note".to_string())
-                .actor(
-                    ActorBuilder::new(
-                        ActivityStreamsObjectBuilder::new()
-                            .object_type("Person".to_string())
-                            .name("Sally".to_string())
-                            .build(),
-                    )
-                    .build(),
-                )
-                .object(
-                    ActivityStreamsObjectBuilder::new()
-                        .object_type("Note".to_string())
-                        .name("A Note".to_string())
-                        .build(),
-                )
-                .build();
+        let actual = ActivityStreamsActivityBuilder::new(
+            "Activity".to_string(),
+            "Sally did something to a note".to_string(),
+        )
+        .actor(ActorBuilder::new("Person".to_string()).name("Sally".to_string()))
+        .object(
+            ActivityStreamsObjectBuilder::new()
+                .object_type("Note".to_string())
+                .name("A Note".to_string()),
+        )
+        .build();
 
         let expected = String::from(
             r#"{

@@ -3,11 +3,15 @@ mod extended;
 
 #[cfg(test)]
 mod tests {
+    use chrono::NaiveDate;
+    use http::Uri;
+
     use crate::{
-        core::{ActivityStreamsActivityBuilder, ActivityStreamsObject, ActivityStreamsSerialize},
+        core::{
+            ActivityStreamsActivityBuilder, ActivityStreamsObjectBuilder, ActivityStreamsSerialize,
+        },
         extended::ActorBuilder,
     };
-    use http::Uri;
 
     #[test]
     fn it_works() {
@@ -26,8 +30,8 @@ mod tests {
         .build();
         let expected = r#"{
   "@context": "https://www.w3.org/ns/activitystreams",
-  "summary": "Martin created an image",
   "type": "Create",
+  "summary": "Martin created an image",
   "actor": "http://www.test.example/martin",
   "object":"http://example.org/foo.jpg"
 }"#;
@@ -41,28 +45,30 @@ mod tests {
             "Martin created an image".to_string(),
         )
         .actor(
-            ActorBuilder::new(
-                "Person".to_string(),
-                "http://www.test.example/martin".to_string(),
-                "Martin Smith".to_string(),
-            )
-            .url("http://example.org/martin".parse::<Uri>().unwrap())
-            .published(),
+            ActorBuilder::new("Person".to_string())
+                .id("http://www.test.example/martin".parse::<Uri>().unwrap())
+                .name("Martin Smith".to_string())
+                .url("http://example.org/martin".parse::<Uri>().unwrap())
+                .published(NaiveDate::from_ymd(2015, 2, 10).and_hms(15, 4, 55)),
         ) // TODO: take a date-time and convert to string
         .object(
-            ActivityStreamsObject::new("Article".to_string())
-                .id("http://www.test.example/blog/abc123/xyz".to_string())
+            ActivityStreamsObjectBuilder::new()
+                .object_type("Article".to_string())
+                .id("http://www.test.example/blog/abc123/xyz"
+                    .parse::<Uri>()
+                    .unwrap())
                 .name("Why I love Activity Streams".to_string())
                 .url(
                     "http://example.org/blog/2011/02/entry"
                         .parse::<Uri>()
                         .unwrap(),
-                )
-                .target(
-                    ActivityStreamsObject::new("OrderedCollection".to_string())
-                        .id("http://example.org/blog/".to_string())
-                        .name("Martin's Blog".to_string()),
                 ),
+        )
+        .target(
+            ActivityStreamsObjectBuilder::new()
+                .object_type("OrderedCollection".to_string())
+                .id("http://example.org/blog/".parse::<Uri>().unwrap())
+                .name("Martin's Blog".to_string()),
         )
         .build();
         let expected = r#"{

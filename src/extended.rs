@@ -1,4 +1,5 @@
 use crate::core::{ActivityStreamsObject, ActivityStreamsObjectBuilder, ActivityStreamsSerialize};
+use chrono::NaiveDateTime;
 use http::Uri;
 use serde::{Deserialize, Serialize};
 
@@ -13,8 +14,6 @@ pub struct Actor {
     #[serde(skip_serializing_if = "Option::is_none")]
     summary: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    url: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     inbox: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     outbox: Option<String>,
@@ -27,8 +26,8 @@ pub struct Actor {
 }
 
 impl ActivityStreamsSerialize for Actor {
-    fn from_json(json: String) -> Self {
-        ActorBuilder::new(ActivityStreamsObjectBuilder::new().build()).build()
+    fn from_json(_json: String) -> Self {
+        ActorBuilder::new("Actor".to_string()).build()
     }
 }
 
@@ -37,7 +36,6 @@ pub struct ActorBuilder {
 
     preferred_username: Option<String>,
     summary: Option<String>,
-    url: Option<Uri>,
     inbox: Option<String>,
     outbox: Option<String>,
     followers: Option<String>,
@@ -46,20 +44,37 @@ pub struct ActorBuilder {
 }
 
 impl ActorBuilder {
-    pub fn new(base: ActivityStreamsObject) -> Self {
+    pub fn new(actor_type: String) -> Self {
         ActorBuilder {
-            base: ActivityStreamsObjectBuilder::new(actor_type)
-                .id(id)
-                .name(name),
+            base: ActivityStreamsObjectBuilder::new().object_type(actor_type),
             preferred_username: None,
             summary: None,
-            url: None,
             inbox: None,
             outbox: None,
             followers: None,
             following: None,
             liked: None,
         }
+    }
+
+    pub fn id(mut self, id: Uri) -> Self {
+        self.base.id(id);
+        self
+    }
+
+    pub fn name(mut self, name: String) -> Self {
+        self.base.name(name);
+        self
+    }
+
+    pub fn url(mut self, url: Uri) -> Self {
+        self.base.url(url);
+        self
+    }
+
+    pub fn published(mut self, datetime: NaiveDateTime) -> Self {
+        self.base.published(datetime);
+        self
     }
 
     pub fn preferred_username(mut self, username: String) -> Self {
@@ -69,11 +84,6 @@ impl ActorBuilder {
 
     pub fn summary(mut self, summary: String) -> Self {
         self.summary = Some(summary);
-        self
-    }
-
-    pub fn url(mut self, url: Uri) -> Self {
-        self.url = Some(url);
         self
     }
 
@@ -108,10 +118,6 @@ impl ActorBuilder {
 
             preferred_username: self.preferred_username,
             summary: self.summary,
-            url: match self.url {
-                None => None,
-                u => u.unwrap().to_string(),
-            },
             inbox: self.inbox,
             outbox: self.outbox,
             followers: self.followers,
@@ -123,21 +129,17 @@ impl ActorBuilder {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::{ActivityStreamsObjectBuilder, ActivityStreamsSerialize};
+    use crate::core::ActivityStreamsSerialize;
     use crate::extended::ActorBuilder;
     use http::Uri;
 
     #[test]
     fn create_actor_object() {
-        let actual = ActorBuilder::new(
-            ActivityStreamsObjectBuilder::new()
-                .object_type("Person".to_string())
-                .id("https://example.com/person/1234".parse::<Uri>().unwrap())
-                .name("name".to_string())
-                .build(),
-        )
-        .preferred_username("dma".to_string())
-        .build();
+        let actual = ActorBuilder::new("Person".to_string())
+            .id("https://example.com/person/1234".parse::<Uri>().unwrap())
+            .name("name".to_string())
+            .preferred_username("dma".to_string())
+            .build();
         let expected = String::from(
             r#"{
   "@context": [
