@@ -1,4 +1,7 @@
-use crate::core::{ActivityStreamsObject, ActivityStreamsObjectBuilder, ActivityStreamsSerialize};
+use crate::core::{
+    ActivityStreamsLinkBuilder, ActivityStreamsObject, ActivityStreamsObjectBuilder,
+    ActivityStreamsSerialize,
+};
 use chrono::NaiveDateTime;
 use http::Uri;
 use serde::{Deserialize, Serialize};
@@ -77,6 +80,11 @@ impl ActorBuilder {
         self
     }
 
+    pub fn image(mut self, image: ActivityStreamsLinkBuilder) -> Self {
+        self.base.image(image);
+        self
+    }
+
     pub fn preferred_username(mut self, username: String) -> Self {
         self.preferred_username = Some(username);
         self
@@ -129,22 +137,27 @@ impl ActorBuilder {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::ActivityStreamsSerialize;
+    use crate::core::{
+        ActivityStreamsContextBuilder, ActivityStreamsDocument, ActivityStreamsSerialize,
+    };
     use crate::extended::ActorBuilder;
     use http::Uri;
 
     #[test]
     fn create_actor_object() {
-        let actual = ActorBuilder::new("Person".to_string())
-            .id("https://example.com/person/1234".parse::<Uri>().unwrap())
-            .name("name".to_string())
-            .preferred_username("dma".to_string())
-            .build();
+        let actual = ActivityStreamsDocument::new(
+            ActivityStreamsContextBuilder::new().build(),
+            ActorBuilder::new("Person".to_string())
+                .id("https://example.com/person/1234".parse::<Uri>().unwrap())
+                .name("name".to_string())
+                .preferred_username("dma".to_string())
+                .build(),
+        );
         let expected = String::from(
             r#"{
-  "@context": [
-    "https://www.w3.org/ns/activitystreams"
-  ],
+  "@context": {
+    "@vocab": "https://www.w3.org/ns/activitystreams"
+  },
   "type": "Person",
   "id": "https://example.com/person/1234",
   "name": "name",
