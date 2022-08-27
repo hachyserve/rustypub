@@ -63,8 +63,9 @@ mod tests {
             ActivityStreamsContextBuilder::new().build(),
             ActivityStreamsActivityBuilder::new(
                 "Add".to_string(),
-                "Martin created an image".to_string(),
+                "Martin added an article to his blog".to_string(),
             )
+            // TODO: figure out how to get a 'Z' on this. probably requires a time-zone (so not naive)
             .published(NaiveDate::from_ymd(2015, 2, 10).and_hms(15, 4, 55))
             .actor(
                 ActorBuilder::new("Person".to_string())
@@ -77,7 +78,7 @@ mod tests {
                                 .parse::<Uri>()
                                 .unwrap(),
                         )
-                        .media_type("image/jpg".to_string()),
+                        .media_type("image/jpeg".to_string()),
                     )),
             )
             .object(
