@@ -1,4 +1,4 @@
-use chrono::NaiveDateTime;
+use chrono::{DateTime, Utc};
 use http::Uri;
 use serde::{Deserialize, Serialize};
 
@@ -123,7 +123,7 @@ pub struct ActivityStreamsObject {
     url: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    published: Option<NaiveDateTime>,
+    published: Option<DateTime<Utc>>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     image: Option<Box<ActivityStreamsLink>>,
@@ -136,7 +136,7 @@ pub struct ActivityStreamsObjectBuilder {
     id: Option<Uri>,
     name: Option<String>,
     url: Option<Uri>,
-    published: Option<NaiveDateTime>,
+    published: Option<DateTime<Utc>>,
     image: Option<ActivityStreamsLinkBuilder>,
     // TODO: more fields
 }
@@ -173,7 +173,7 @@ impl ActivityStreamsObjectBuilder {
         self.clone()
     }
 
-    pub fn published(&mut self, datetime: NaiveDateTime) -> Self {
+    pub fn published(&mut self, datetime: DateTime<Utc>) -> Self {
         self.published = Some(datetime);
         self.clone()
     }
@@ -470,7 +470,7 @@ impl ActivityStreamsActivityBuilder {
         }
     }
 
-    pub fn published(mut self, datetime: NaiveDateTime) -> Self {
+    pub fn published(mut self, datetime: DateTime<Utc>) -> Self {
         self.base.published(datetime);
         self
     }
@@ -532,6 +532,7 @@ impl ActivityStreamsActivityBuilder {
 mod tests {
     use crate::{core::*, extended::ActorBuilder};
     use http::Uri;
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn create_activity_stream_object() {

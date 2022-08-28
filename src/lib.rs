@@ -3,17 +3,11 @@ mod extended;
 
 #[cfg(test)]
 mod tests {
-    use chrono::NaiveDate;
+    use chrono::{DateTime, NaiveDate, Utc};
     use http::Uri;
+    use pretty_assertions::assert_eq;
 
-    use crate::{
-        core::{
-            ActivityStreamsActivityBuilder, ActivityStreamsContextBuilder, ActivityStreamsDocument,
-            ActivityStreamsLinkBuilder, ActivityStreamsObjectBuilder, ActivityStreamsSerialize,
-            ActivityStreamsUriBuilder,
-        },
-        extended::ActorBuilder,
-    };
+    use crate::{core::*, extended::ActorBuilder};
 
     #[test]
     fn it_works() {
@@ -66,7 +60,10 @@ mod tests {
                 "Martin added an article to his blog".to_string(),
             )
             // TODO: figure out how to get a 'Z' on this. probably requires a time-zone (so not naive)
-            .published(NaiveDate::from_ymd(2015, 2, 10).and_hms(15, 4, 55))
+            .published(DateTime::<Utc>::from_utc(
+                NaiveDate::from_ymd(2015, 2, 10).and_hms(15, 4, 55),
+                Utc,
+            ))
             .actor(
                 ActorBuilder::new("Person".to_string())
                     .id("http://www.test.example/martin".parse::<Uri>().unwrap())
@@ -120,13 +117,13 @@ mod tests {
       "mediaType": "image/jpeg"
     }
   },
-  "object" : {
+  "object": {
     "type": "Article",
     "id": "http://www.test.example/blog/abc123/xyz",
-    "name": "Why I love Activity Streams"
-    "url": "http://example.org/blog/2011/02/entry",
+    "name": "Why I love Activity Streams",
+    "url": "http://example.org/blog/2011/02/entry"
   },
-  "target" : {
+  "target": {
     "type": "OrderedCollection",
     "id": "http://example.org/blog/",
     "name": "Martin's Blog"

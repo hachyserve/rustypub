@@ -1,8 +1,5 @@
-use crate::core::{
-    ActivityStreamsLinkBuilder, ActivityStreamsObject, ActivityStreamsObjectBuilder,
-    ActivityStreamsSerialize,
-};
-use chrono::NaiveDateTime;
+use crate::core::*;
+use chrono::{DateTime, Utc};
 use http::Uri;
 use serde::{Deserialize, Serialize};
 
@@ -75,7 +72,7 @@ impl ActorBuilder {
         self
     }
 
-    pub fn published(mut self, datetime: NaiveDateTime) -> Self {
+    pub fn published(mut self, datetime: DateTime<Utc>) -> Self {
         self.base.published(datetime);
         self
     }
@@ -142,6 +139,7 @@ mod tests {
     };
     use crate::extended::ActorBuilder;
     use http::Uri;
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn create_actor_object() {
