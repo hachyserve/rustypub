@@ -1,5 +1,7 @@
 # activitypub
 
+https://www.w3.org/TR/activitystreams-core/
+
 Types:
 
 From https://www.w3.org/TR/activitystreams-vocabulary/#types
