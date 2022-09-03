@@ -131,4 +131,44 @@ mod tests {
 }"#;
         assert_eq!(actual.to_json_pretty(), expected);
     }
+
+    #[test]
+    fn object_4_1_7() {
+        let actual = ActivityStreamsDocument::new(
+            ActivityStreamsContextBuilder::new().build(),
+            ActivityStreamsObjectBuilder::new()
+                .id("http://example.org/foo".parse::<Uri>().unwrap())
+                .object_type("Note".to_string())
+                .name("My favourite stew recipe".to_string())
+                .published(DateTime::<Utc>::from_utc(
+                    NaiveDate::from_ymd(2014, 8, 21).and_hms(12, 34, 56),
+                    Utc,
+                ))
+                .add_attributed_to(
+                    ActorBuilder::new("Person".to_string())
+                        .id("http://joe.website.example/".parse::<Uri>().unwrap())
+                        .name("Joe Smith".to_string())
+                        .build(),
+                )
+                .build(),
+        );
+
+        let expected = r#"{
+  "@context": {
+    "@vocab": "https://www.w3.org/ns/activitystreams"
+  },
+  "type": "Note",
+  "id": "http://example.org/foo",
+  "name": "My favourite stew recipe",
+  "published": "2014-08-21T12:34:56Z",
+  "attributedTo": [
+    {
+      "type": "Person",
+      "id": "http://joe.website.example/",
+      "name": "Joe Smith"
+    }
+  ]
+}"#;
+        assert_eq!(actual.to_json_pretty(), expected);
+    }
 }

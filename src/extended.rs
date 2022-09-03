@@ -3,10 +3,10 @@ use chrono::{DateTime, Utc};
 use http::Uri;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Actor {
     #[serde(flatten)]
-    base: ActivityStreamsObject,
+    base: ActivityStreamsObject<ActivityStreamsNull>,
 
     #[serde(rename = "preferredUsername")]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -32,7 +32,7 @@ impl ActivityStreamsSerialize for Actor {
 }
 
 pub struct ActorBuilder {
-    base: ActivityStreamsObjectBuilder,
+    base: ActivityStreamsObjectBuilder<ActivityStreamsNull>,
 
     preferred_username: Option<String>,
     summary: Option<String>,
