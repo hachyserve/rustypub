@@ -1,10 +1,10 @@
-use chrono::{DateTime, Utc};
-
 use crate::extended::{Actor, ActorBuilder};
+use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 
 pub trait Serde
 where
-    Self: serde::Serialize + serde::Deserialize,
+    Self: Serialize + Deserialize,
 {
     fn to_json(&self) -> String {
         let serialized = serde_json::to_string(&self).unwrap();
@@ -22,7 +22,7 @@ where
 }
 
 /// Null-type object that implements `Serde` for convenience
-#[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Null {}
 
 impl Serde for Null {
@@ -37,7 +37,7 @@ impl Serde for Null {
     }
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Document<T: Serde> {
     #[serde(rename = "@context")]
     context: Context,
@@ -73,7 +73,7 @@ impl<T: Serde> Document<T> {
 /// alternative URL "http://www.w3.org/ns/activitystreams" instead. This can be
 /// done using a string, object, or array.
 /// https://www.w3.org/TR/activitystreams-core/#jsonld
-#[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Context {
     #[serde(rename = "@vocab")]
     namespace: String,
@@ -124,7 +124,7 @@ impl ContextBuilder {
 /// summary | summaryMap | tag | updated | url | to | bto | cc | bcc |
 /// mediaType | duration
 /// All properties are optional (including the id and type).
-#[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Object<AttributedToT: Serde> {
     #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
     object_type: Option<String>,
@@ -237,7 +237,7 @@ impl<AttributedToT: Serde + Clone> Serde for Object<AttributedToT> {
     }
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Uri {
     href: String,
 
@@ -282,7 +282,7 @@ impl UriBuilder {
     }
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Preview {
     #[serde(flatten)]
     base: Object<Null>,
@@ -334,7 +334,7 @@ impl PreviewBuilder {
     }
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Link {
     #[serde(rename = "type")]
     link_type: String,
@@ -439,7 +439,7 @@ impl LinkBuilder {
     }
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Activity {
     #[serde(flatten)]
     base: Object<Null>,

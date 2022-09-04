@@ -1,7 +1,8 @@
 use crate::core::*;
 use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 
-#[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Actor {
     #[serde(flatten)]
     base: Object<Null>,
