@@ -1,12 +1,10 @@
 use chrono::{DateTime, Utc};
-use http::Uri;
-use serde::{Deserialize, Serialize};
 
 use crate::extended::{Actor, ActorBuilder};
 
-pub trait ActivityStreamsSerialize
+pub trait Serialize
 where
-    Self: Serialize,
+    Self: serde::Serialize,
 {
     fn to_json(&self) -> String {
         let serialized = serde_json::to_string(&self).unwrap();
@@ -23,11 +21,11 @@ where
     fn from_json(json: String) -> Self;
 }
 
-/// Null-type object that implements `ActivityStreamsSerialize` for convenience
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct ActivityStreamsNull {}
+/// Null-type object that implements `Serialize` for convenience
+#[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
+pub struct Null {}
 
-impl ActivityStreamsSerialize for ActivityStreamsNull {
+impl Serialize for Null {
     fn to_json(&self) -> String {
         self.to_json_pretty()
     }
@@ -39,28 +37,28 @@ impl ActivityStreamsSerialize for ActivityStreamsNull {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct ActivityStreamsDocument<T: ActivityStreamsSerialize> {
+#[derive(serde::Serialize, serde::Deserialize, Debug)]
+pub struct Document<T: Serialize> {
     #[serde(rename = "@context")]
-    context: ActivityStreamsContext,
+    context: Context,
 
     #[serde(flatten)]
     object: T,
 }
 
-impl<T: ActivityStreamsSerialize> ActivityStreamsSerialize for ActivityStreamsDocument<T> {
+impl<T: Serialize> Serialize for Document<T> {
     fn from_json(_json: String) -> Self {
-        ActivityStreamsDocument {
-            context: ActivityStreamsContextBuilder::new().build(),
+        Document {
+            context: ContextBuilder::new().build(),
             // TODO: figure out how to know what type this is
             object: T::from_json(_json),
         }
     }
 }
 
-impl<T: ActivityStreamsSerialize> ActivityStreamsDocument<T> {
-    pub fn new(context: ActivityStreamsContext, object: T) -> Self {
-        ActivityStreamsDocument { context, object }
+impl<T: Serialize> Document<T> {
+    pub fn new(context: Context, object: T) -> Self {
+        Document { context, object }
     }
 }
 
@@ -73,8 +71,8 @@ impl<T: ActivityStreamsSerialize> ActivityStreamsDocument<T> {
 /// alternative URL "http://www.w3.org/ns/activitystreams" instead. This can be
 /// done using a string, object, or array.
 /// https://www.w3.org/TR/activitystreams-core/#jsonld
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct ActivityStreamsContext {
+#[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
+pub struct Context {
     #[serde(rename = "@vocab")]
     namespace: String,
 
@@ -84,17 +82,17 @@ pub struct ActivityStreamsContext {
 }
 
 #[derive(Clone)]
-pub struct ActivityStreamsContextBuilder {
+pub struct ContextBuilder {
     namespace: String,
     language: Option<String>,
 }
 
-impl ActivityStreamsContextBuilder {
+impl ContextBuilder {
     const NAMESPACE: &'static str = "https://www.w3.org/ns/activitystreams";
 
     pub fn new() -> Self {
-        ActivityStreamsContextBuilder {
-            namespace: ActivityStreamsContextBuilder::NAMESPACE.to_string(),
+        ContextBuilder {
+            namespace: ContextBuilder::NAMESPACE.to_string(),
             language: None,
         }
     }
@@ -105,8 +103,8 @@ impl ActivityStreamsContextBuilder {
         self
     }
 
-    pub fn build(self) -> ActivityStreamsContext {
-        ActivityStreamsContext {
+    pub fn build(self) -> Context {
+        Context {
             namespace: self.namespace,
             language: self.language,
         }
@@ -124,8 +122,8 @@ impl ActivityStreamsContextBuilder {
 /// summary | summaryMap | tag | updated | url | to | bto | cc | bcc |
 /// mediaType | duration
 /// All properties are optional (including the id and type).
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct ActivityStreamsObject<AttributedToT: ActivityStreamsSerialize> {
+#[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
+pub struct Object<AttributedToT: Serialize> {
     #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
     object_type: Option<String>,
 
@@ -142,28 +140,28 @@ pub struct ActivityStreamsObject<AttributedToT: ActivityStreamsSerialize> {
     published: Option<DateTime<Utc>>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    image: Option<Box<ActivityStreamsLink>>,
+    image: Option<Box<Link>>,
 
     #[serde(rename = "attributedTo", skip_serializing_if = "Vec::is_empty")]
     attributed_to: Vec<AttributedToT>,
 }
 
 #[derive(Clone)]
-pub struct ActivityStreamsObjectBuilder<AttributedToT: ActivityStreamsSerialize + Clone> {
+pub struct ObjectBuilder<AttributedToT: Serialize + Clone> {
     object_type: Option<String>,
     // TODO: actually an IRI: consider https://docs.rs/iref/latest/iref/
-    id: Option<Uri>,
+    id: Option<http::Uri>,
     name: Option<String>,
-    url: Option<Uri>,
+    url: Option<http::Uri>,
     published: Option<DateTime<Utc>>,
-    image: Option<ActivityStreamsLinkBuilder>,
+    image: Option<LinkBuilder>,
     attributed_to: Vec<AttributedToT>,
     // TODO: more fields
 }
 
-impl<AttributedToT: ActivityStreamsSerialize + Clone> ActivityStreamsObjectBuilder<AttributedToT> {
+impl<AttributedToT: Serialize + Clone> ObjectBuilder<AttributedToT> {
     pub fn new() -> Self {
-        ActivityStreamsObjectBuilder {
+        ObjectBuilder {
             object_type: None,
             id: None,
             name: None,
@@ -179,7 +177,7 @@ impl<AttributedToT: ActivityStreamsSerialize + Clone> ActivityStreamsObjectBuild
         self
     }
 
-    pub fn id(&mut self, id: Uri) -> Self {
+    pub fn id(&mut self, id: http::Uri) -> Self {
         self.id = Some(id);
         self.clone()
     }
@@ -189,7 +187,7 @@ impl<AttributedToT: ActivityStreamsSerialize + Clone> ActivityStreamsObjectBuild
         self.clone()
     }
 
-    pub fn url(&mut self, url: Uri) -> Self {
+    pub fn url(&mut self, url: http::Uri) -> Self {
         self.url = Some(url);
         self.clone()
     }
@@ -199,7 +197,7 @@ impl<AttributedToT: ActivityStreamsSerialize + Clone> ActivityStreamsObjectBuild
         self.clone()
     }
 
-    pub fn image(&mut self, image: ActivityStreamsLinkBuilder) -> Self {
+    pub fn image(&mut self, image: LinkBuilder) -> Self {
         self.image = Some(image);
         self.clone()
     }
@@ -209,8 +207,8 @@ impl<AttributedToT: ActivityStreamsSerialize + Clone> ActivityStreamsObjectBuild
         self
     }
 
-    pub fn build(self) -> ActivityStreamsObject<AttributedToT> {
-        ActivityStreamsObject {
+    pub fn build(self) -> Object<AttributedToT> {
+        Object {
             object_type: self.object_type,
             id: match self.id {
                 None => None,
@@ -231,16 +229,14 @@ impl<AttributedToT: ActivityStreamsSerialize + Clone> ActivityStreamsObjectBuild
     }
 }
 
-impl<AttributedToT: ActivityStreamsSerialize + Clone> ActivityStreamsSerialize
-    for ActivityStreamsObject<AttributedToT>
-{
+impl<AttributedToT: Serialize + Clone> Serialize for Object<AttributedToT> {
     fn from_json(_json: String) -> Self {
-        ActivityStreamsObjectBuilder::new().build()
+        ObjectBuilder::new().build()
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct ActivityStreamsUri {
+#[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
+pub struct Uri {
     href: String,
 
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -248,9 +244,9 @@ pub struct ActivityStreamsUri {
     media_type: Option<String>,
 }
 
-impl ActivityStreamsSerialize for ActivityStreamsUri {
+impl Serialize for Uri {
     fn from_json(_json: String) -> Self {
-        ActivityStreamsUri {
+        Uri {
             href: "todo".to_string(),
             media_type: None,
         }
@@ -258,14 +254,14 @@ impl ActivityStreamsSerialize for ActivityStreamsUri {
 }
 
 #[derive(Clone)]
-pub struct ActivityStreamsUriBuilder {
-    href: Uri,
+pub struct UriBuilder {
+    href: http::Uri,
     media_type: Option<String>,
 }
 
-impl ActivityStreamsUriBuilder {
-    pub fn new(href: Uri) -> Self {
-        ActivityStreamsUriBuilder {
+impl UriBuilder {
+    pub fn new(href: http::Uri) -> Self {
+        UriBuilder {
             href,
             media_type: None,
         }
@@ -276,44 +272,42 @@ impl ActivityStreamsUriBuilder {
         self
     }
 
-    pub fn build(self) -> ActivityStreamsUri {
-        ActivityStreamsUri {
+    pub fn build(self) -> Uri {
+        Uri {
             href: self.href.to_string(),
             media_type: self.media_type,
         }
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct ActivityStreamsPreview {
+#[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
+pub struct Preview {
     #[serde(flatten)]
-    base: ActivityStreamsObject<ActivityStreamsNull>,
+    base: Object<Null>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     duration: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    url: Option<ActivityStreamsUri>,
+    url: Option<Uri>,
 }
 
-impl ActivityStreamsSerialize for ActivityStreamsPreview {
+impl Serialize for Preview {
     fn from_json(_json: String) -> Self {
-        ActivityStreamsPreviewBuilder::new("todo".to_string(), "unimplemented".to_string()).build()
+        PreviewBuilder::new("todo".to_string(), "unimplemented".to_string()).build()
     }
 }
 
-pub struct ActivityStreamsPreviewBuilder {
-    base: ActivityStreamsObjectBuilder<ActivityStreamsNull>,
+pub struct PreviewBuilder {
+    base: ObjectBuilder<Null>,
     duration: Option<String>,
-    url: Option<ActivityStreamsUri>,
+    url: Option<Uri>,
 }
 
-impl ActivityStreamsPreviewBuilder {
+impl PreviewBuilder {
     pub fn new(preview_type: String, name: String) -> Self {
-        ActivityStreamsPreviewBuilder {
-            base: ActivityStreamsObjectBuilder::new()
-                .object_type(preview_type)
-                .name(name),
+        PreviewBuilder {
+            base: ObjectBuilder::new().object_type(preview_type).name(name),
             duration: None,
             url: None,
         }
@@ -324,13 +318,13 @@ impl ActivityStreamsPreviewBuilder {
         self
     }
 
-    pub fn url(mut self, url: ActivityStreamsUri) -> Self {
+    pub fn url(mut self, url: Uri) -> Self {
         self.url = Some(url);
         self
     }
 
-    pub fn build(self) -> ActivityStreamsPreview {
-        ActivityStreamsPreview {
+    pub fn build(self) -> Preview {
+        Preview {
             base: self.base.build(),
             duration: self.duration,
             url: self.url,
@@ -338,13 +332,13 @@ impl ActivityStreamsPreviewBuilder {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct ActivityStreamsLink {
+#[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
+pub struct Link {
     #[serde(rename = "type")]
     link_type: String,
 
     #[serde(flatten)]
-    href: ActivityStreamsUri,
+    href: Uri,
 
     #[serde(skip_serializing_if = "Vec::is_empty")]
     rel: Vec<String>, // TODO: RFC5988 validation
@@ -362,36 +356,33 @@ pub struct ActivityStreamsLink {
     width: Option<u32>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    preview: Option<ActivityStreamsPreview>,
+    preview: Option<Preview>,
 }
 
-impl ActivityStreamsLink {
+impl Link {
     pub const TYPE: &'static str = "Link";
 }
 
-impl ActivityStreamsSerialize for ActivityStreamsLink {
+impl Serialize for Link {
     fn from_json(_json: String) -> Self {
-        ActivityStreamsLinkBuilder::new(ActivityStreamsUriBuilder::new(
-            "href".parse::<Uri>().unwrap(),
-        ))
-        .build()
+        LinkBuilder::new(UriBuilder::new("href".parse::<http::Uri>().unwrap())).build()
     }
 }
 
 #[derive(Clone)]
-pub struct ActivityStreamsLinkBuilder {
-    href: ActivityStreamsUriBuilder,
+pub struct LinkBuilder {
+    href: UriBuilder,
     rel: Vec<String>, // TODO: RFC5988 validation
     name: Option<String>,
     hreflang: Option<String>, // TODO: BCP47 language tag
     height: Option<u32>,
     width: Option<u32>,
-    preview: Option<ActivityStreamsPreview>,
+    preview: Option<Preview>,
 }
 
-impl ActivityStreamsLinkBuilder {
-    pub fn new(href: ActivityStreamsUriBuilder) -> Self {
-        ActivityStreamsLinkBuilder {
+impl LinkBuilder {
+    pub fn new(href: UriBuilder) -> Self {
+        LinkBuilder {
             href,
             rel: Vec::new(),
             name: None,
@@ -427,14 +418,14 @@ impl ActivityStreamsLinkBuilder {
         self
     }
 
-    pub fn preview(mut self, preview: ActivityStreamsPreview) -> Self {
+    pub fn preview(mut self, preview: Preview) -> Self {
         self.preview = Some(preview);
         self
     }
 
-    pub fn build(self) -> ActivityStreamsLink {
-        ActivityStreamsLink {
-            link_type: ActivityStreamsLink::TYPE.to_string(),
+    pub fn build(self) -> Link {
+        Link {
+            link_type: Link::TYPE.to_string(),
             href: self.href.build(),
             rel: self.rel,
             name: self.name,
@@ -446,49 +437,48 @@ impl ActivityStreamsLinkBuilder {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct ActivityStreamsActivity {
+#[derive(serde::Serialize, serde::Deserialize, Debug)]
+pub struct Activity {
     #[serde(flatten)]
-    base: ActivityStreamsObject<ActivityStreamsNull>,
+    base: Object<Null>,
 
     summary: String,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     actor: Option<Actor>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    object: Option<ActivityStreamsObject<ActivityStreamsNull>>,
+    object: Option<Object<Null>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    target: Option<ActivityStreamsObject<ActivityStreamsNull>>, // TODO: ActivityStreamsTarget
+    target: Option<Object<Null>>, // TODO: Target
     #[serde(skip_serializing_if = "Option::is_none")]
-    result: Option<String>, // TODO: ActivityStreamsResult
+    result: Option<String>, // TODO: Result
     #[serde(skip_serializing_if = "Option::is_none")]
-    origin: Option<String>, // TODO: ActivityStreamsOrigin
+    origin: Option<String>, // TODO: Origin
     #[serde(skip_serializing_if = "Option::is_none")]
-    instrument: Option<String>, // TODO: ActivityStreamsInstrument
+    instrument: Option<String>, // TODO: Instrument
 }
 
-impl ActivityStreamsSerialize for ActivityStreamsActivity {
+impl Serialize for Activity {
     fn from_json(_json: String) -> Self {
-        ActivityStreamsActivityBuilder::new("unknown".to_string(), "unimplemented".to_string())
-            .build()
+        ActivityBuilder::new("unknown".to_string(), "unimplemented".to_string()).build()
     }
 }
 
-pub struct ActivityStreamsActivityBuilder {
-    base: ActivityStreamsObjectBuilder<ActivityStreamsNull>,
+pub struct ActivityBuilder {
+    base: ObjectBuilder<Null>,
     summary: String,
     actor: Option<ActorBuilder>,
-    object: Option<ActivityStreamsObjectBuilder<ActivityStreamsNull>>,
-    target: Option<ActivityStreamsObjectBuilder<ActivityStreamsNull>>,
+    object: Option<ObjectBuilder<Null>>,
+    target: Option<ObjectBuilder<Null>>,
     result: Option<String>,
     origin: Option<String>,
     instrument: Option<String>,
 }
 
-impl ActivityStreamsActivityBuilder {
+impl ActivityBuilder {
     pub fn new(activity_type: String, summary: String) -> Self {
-        ActivityStreamsActivityBuilder {
-            base: ActivityStreamsObjectBuilder::new().object_type(activity_type),
+        ActivityBuilder {
+            base: ObjectBuilder::new().object_type(activity_type),
             summary,
             actor: None,
             object: None,
@@ -509,12 +499,12 @@ impl ActivityStreamsActivityBuilder {
         self
     }
 
-    pub fn object(mut self, object: ActivityStreamsObjectBuilder<ActivityStreamsNull>) -> Self {
+    pub fn object(mut self, object: ObjectBuilder<Null>) -> Self {
         self.object = Some(object);
         self
     }
 
-    pub fn target(mut self, target: ActivityStreamsObjectBuilder<ActivityStreamsNull>) -> Self {
+    pub fn target(mut self, target: ObjectBuilder<Null>) -> Self {
         self.target = Some(target);
         self
     }
@@ -534,8 +524,8 @@ impl ActivityStreamsActivityBuilder {
         self
     }
 
-    pub fn build(self) -> ActivityStreamsActivity {
-        ActivityStreamsActivity {
+    pub fn build(self) -> Activity {
+        Activity {
             base: self.base.build(),
             summary: self.summary,
             actor: match self.actor {
@@ -560,19 +550,13 @@ impl ActivityStreamsActivityBuilder {
 #[cfg(test)]
 mod tests {
     use crate::{core::*, extended::ActorBuilder};
-    use http::Uri;
     use pretty_assertions::assert_eq;
 
     #[test]
     fn create_activity_stream_object() {
-        let object: ActivityStreamsObject<ActivityStreamsNull> =
-            ActivityStreamsObjectBuilder::new()
-                .name("name".to_string())
-                .build();
-        let actual = ActivityStreamsDocument::new(
-            ActivityStreamsContextBuilder::new()
-                .language("en".to_string())
-                .build(),
+        let object: Object<Null> = ObjectBuilder::new().name("name".to_string()).build();
+        let actual = Document::new(
+            ContextBuilder::new().language("en".to_string()).build(),
             object,
         );
         let expected = String::from(
@@ -589,10 +573,10 @@ mod tests {
 
     #[test]
     fn create_link() {
-        let actual = ActivityStreamsDocument::new(
-            ActivityStreamsContextBuilder::new().build(),
-            ActivityStreamsLinkBuilder::new(ActivityStreamsUriBuilder::new(
-                "http://example.org/abc".parse::<Uri>().unwrap(),
+        let actual = Document::new(
+            ContextBuilder::new().build(),
+            LinkBuilder::new(UriBuilder::new(
+                "http://example.org/abc".parse::<http::Uri>().unwrap(),
             ))
             .name("An example link".to_string())
             .hreflang("en".to_string())
@@ -614,13 +598,15 @@ mod tests {
 
     #[test]
     fn create_preview() {
-        let actual = ActivityStreamsDocument::new(
-            ActivityStreamsContextBuilder::new().build(),
-            ActivityStreamsPreviewBuilder::new("Video".to_string(), "Trailer".to_string())
+        let actual = Document::new(
+            ContextBuilder::new().build(),
+            PreviewBuilder::new("Video".to_string(), "Trailer".to_string())
                 .duration("PT1M".to_string())
                 .url(
-                    ActivityStreamsUriBuilder::new(
-                        "http://example.org/trailer.mkv".parse::<Uri>().unwrap(),
+                    UriBuilder::new(
+                        "http://example.org/trailer.mkv"
+                            .parse::<http::Uri>()
+                            .unwrap(),
                     )
                     .media_type("video/mkv".to_string())
                     .build(),
@@ -646,15 +632,15 @@ mod tests {
 
     #[test]
     fn create_activity() {
-        let actual = ActivityStreamsDocument::new(
-            ActivityStreamsContextBuilder::new().build(),
-            ActivityStreamsActivityBuilder::new(
+        let actual = Document::new(
+            ContextBuilder::new().build(),
+            ActivityBuilder::new(
                 "Activity".to_string(),
                 "Sally did something to a note".to_string(),
             )
             .actor(ActorBuilder::new("Person".to_string()).name("Sally".to_string()))
             .object(
-                ActivityStreamsObjectBuilder::new()
+                ObjectBuilder::new()
                     .object_type("Note".to_string())
                     .name("A Note".to_string()),
             )
