@@ -2,9 +2,9 @@ use chrono::{DateTime, Utc};
 
 use crate::extended::{Actor, ActorBuilder};
 
-pub trait Serialize
+pub trait Serde
 where
-    Self: serde::Serialize,
+    Self: serde::Serialize + serde::Deserialize,
 {
     fn to_json(&self) -> String {
         let serialized = serde_json::to_string(&self).unwrap();
@@ -21,11 +21,11 @@ where
     fn from_json(json: String) -> Self;
 }
 
-/// Null-type object that implements `Serialize` for convenience
+/// Null-type object that implements `Serde` for convenience
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
 pub struct Null {}
 
-impl Serialize for Null {
+impl Serde for Null {
     fn to_json(&self) -> String {
         self.to_json_pretty()
     }
@@ -38,7 +38,7 @@ impl Serialize for Null {
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
-pub struct Document<T: Serialize> {
+pub struct Document<T: Serde> {
     #[serde(rename = "@context")]
     context: Context,
 
@@ -46,17 +46,19 @@ pub struct Document<T: Serialize> {
     object: T,
 }
 
-impl<T: Serialize> Serialize for Document<T> {
-    fn from_json(_json: String) -> Self {
+impl<T: Serde> Serde for Document<T> {
+    fn from_json(json: String) -> Self {
+        return serde_json::from_str(&json).unwrap();
+        /*
         Document {
             context: ContextBuilder::new().build(),
             // TODO: figure out how to know what type this is
             object: T::from_json(_json),
-        }
+        }*/
     }
 }
 
-impl<T: Serialize> Document<T> {
+impl<T: Serde> Document<T> {
     pub fn new(context: Context, object: T) -> Self {
         Document { context, object }
     }
@@ -123,7 +125,7 @@ impl ContextBuilder {
 /// mediaType | duration
 /// All properties are optional (including the id and type).
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
-pub struct Object<AttributedToT: Serialize> {
+pub struct Object<AttributedToT: Serde> {
     #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
     object_type: Option<String>,
 
@@ -147,7 +149,7 @@ pub struct Object<AttributedToT: Serialize> {
 }
 
 #[derive(Clone)]
-pub struct ObjectBuilder<AttributedToT: Serialize + Clone> {
+pub struct ObjectBuilder<AttributedToT: Serde + Clone> {
     object_type: Option<String>,
     // TODO: actually an IRI: consider https://docs.rs/iref/latest/iref/
     id: Option<http::Uri>,
@@ -159,7 +161,7 @@ pub struct ObjectBuilder<AttributedToT: Serialize + Clone> {
     // TODO: more fields
 }
 
-impl<AttributedToT: Serialize + Clone> ObjectBuilder<AttributedToT> {
+impl<AttributedToT: Serde + Clone> ObjectBuilder<AttributedToT> {
     pub fn new() -> Self {
         ObjectBuilder {
             object_type: None,
@@ -229,7 +231,7 @@ impl<AttributedToT: Serialize + Clone> ObjectBuilder<AttributedToT> {
     }
 }
 
-impl<AttributedToT: Serialize + Clone> Serialize for Object<AttributedToT> {
+impl<AttributedToT: Serde + Clone> Serde for Object<AttributedToT> {
     fn from_json(_json: String) -> Self {
         ObjectBuilder::new().build()
     }
@@ -244,7 +246,7 @@ pub struct Uri {
     media_type: Option<String>,
 }
 
-impl Serialize for Uri {
+impl Serde for Uri {
     fn from_json(_json: String) -> Self {
         Uri {
             href: "todo".to_string(),
@@ -292,7 +294,7 @@ pub struct Preview {
     url: Option<Uri>,
 }
 
-impl Serialize for Preview {
+impl Serde for Preview {
     fn from_json(_json: String) -> Self {
         PreviewBuilder::new("todo".to_string(), "unimplemented".to_string()).build()
     }
@@ -363,7 +365,7 @@ impl Link {
     pub const TYPE: &'static str = "Link";
 }
 
-impl Serialize for Link {
+impl Serde for Link {
     fn from_json(_json: String) -> Self {
         LinkBuilder::new(UriBuilder::new("href".parse::<http::Uri>().unwrap())).build()
     }
@@ -458,7 +460,7 @@ pub struct Activity {
     instrument: Option<String>, // TODO: Instrument
 }
 
-impl Serialize for Activity {
+impl Serde for Activity {
     fn from_json(_json: String) -> Self {
         ActivityBuilder::new("unknown".to_string(), "unimplemented".to_string()).build()
     }
@@ -553,7 +555,7 @@ mod tests {
     use pretty_assertions::assert_eq;
 
     #[test]
-    fn create_activity_stream_object() {
+    fn serialize_activity_stream_object() {
         let object: Object<Null> = ObjectBuilder::new().name("name".to_string()).build();
         let actual = Document::new(
             ContextBuilder::new().language("en".to_string()).build(),
@@ -569,6 +571,23 @@ mod tests {
 }"#,
         );
         assert_eq!(actual.to_json_pretty(), expected)
+    }
+
+    #[test]
+    fn deserialize_activity_stream_object() {
+        let actual = String::from(
+            r#"{
+  "@context": {
+    "@vocab": "https://www.w3.org/ns/activitystreams",
+    "@language": "en"
+  },
+  "name": "name"
+}"#,
+        );
+        let document: Document<Object<Null>> = Document::from_json(actual);
+        assert_eq!(document.context.language, Some("en".to_string()));
+        let object = document.object as Object<Null>;
+        assert_eq!(object.name, Some("name".to_string()));
     }
 
     #[test]

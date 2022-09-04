@@ -23,7 +23,7 @@ pub struct Actor {
     liked: Option<String>,
 }
 
-impl Serialize for Actor {
+impl Serde for Actor {
     fn from_json(_json: String) -> Self {
         ActorBuilder::new("Actor".to_string()).build()
     }
@@ -132,7 +132,9 @@ impl ActorBuilder {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::*;
+    use crate::core::{
+        ActivityStreamsContextBuilder, ActivityStreamsDocument, ActivityStreamsSerde,
+    };
     use crate::extended::ActorBuilder;
     use pretty_assertions::assert_eq;
 
