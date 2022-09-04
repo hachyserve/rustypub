@@ -1,12 +1,10 @@
 use crate::core::*;
 use chrono::{DateTime, Utc};
-use http::Uri;
-use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
 pub struct Actor {
     #[serde(flatten)]
-    base: ActivityStreamsObject<ActivityStreamsNull>,
+    base: Object<Null>,
 
     #[serde(rename = "preferredUsername")]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -25,14 +23,14 @@ pub struct Actor {
     liked: Option<String>,
 }
 
-impl ActivityStreamsSerialize for Actor {
+impl Serialize for Actor {
     fn from_json(_json: String) -> Self {
         ActorBuilder::new("Actor".to_string()).build()
     }
 }
 
 pub struct ActorBuilder {
-    base: ActivityStreamsObjectBuilder<ActivityStreamsNull>,
+    base: ObjectBuilder<Null>,
 
     preferred_username: Option<String>,
     summary: Option<String>,
@@ -46,7 +44,7 @@ pub struct ActorBuilder {
 impl ActorBuilder {
     pub fn new(actor_type: String) -> Self {
         ActorBuilder {
-            base: ActivityStreamsObjectBuilder::new().object_type(actor_type),
+            base: ObjectBuilder::new().object_type(actor_type),
             preferred_username: None,
             summary: None,
             inbox: None,
@@ -57,7 +55,7 @@ impl ActorBuilder {
         }
     }
 
-    pub fn id(mut self, id: Uri) -> Self {
+    pub fn id(mut self, id: http::Uri) -> Self {
         self.base.id(id);
         self
     }
@@ -67,7 +65,7 @@ impl ActorBuilder {
         self
     }
 
-    pub fn url(mut self, url: Uri) -> Self {
+    pub fn url(mut self, url: http::Uri) -> Self {
         self.base.url(url);
         self
     }
@@ -77,7 +75,7 @@ impl ActorBuilder {
         self
     }
 
-    pub fn image(mut self, image: ActivityStreamsLinkBuilder) -> Self {
+    pub fn image(mut self, image: LinkBuilder) -> Self {
         self.base.image(image);
         self
     }
@@ -134,19 +132,18 @@ impl ActorBuilder {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::{
-        ActivityStreamsContextBuilder, ActivityStreamsDocument, ActivityStreamsSerialize,
-    };
+    use crate::core::*;
     use crate::extended::ActorBuilder;
-    use http::Uri;
     use pretty_assertions::assert_eq;
 
     #[test]
     fn create_actor_object() {
-        let actual = ActivityStreamsDocument::new(
-            ActivityStreamsContextBuilder::new().build(),
+        let actual = Document::new(
+            ContextBuilder::new().build(),
             ActorBuilder::new("Person".to_string())
-                .id("https://example.com/person/1234".parse::<Uri>().unwrap())
+                .id("https://example.com/person/1234"
+                    .parse::<http::Uri>()
+                    .unwrap())
                 .name("name".to_string())
                 .preferred_username("dma".to_string())
                 .build(),
