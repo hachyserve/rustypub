@@ -24,8 +24,8 @@ pub struct Actor {
     liked: Option<String>,
 }
 
-impl<'a> Serde<'_> for Actor {
-    fn from_json(_json: &'a String) -> Self {
+impl Serde for Actor {
+    fn from_json(_json: &String) -> Self {
         ActorBuilder::new("Actor".to_string()).build()
     }
 }
