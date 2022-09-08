@@ -23,12 +23,13 @@ pub struct Actor {
     #[serde(skip_serializing_if = "Option::is_none")]
     liked: Option<String>,
 }
-
+/*
 impl Serde for Actor {
     fn from_json(_json: &String) -> Self {
         ActorBuilder::new("Actor".to_string()).build()
     }
 }
+*/
 
 pub struct ActorBuilder {
     base: ObjectBuilder<Null>,

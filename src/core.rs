@@ -2,9 +2,9 @@ use crate::extended::{Actor, ActorBuilder};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-pub trait Serde
+pub trait Serde<'de>
 where
-    Self: Serialize + for<'de> Deserialize<'de>,
+    Self: Serialize + Deserialize<'de>,
 {
     fn to_json(&self) -> String {
         let serialized = serde_json::to_string(&self).unwrap();
@@ -18,14 +18,17 @@ where
         serialized
     }
 
-    fn from_json(json: &String) -> Self;
+    fn from_json(json: &'de String) -> Self {
+        return serde_json::from_str(&json).unwrap();
+    }
 }
 
 /// Null-type object that implements `Serde` for convenience
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Null {}
 
-impl Serde for Null {
+impl Serde<'_> for Null {}
+/*
     fn to_json(&self) -> String {
         self.to_json_pretty()
     }
@@ -36,9 +39,10 @@ impl Serde for Null {
         panic!("intentionally unimplemented");
     }
 }
+*/
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Document<T: Serde> {
+pub struct Document<T> {
     #[serde(rename = "@context")]
     context: Context,
 
@@ -46,13 +50,9 @@ pub struct Document<T: Serde> {
     object: T,
 }
 
-impl<T: Serde> Document<T> {
-    fn from_json(json: &String) -> Self {
-        return serde_json::from_str(&json).unwrap();
-    }
-}
+impl<'a, T: Serde<'a>> Serde<'a> for Document<T> {}
 
-impl<T: Serde> Document<T> {
+impl<'a, T: Serde<'a>> Document<T> {
     pub fn new(context: Context, object: T) -> Self {
         Document { context, object }
     }
@@ -155,7 +155,7 @@ pub struct ObjectBuilder<AttributedToT> {
     // TODO: more fields
 }
 
-impl<AttributedToT: Serde + Clone> ObjectBuilder<AttributedToT> {
+impl<'a, AttributedToT: Serde<'a> + Clone> ObjectBuilder<AttributedToT> {
     pub fn new() -> Self {
         ObjectBuilder {
             object_type: None,
@@ -225,12 +225,13 @@ impl<AttributedToT: Serde + Clone> ObjectBuilder<AttributedToT> {
     }
 }
 
-impl<AttributedToT: Serde + Clone> Serde for Object<AttributedToT> {
+impl<'a, AttributedToT: Serde<'a> + Clone> Serde<'a> for Object<AttributedToT> {}
+/*
     fn from_json(json: &String) -> Self {
-        //ObjectBuilder::new().build()
         return serde_json::from_str(&json).unwrap();
     }
 }
+*/
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Uri {
@@ -241,11 +242,13 @@ pub struct Uri {
     media_type: Option<String>,
 }
 
-impl Serde for Uri {
+impl Serde<'_> for Uri {}
+/*
     fn from_json(json: &String) -> Self {
         return serde_json::from_str(&json).unwrap();
     }
 }
+*/
 
 #[derive(Clone)]
 pub struct UriBuilder {
@@ -286,11 +289,13 @@ pub struct Preview {
     url: Option<Uri>,
 }
 
-impl Serde for Preview {
+impl Serde<'_> for Preview {}
+/*
     fn from_json(json: &String) -> Self {
         return serde_json::from_str(&json).unwrap();
     }
 }
+*/
 
 pub struct PreviewBuilder {
     base: ObjectBuilder<Null>,
@@ -357,11 +362,13 @@ impl Link {
     pub const TYPE: &'static str = "Link";
 }
 
-impl Serde for Link {
+impl Serde<'_> for Link {}
+/*
     fn from_json(json: &String) -> Self {
         return serde_json::from_str(&json).unwrap();
     }
 }
+*/
 
 #[derive(Clone)]
 pub struct LinkBuilder {
@@ -452,11 +459,13 @@ pub struct Activity {
     instrument: Option<String>, // TODO: Instrument
 }
 
-impl Serde for Activity {
+impl Serde<'_> for Activity {}
+/*
     fn from_json(json: &String) -> Self {
         return serde_json::from_str(&json).unwrap();
     }
 }
+*/
 
 pub struct ActivityBuilder {
     base: ObjectBuilder<Null>,
