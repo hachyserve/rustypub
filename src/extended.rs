@@ -24,8 +24,8 @@ pub struct Actor {
     liked: Option<String>,
 }
 
-impl Serde for Actor {
-    fn from_json(_json: String) -> Self {
+impl<'a> Serde<'_> for Actor {
+    fn from_json(_json: &'a String) -> Self {
         ActorBuilder::new("Actor".to_string()).build()
     }
 }
@@ -42,7 +42,7 @@ pub struct ActorBuilder {
     liked: Option<String>,
 }
 
-impl ActorBuilder {
+impl<'a> ActorBuilder {
     pub fn new(actor_type: String) -> Self {
         ActorBuilder {
             base: ObjectBuilder::new().object_type(actor_type),
@@ -133,9 +133,7 @@ impl ActorBuilder {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::{
-        ActivityStreamsContextBuilder, ActivityStreamsDocument, ActivityStreamsSerde,
-    };
+    use crate::core::*;
     use crate::extended::ActorBuilder;
     use pretty_assertions::assert_eq;
 

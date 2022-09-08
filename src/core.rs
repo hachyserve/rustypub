@@ -2,9 +2,9 @@ use crate::extended::{Actor, ActorBuilder};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-pub trait Serde
+pub trait Serde<'de>
 where
-    Self: Serialize + Deserialize,
+    Self: Serialize + Deserialize<'de>,
 {
     fn to_json(&self) -> String {
         let serialized = serde_json::to_string(&self).unwrap();
@@ -18,27 +18,30 @@ where
         serialized
     }
 
-    fn from_json(json: String) -> Self;
+    fn from_json(json: &'de String) -> Self;
 }
 
 /// Null-type object that implements `Serde` for convenience
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Null {}
 
-impl Serde for Null {
+impl<'de> Serde<'_> for Null {
     fn to_json(&self) -> String {
         self.to_json_pretty()
     }
     fn to_json_pretty(&self) -> String {
         panic!("intentionally unimplemented");
     }
-    fn from_json(_json: String) -> Self {
+    fn from_json(_json: &'de String) -> Self {
         panic!("intentionally unimplemented");
     }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Document<T: Serde> {
+pub struct Document<T: Serde<'de>>
+where
+    T: for<'a> Serde<'a>,
+{
     #[serde(rename = "@context")]
     context: Context,
 
@@ -46,8 +49,8 @@ pub struct Document<T: Serde> {
     object: T,
 }
 
-impl<T: Serde> Serde for Document<T> {
-    fn from_json(json: String) -> Self {
+impl<'a, T: for<'b> Serde<'b>> Serde<'a> for Document<T> {
+    fn from_json(json: &'a String) -> Self {
         return serde_json::from_str(&json).unwrap();
         /*
         Document {
@@ -58,7 +61,7 @@ impl<T: Serde> Serde for Document<T> {
     }
 }
 
-impl<T: Serde> Document<T> {
+impl<'a, T: for<'b> Serde<'b>> Document<T> {
     pub fn new(context: Context, object: T) -> Self {
         Document { context, object }
     }
@@ -125,7 +128,7 @@ impl ContextBuilder {
 /// mediaType | duration
 /// All properties are optional (including the id and type).
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Object<AttributedToT: Serde> {
+pub struct Object<AttributedToT> {
     #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
     object_type: Option<String>,
 
@@ -149,7 +152,7 @@ pub struct Object<AttributedToT: Serde> {
 }
 
 #[derive(Clone)]
-pub struct ObjectBuilder<AttributedToT: Serde + Clone> {
+pub struct ObjectBuilder<AttributedToT> {
     object_type: Option<String>,
     // TODO: actually an IRI: consider https://docs.rs/iref/latest/iref/
     id: Option<http::Uri>,
@@ -161,7 +164,7 @@ pub struct ObjectBuilder<AttributedToT: Serde + Clone> {
     // TODO: more fields
 }
 
-impl<AttributedToT: Serde + Clone> ObjectBuilder<AttributedToT> {
+impl<'a, AttributedToT: Serde<'a> + Clone> ObjectBuilder<AttributedToT> {
     pub fn new() -> Self {
         ObjectBuilder {
             object_type: None,
@@ -231,9 +234,10 @@ impl<AttributedToT: Serde + Clone> ObjectBuilder<AttributedToT> {
     }
 }
 
-impl<AttributedToT: Serde + Clone> Serde for Object<AttributedToT> {
-    fn from_json(_json: String) -> Self {
-        ObjectBuilder::new().build()
+impl<'a, AttributedToT: Serde<'a> + Clone> Serde<'a> for Object<AttributedToT> {
+    fn from_json(json: &'a String) -> Self {
+        //ObjectBuilder::new().build()
+        return serde_json::from_str(&json).unwrap();
     }
 }
 
@@ -246,12 +250,13 @@ pub struct Uri {
     media_type: Option<String>,
 }
 
-impl Serde for Uri {
-    fn from_json(_json: String) -> Self {
-        Uri {
-            href: "todo".to_string(),
-            media_type: None,
-        }
+impl<'a> Serde<'a> for Uri {
+    fn from_json(json: &'a String) -> Self {
+        return serde_json::from_str(&json).unwrap();
+        //Uri {
+        //    href: "todo".to_string(),
+        //    media_type: None,
+        //}
     }
 }
 
@@ -294,9 +299,10 @@ pub struct Preview {
     url: Option<Uri>,
 }
 
-impl Serde for Preview {
-    fn from_json(_json: String) -> Self {
-        PreviewBuilder::new("todo".to_string(), "unimplemented".to_string()).build()
+impl<'a> Serde<'_> for Preview {
+    fn from_json(json: &'a String) -> Self {
+        return serde_json::from_str(&json).unwrap();
+        //PreviewBuilder::new("todo".to_string(), "unimplemented".to_string()).build()
     }
 }
 
@@ -365,9 +371,10 @@ impl Link {
     pub const TYPE: &'static str = "Link";
 }
 
-impl Serde for Link {
-    fn from_json(_json: String) -> Self {
-        LinkBuilder::new(UriBuilder::new("href".parse::<http::Uri>().unwrap())).build()
+impl<'a> Serde<'_> for Link {
+    fn from_json(json: &'a String) -> Self {
+        return serde_json::from_str(&json).unwrap();
+        //LinkBuilder::new(UriBuilder::new("href".parse::<http::Uri>().unwrap())).build()
     }
 }
 
@@ -382,7 +389,7 @@ pub struct LinkBuilder {
     preview: Option<Preview>,
 }
 
-impl LinkBuilder {
+impl<'a> LinkBuilder {
     pub fn new(href: UriBuilder) -> Self {
         LinkBuilder {
             href,
@@ -460,9 +467,10 @@ pub struct Activity {
     instrument: Option<String>, // TODO: Instrument
 }
 
-impl Serde for Activity {
-    fn from_json(_json: String) -> Self {
-        ActivityBuilder::new("unknown".to_string(), "unimplemented".to_string()).build()
+impl<'a> Serde<'_> for Activity {
+    fn from_json(json: &'a String) -> Self {
+        return serde_json::from_str(&json).unwrap();
+        //ActivityBuilder::new("unknown".to_string(), "unimplemented".to_string()).build()
     }
 }
 
@@ -584,7 +592,7 @@ mod tests {
   "name": "name"
 }"#,
         );
-        let document: Document<Object<Null>> = Document::from_json(actual);
+        let document: Document<Object<Null>> = Document::from_json(&actual);
         assert_eq!(document.context.language, Some("en".to_string()));
         let object = document.object as Object<Null>;
         assert_eq!(object.name, Some("name".to_string()));
