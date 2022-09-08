@@ -49,12 +49,6 @@ pub struct Document<T: Serde> {
 impl<T: Serde> Document<T> {
     fn from_json(json: &String) -> Self {
         return serde_json::from_str(&json).unwrap();
-        /*
-        Document {
-            context: ContextBuilder::new().build(),
-            // TODO: figure out how to know what type this is
-            object: T::from_json(_json),
-        }*/
     }
 }
 
@@ -250,10 +244,6 @@ pub struct Uri {
 impl Serde for Uri {
     fn from_json(json: &String) -> Self {
         return serde_json::from_str(&json).unwrap();
-        //Uri {
-        //    href: "todo".to_string(),
-        //    media_type: None,
-        //}
     }
 }
 
@@ -299,7 +289,6 @@ pub struct Preview {
 impl Serde for Preview {
     fn from_json(json: &String) -> Self {
         return serde_json::from_str(&json).unwrap();
-        //PreviewBuilder::new("todo".to_string(), "unimplemented".to_string()).build()
     }
 }
 
@@ -371,7 +360,6 @@ impl Link {
 impl Serde for Link {
     fn from_json(json: &String) -> Self {
         return serde_json::from_str(&json).unwrap();
-        //LinkBuilder::new(UriBuilder::new("href".parse::<http::Uri>().unwrap())).build()
     }
 }
 
@@ -467,7 +455,6 @@ pub struct Activity {
 impl Serde for Activity {
     fn from_json(json: &String) -> Self {
         return serde_json::from_str(&json).unwrap();
-        //ActivityBuilder::new("unknown".to_string(), "unimplemented".to_string()).build()
     }
 }
 
