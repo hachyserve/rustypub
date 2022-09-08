@@ -25,7 +25,7 @@ where
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Null {}
 
-impl<'de> Serde<'_> for Null {
+impl<'de> Serde<'de> for Null {
     fn to_json(&self) -> String {
         self.to_json_pretty()
     }
@@ -38,7 +38,7 @@ impl<'de> Serde<'_> for Null {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Document<T: Serde<'de>>
+pub struct Document<T>
 where
     T: for<'a> Serde<'a>,
 {
