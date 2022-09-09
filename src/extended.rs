@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Actor {
     #[serde(flatten)]
-    base: Object<Null>,
+    pub base: Object<Null>,
 
     #[serde(rename = "preferredUsername")]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -130,11 +130,11 @@ impl<'a> ActorBuilder {
 #[cfg(test)]
 mod tests {
     use crate::core::*;
-    use crate::extended::ActorBuilder;
+    use crate::extended::{Actor, ActorBuilder};
     use pretty_assertions::assert_eq;
 
     #[test]
-    fn create_actor_object() {
+    fn serialize_actor() {
         let actual = Document::new(
             ContextBuilder::new().build(),
             ActorBuilder::new("Person".to_string())
@@ -157,5 +157,29 @@ mod tests {
 }"#,
         );
         assert_eq!(actual.to_json_pretty(), expected)
+    }
+
+    #[test]
+    fn deserialize_actor() {
+        let actual = String::from(
+            r#"{
+  "@context": {
+    "@vocab": "https://www.w3.org/ns/activitystreams"
+  },
+  "type": "Person",
+  "id": "https://example.com/person/1234",
+  "name": "name",
+  "preferredUsername": "dma"
+}"#,
+        );
+        let document: Document<Actor> = Document::from_json(&actual);
+        let actor = document.object as Actor;
+        assert_eq!(actor.base.object_type, Some("Person".to_string()));
+        assert_eq!(
+            actor.base.id,
+            Some("https://example.com/person/1234".to_string())
+        );
+        assert_eq!(actor.base.name, Some("name".to_string()));
+        assert_eq!(actor.preferred_username, Some("dma".to_string()));
     }
 }

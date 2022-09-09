@@ -35,7 +35,7 @@ pub struct Document<T> {
     context: Context,
 
     #[serde(flatten)]
-    object: T,
+    pub object: T,
 }
 
 impl<'a, T: Serde<'a>> Serde<'a> for Document<T> {}
@@ -109,29 +109,29 @@ impl ContextBuilder {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Object<AttributedToT> {
     #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
-    object_type: Option<String>,
+    pub object_type: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    id: Option<String>,
+    pub id: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    name: Option<String>,
+    pub name: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    url: Option<String>,
+    pub url: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    published: Option<DateTime<Utc>>,
+    pub published: Option<DateTime<Utc>>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    image: Option<Box<Link>>,
+    pub image: Option<Box<Link>>,
 
     #[serde(
         rename = "attributedTo",
         skip_serializing_if = "Vec::is_empty",
         default = "Vec::new"
     )]
-    attributed_to: Vec<AttributedToT>,
+    pub attributed_to: Vec<AttributedToT>,
 }
 
 #[derive(Clone)]
@@ -313,7 +313,7 @@ pub struct Link {
     #[serde(flatten)]
     href: Uri,
 
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[serde(skip_serializing_if = "Vec::is_empty", default = "Vec::new")]
     rel: Vec<String>, // TODO: RFC5988 validation
 
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -518,7 +518,7 @@ mod tests {
     use pretty_assertions::assert_eq;
 
     #[test]
-    fn serialize_activity_stream_object() {
+    fn serialize_object() {
         let object: Object<Null> = ObjectBuilder::new().name("name".to_string()).build();
         let actual = Document::new(
             ContextBuilder::new().language("en".to_string()).build(),
@@ -537,7 +537,7 @@ mod tests {
     }
 
     #[test]
-    fn deserialize_activity_stream_object() {
+    fn deserialize_object() {
         let actual = String::from(
             r#"{
   "@context": {
@@ -554,7 +554,7 @@ mod tests {
     }
 
     #[test]
-    fn create_link() {
+    fn serialize_link() {
         let actual = Document::new(
             ContextBuilder::new().build(),
             LinkBuilder::new(UriBuilder::new(
@@ -579,7 +579,28 @@ mod tests {
     }
 
     #[test]
-    fn create_preview() {
+    fn deserialize_link() {
+        let actual = String::from(
+            r#"{
+  "@context": {
+    "@vocab": "https://www.w3.org/ns/activitystreams"
+  },
+  "type": "Link",
+  "href": "http://example.org/abc",
+  "name": "An example link",
+  "hreflang": "en"
+}"#,
+        );
+        let document: Document<Link> = Document::from_json(&actual);
+        let link = document.object as Link;
+        assert_eq!(link.link_type, "Link");
+        assert_eq!(link.href.href, "http://example.org/abc");
+        assert_eq!(link.name, Some("An example link".to_string()));
+        assert_eq!(link.hreflang, Some("en".to_string()));
+    }
+
+    #[test]
+    fn serialize_preview() {
         let actual = Document::new(
             ContextBuilder::new().build(),
             PreviewBuilder::new("Video".to_string(), "Trailer".to_string())
@@ -613,7 +634,39 @@ mod tests {
     }
 
     #[test]
-    fn create_activity() {
+    fn deserialize_preview() {
+        let actual = String::from(
+            r#"{
+  "@context": {
+    "@vocab": "https://www.w3.org/ns/activitystreams"
+  },
+  "type": "Video",
+  "name": "Trailer",
+  "duration": "PT1M",
+  "url": {
+    "href": "http://example.org/trailer.mkv",
+    "mediaType": "video/mkv"
+  }
+}"#,
+        );
+        let document: Document<Preview> = Document::from_json(&actual);
+        let preview = document.object as Preview;
+        assert_eq!(preview.base.object_type, Some("Video".to_string()));
+        assert_eq!(preview.base.name, Some("Trailer".to_string()));
+        assert_eq!(preview.duration, Some("PT1M".to_string()));
+        assert!(preview.url.is_some());
+        assert_eq!(
+            preview.url.as_ref().unwrap().href,
+            "http://example.org/trailer.mkv".to_string()
+        );
+        assert_eq!(
+            preview.url.as_ref().unwrap().media_type,
+            Some("video/mkv".to_string())
+        );
+    }
+
+    #[test]
+    fn serialize_activity() {
         let actual = Document::new(
             ContextBuilder::new().build(),
             ActivityBuilder::new(
@@ -647,5 +700,43 @@ mod tests {
 }"#,
         );
         assert_eq!(actual.to_json_pretty(), expected);
+    }
+
+    #[test]
+    fn deserialize_activity() {
+        let actual = String::from(
+            r#"{
+  "@context": {
+    "@vocab": "https://www.w3.org/ns/activitystreams"
+  },
+  "type": "Activity",
+  "summary": "Sally did something to a note",
+  "actor": {
+    "type": "Person",
+    "name": "Sally"
+  },
+  "object": {
+    "type": "Note",
+    "name": "A Note"
+  }
+}"#,
+        );
+        let document: Document<Activity> = Document::from_json(&actual);
+        let activity = document.object as Activity;
+        assert_eq!(activity.base.object_type, Some("Activity".to_string()));
+        assert_eq!(
+            activity.summary,
+            "Sally did something to a note".to_string()
+        );
+
+        assert!(activity.actor.is_some());
+        let actor = activity.actor.as_ref().unwrap();
+        assert_eq!(actor.base.object_type, Some("Person".to_string()));
+        assert_eq!(actor.base.name, Some("Sally".to_string()));
+
+        assert!(activity.object.is_some());
+        let object = activity.object.as_ref().unwrap();
+        assert_eq!(object.object_type, Some("Note".to_string()));
+        assert_eq!(object.name, Some("A Note".to_string()));
     }
 }
