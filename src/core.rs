@@ -28,18 +28,6 @@ where
 pub struct Null {}
 
 impl Serde<'_> for Null {}
-/*
-    fn to_json(&self) -> String {
-        self.to_json_pretty()
-    }
-    fn to_json_pretty(&self) -> String {
-        panic!("intentionally unimplemented");
-    }
-    fn from_json<'de>(_json: &String) -> Self {
-        panic!("intentionally unimplemented");
-    }
-}
-*/
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Document<T> {
