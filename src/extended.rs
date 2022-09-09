@@ -1,7 +1,8 @@
 use crate::core::*;
 use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 
-#[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Actor {
     #[serde(flatten)]
     base: Object<Null>,
@@ -23,11 +24,7 @@ pub struct Actor {
     liked: Option<String>,
 }
 
-impl Serialize for Actor {
-    fn from_json(_json: String) -> Self {
-        ActorBuilder::new("Actor".to_string()).build()
-    }
-}
+impl Serde<'_> for Actor {}
 
 pub struct ActorBuilder {
     base: ObjectBuilder<Null>,
@@ -41,7 +38,7 @@ pub struct ActorBuilder {
     liked: Option<String>,
 }
 
-impl ActorBuilder {
+impl<'a> ActorBuilder {
     pub fn new(actor_type: String) -> Self {
         ActorBuilder {
             base: ObjectBuilder::new().object_type(actor_type),

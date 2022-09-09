@@ -1,10 +1,10 @@
-use chrono::{DateTime, Utc};
-
 use crate::extended::{Actor, ActorBuilder};
+use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 
-pub trait Serialize
+pub trait Serde<'de>
 where
-    Self: serde::Serialize,
+    Self: Serialize + Deserialize<'de>,
 {
     fn to_json(&self) -> String {
         let serialized = serde_json::to_string(&self).unwrap();
@@ -18,27 +18,19 @@ where
         serialized
     }
 
-    fn from_json(json: String) -> Self;
+    fn from_json(json: &'de String) -> Self {
+        return serde_json::from_str(&json).unwrap();
+    }
 }
 
-/// Null-type object that implements `Serialize` for convenience
-#[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
+/// Null-type object that implements `Serde` for convenience
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Null {}
 
-impl Serialize for Null {
-    fn to_json(&self) -> String {
-        self.to_json_pretty()
-    }
-    fn to_json_pretty(&self) -> String {
-        panic!("intentionally unimplemented");
-    }
-    fn from_json(_json: String) -> Self {
-        panic!("intentionally unimplemented");
-    }
-}
+impl Serde<'_> for Null {}
 
-#[derive(serde::Serialize, serde::Deserialize, Debug)]
-pub struct Document<T: Serialize> {
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Document<T> {
     #[serde(rename = "@context")]
     context: Context,
 
@@ -46,17 +38,9 @@ pub struct Document<T: Serialize> {
     object: T,
 }
 
-impl<T: Serialize> Serialize for Document<T> {
-    fn from_json(_json: String) -> Self {
-        Document {
-            context: ContextBuilder::new().build(),
-            // TODO: figure out how to know what type this is
-            object: T::from_json(_json),
-        }
-    }
-}
+impl<'a, T: Serde<'a>> Serde<'a> for Document<T> {}
 
-impl<T: Serialize> Document<T> {
+impl<'a, T: Serde<'a>> Document<T> {
     pub fn new(context: Context, object: T) -> Self {
         Document { context, object }
     }
@@ -71,7 +55,7 @@ impl<T: Serialize> Document<T> {
 /// alternative URL "http://www.w3.org/ns/activitystreams" instead. This can be
 /// done using a string, object, or array.
 /// https://www.w3.org/TR/activitystreams-core/#jsonld
-#[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Context {
     #[serde(rename = "@vocab")]
     namespace: String,
@@ -122,8 +106,8 @@ impl ContextBuilder {
 /// summary | summaryMap | tag | updated | url | to | bto | cc | bcc |
 /// mediaType | duration
 /// All properties are optional (including the id and type).
-#[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
-pub struct Object<AttributedToT: Serialize> {
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Object<AttributedToT> {
     #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
     object_type: Option<String>,
 
@@ -142,12 +126,16 @@ pub struct Object<AttributedToT: Serialize> {
     #[serde(skip_serializing_if = "Option::is_none")]
     image: Option<Box<Link>>,
 
-    #[serde(rename = "attributedTo", skip_serializing_if = "Vec::is_empty")]
+    #[serde(
+        rename = "attributedTo",
+        skip_serializing_if = "Vec::is_empty",
+        default = "Vec::new"
+    )]
     attributed_to: Vec<AttributedToT>,
 }
 
 #[derive(Clone)]
-pub struct ObjectBuilder<AttributedToT: Serialize + Clone> {
+pub struct ObjectBuilder<AttributedToT> {
     object_type: Option<String>,
     // TODO: actually an IRI: consider https://docs.rs/iref/latest/iref/
     id: Option<http::Uri>,
@@ -159,7 +147,7 @@ pub struct ObjectBuilder<AttributedToT: Serialize + Clone> {
     // TODO: more fields
 }
 
-impl<AttributedToT: Serialize + Clone> ObjectBuilder<AttributedToT> {
+impl<'a, AttributedToT: Serde<'a> + Clone> ObjectBuilder<AttributedToT> {
     pub fn new() -> Self {
         ObjectBuilder {
             object_type: None,
@@ -229,13 +217,9 @@ impl<AttributedToT: Serialize + Clone> ObjectBuilder<AttributedToT> {
     }
 }
 
-impl<AttributedToT: Serialize + Clone> Serialize for Object<AttributedToT> {
-    fn from_json(_json: String) -> Self {
-        ObjectBuilder::new().build()
-    }
-}
+impl<'a, AttributedToT: Serde<'a> + Clone> Serde<'a> for Object<AttributedToT> {}
 
-#[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Uri {
     href: String,
 
@@ -244,14 +228,7 @@ pub struct Uri {
     media_type: Option<String>,
 }
 
-impl Serialize for Uri {
-    fn from_json(_json: String) -> Self {
-        Uri {
-            href: "todo".to_string(),
-            media_type: None,
-        }
-    }
-}
+impl Serde<'_> for Uri {}
 
 #[derive(Clone)]
 pub struct UriBuilder {
@@ -280,7 +257,7 @@ impl UriBuilder {
     }
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Preview {
     #[serde(flatten)]
     base: Object<Null>,
@@ -292,11 +269,7 @@ pub struct Preview {
     url: Option<Uri>,
 }
 
-impl Serialize for Preview {
-    fn from_json(_json: String) -> Self {
-        PreviewBuilder::new("todo".to_string(), "unimplemented".to_string()).build()
-    }
-}
+impl Serde<'_> for Preview {}
 
 pub struct PreviewBuilder {
     base: ObjectBuilder<Null>,
@@ -332,7 +305,7 @@ impl PreviewBuilder {
     }
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Link {
     #[serde(rename = "type")]
     link_type: String,
@@ -363,11 +336,7 @@ impl Link {
     pub const TYPE: &'static str = "Link";
 }
 
-impl Serialize for Link {
-    fn from_json(_json: String) -> Self {
-        LinkBuilder::new(UriBuilder::new("href".parse::<http::Uri>().unwrap())).build()
-    }
-}
+impl Serde<'_> for Link {}
 
 #[derive(Clone)]
 pub struct LinkBuilder {
@@ -380,7 +349,7 @@ pub struct LinkBuilder {
     preview: Option<Preview>,
 }
 
-impl LinkBuilder {
+impl<'a> LinkBuilder {
     pub fn new(href: UriBuilder) -> Self {
         LinkBuilder {
             href,
@@ -437,7 +406,7 @@ impl LinkBuilder {
     }
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Activity {
     #[serde(flatten)]
     base: Object<Null>,
@@ -458,11 +427,7 @@ pub struct Activity {
     instrument: Option<String>, // TODO: Instrument
 }
 
-impl Serialize for Activity {
-    fn from_json(_json: String) -> Self {
-        ActivityBuilder::new("unknown".to_string(), "unimplemented".to_string()).build()
-    }
-}
+impl Serde<'_> for Activity {}
 
 pub struct ActivityBuilder {
     base: ObjectBuilder<Null>,
@@ -553,7 +518,7 @@ mod tests {
     use pretty_assertions::assert_eq;
 
     #[test]
-    fn create_activity_stream_object() {
+    fn serialize_activity_stream_object() {
         let object: Object<Null> = ObjectBuilder::new().name("name".to_string()).build();
         let actual = Document::new(
             ContextBuilder::new().language("en".to_string()).build(),
@@ -569,6 +534,23 @@ mod tests {
 }"#,
         );
         assert_eq!(actual.to_json_pretty(), expected)
+    }
+
+    #[test]
+    fn deserialize_activity_stream_object() {
+        let actual = String::from(
+            r#"{
+  "@context": {
+    "@vocab": "https://www.w3.org/ns/activitystreams",
+    "@language": "en"
+  },
+  "name": "name"
+}"#,
+        );
+        let document: Document<Object<Null>> = Document::from_json(&actual);
+        assert_eq!(document.context.language, Some("en".to_string()));
+        let object = document.object as Object<Null>;
+        assert_eq!(object.name, Some("name".to_string()));
     }
 
     #[test]
