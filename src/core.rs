@@ -138,7 +138,11 @@ pub struct Object<AttributedToT> {
     #[serde(skip_serializing_if = "Option::is_none")]
     image: Option<Box<Link>>,
 
-    #[serde(rename = "attributedTo", skip_serializing_if = "Vec::is_empty")]
+    #[serde(
+        rename = "attributedTo",
+        skip_serializing_if = "Vec::is_empty",
+        default = "Vec::new"
+    )]
     attributed_to: Vec<AttributedToT>,
 }
 
@@ -226,12 +230,6 @@ impl<'a, AttributedToT: Serde<'a> + Clone> ObjectBuilder<AttributedToT> {
 }
 
 impl<'a, AttributedToT: Serde<'a> + Clone> Serde<'a> for Object<AttributedToT> {}
-/*
-    fn from_json(json: &String) -> Self {
-        return serde_json::from_str(&json).unwrap();
-    }
-}
-*/
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Uri {
@@ -243,12 +241,6 @@ pub struct Uri {
 }
 
 impl Serde<'_> for Uri {}
-/*
-    fn from_json(json: &String) -> Self {
-        return serde_json::from_str(&json).unwrap();
-    }
-}
-*/
 
 #[derive(Clone)]
 pub struct UriBuilder {
@@ -290,12 +282,6 @@ pub struct Preview {
 }
 
 impl Serde<'_> for Preview {}
-/*
-    fn from_json(json: &String) -> Self {
-        return serde_json::from_str(&json).unwrap();
-    }
-}
-*/
 
 pub struct PreviewBuilder {
     base: ObjectBuilder<Null>,
@@ -363,12 +349,6 @@ impl Link {
 }
 
 impl Serde<'_> for Link {}
-/*
-    fn from_json(json: &String) -> Self {
-        return serde_json::from_str(&json).unwrap();
-    }
-}
-*/
 
 #[derive(Clone)]
 pub struct LinkBuilder {
@@ -460,12 +440,6 @@ pub struct Activity {
 }
 
 impl Serde<'_> for Activity {}
-/*
-    fn from_json(json: &String) -> Self {
-        return serde_json::from_str(&json).unwrap();
-    }
-}
-*/
 
 pub struct ActivityBuilder {
     base: ObjectBuilder<Null>,
