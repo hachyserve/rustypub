@@ -33,7 +33,7 @@ impl Serde<'_> for Null {}
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Document<T> {
     #[serde(rename = "@context")]
-    context: Context,
+    pub context: Context,
 
     #[serde(flatten)]
     pub object: T,
@@ -109,86 +109,38 @@ impl ContextBuilder {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Object<AttributedToT> {
     #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
-    object_type: Option<String>,
+    pub object_type: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    id: Option<String>,
+    pub id: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    name: Option<String>,
+    pub name: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    url: Option<String>,
+    pub url: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    published: Option<DateTime<Utc>>,
+    pub published: Option<DateTime<Utc>>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    image: Option<Box<Link>>,
+    pub image: Option<Box<Link>>,
 
     #[serde(
         rename = "attributedTo",
         skip_serializing_if = "Vec::is_empty",
         default = "Vec::new"
     )]
-    attributed_to: Vec<AttributedToT>,
+    pub attributed_to: Vec<AttributedToT>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    audience: Option<Box<Object<Null>>>,
+    pub audience: Option<Box<Object<Null>>>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    content: Option<String>,
+    pub content: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    summary: Option<String>,
-}
-
-impl<AttributedToT> Object<AttributedToT> {
-    pub fn objectType(&self) -> Option<&String> {
-        self.object_type.as_ref()
-    }
-
-    pub fn id(&self) -> Option<&String> {
-        self.id.as_ref()
-    }
-
-    pub fn name(&self) -> Option<&String> {
-        self.name.as_ref()
-    }
-
-    pub fn url(&self) -> Option<&String> {
-        self.url.as_ref()
-    }
-
-    pub fn published(&self) -> Option<DateTime<Utc>> {
-        self.published
-    }
-
-    pub fn image(&self) -> Option<&Link> {
-        match &self.image {
-            None => None,
-            Some(l) => Some(&*l),
-        }
-    }
-
-    pub fn attributedTo(&self) -> &Vec<AttributedToT> {
-        self.attributed_to.as_ref()
-    }
-
-    pub fn audience(&self) -> Option<&Object<Null>> {
-        match &self.audience {
-            None => None,
-            Some(a) => Some(&a),
-        }
-    }
-
-    pub fn content(&self) -> Option<&String> {
-        self.content.as_ref()
-    }
-
-    pub fn summary(&self) -> Option<&String> {
-        self.summary.as_ref()
-    }
+    pub summary: Option<String>,
 }
 
 #[derive(Clone)]
@@ -344,13 +296,13 @@ impl UriBuilder {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Preview {
     #[serde(flatten)]
-    base: Object<Null>,
+    pub base: Object<Null>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    duration: Option<String>,
+    pub duration: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    url: Option<Uri>,
+    pub url: Option<Uri>,
 }
 
 impl Serde<'_> for Preview {}
@@ -494,89 +446,23 @@ impl<'a> LinkBuilder {
 pub struct Activity {
     // TODO: consider getters instead of raw access
     #[serde(flatten)]
-    base: Object<Null>,
+    pub base: Object<Null>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    actor: Option<Actor>,
+    pub actor: Option<Actor>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    object: Option<Object<Null>>,
+    pub object: Option<Object<Null>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    target: Option<Object<Null>>,
+    pub target: Option<Object<Null>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    result: Option<String>,
+    pub result: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    origin: Option<String>, // TODO: Origin
+    pub origin: Option<String>, // TODO: Origin
     #[serde(skip_serializing_if = "Option::is_none")]
-    instrument: Option<String>, // TODO: Instrument
+    pub instrument: Option<String>, // TODO: Instrument
 }
 
 impl Serde<'_> for Activity {}
-
-impl Activity {
-    pub fn objectType(&self) -> Option<&String> {
-        self.base.objectType()
-    }
-
-    pub fn id(&self) -> Option<&String> {
-        self.base.id()
-    }
-
-    pub fn name(&self) -> Option<&String> {
-        self.base.name()
-    }
-
-    pub fn url(&self) -> Option<&String> {
-        self.base.url()
-    }
-
-    pub fn published(&self) -> Option<DateTime<Utc>> {
-        self.base.published()
-    }
-
-    pub fn image(&self) -> Option<&Link> {
-        self.base.image()
-    }
-
-    pub fn attributedTo(&self) -> &Vec<Null> {
-        self.base.attributedTo()
-    }
-
-    pub fn audience(&self) -> Option<&Object<Null>> {
-        self.base.audience()
-    }
-
-    pub fn content(&self) -> Option<&String> {
-        self.base.content()
-    }
-
-    pub fn summary(&self) -> Option<&String> {
-        self.base.summary()
-    }
-
-    pub fn actor(&self) -> Option<&Actor> {
-        self.actor.as_ref()
-    }
-
-    pub fn object(&self) -> Option<&Object<Null>> {
-        self.object.as_ref()
-    }
-
-    pub fn target(&self) -> Option<&Object<Null>> {
-        self.target.as_ref()
-    }
-
-    pub fn result(&self) -> Option<&String> {
-        self.result.as_ref()
-    }
-
-    pub fn origin(&self) -> Option<&String> {
-        self.origin.as_ref()
-    }
-
-    pub fn instrument(&self) -> Option<&String> {
-        self.instrument.as_ref()
-    }
-}
 
 #[derive(Clone)]
 pub struct ActivityBuilder {
@@ -668,68 +554,6 @@ pub struct IntransitiveActivity {
 }
 
 impl Serde<'_> for IntransitiveActivity {}
-
-impl IntransitiveActivity {
-    pub fn objectType(&self) -> Option<&String> {
-        self.base.objectType()
-    }
-
-    pub fn id(&self) -> Option<&String> {
-        self.base.id()
-    }
-
-    pub fn name(&self) -> Option<&String> {
-        self.base.name()
-    }
-
-    pub fn url(&self) -> Option<&String> {
-        self.base.url()
-    }
-
-    pub fn published(&self) -> Option<DateTime<Utc>> {
-        self.base.published()
-    }
-
-    pub fn image(&self) -> Option<&Link> {
-        self.base.image()
-    }
-
-    pub fn attributedTo(&self) -> &Vec<Null> {
-        self.base.attributedTo()
-    }
-
-    pub fn audience(&self) -> Option<&Object<Null>> {
-        self.base.audience()
-    }
-
-    pub fn content(&self) -> Option<&String> {
-        self.base.content()
-    }
-
-    pub fn summary(&self) -> Option<&String> {
-        self.base.summary()
-    }
-
-    pub fn actor(&self) -> Option<&Actor> {
-        self.base.actor()
-    }
-
-    pub fn target(&self) -> Option<&Object<Null>> {
-        self.base.target()
-    }
-
-    pub fn result(&self) -> Option<&String> {
-        self.base.result()
-    }
-
-    pub fn origin(&self) -> Option<&String> {
-        self.base.origin()
-    }
-
-    pub fn instrument(&self) -> Option<&String> {
-        self.base.instrument()
-    }
-}
 
 #[derive(Clone)]
 pub struct IntransitiveActivityBuilder {
@@ -1017,8 +841,8 @@ mod tests {
 
         assert!(activity.actor.is_some());
         let actor = activity.actor.as_ref().unwrap();
-        assert_eq!(actor.objectType(), Some(&"Person".to_string()));
-        assert_eq!(actor.name(), Some(&"Sally".to_string()));
+        assert_eq!(actor.base.object_type, Some("Person".to_string()));
+        assert_eq!(actor.base.name, Some("Sally".to_string()));
 
         assert!(activity.object.is_some());
         let object = activity.object.as_ref().unwrap();

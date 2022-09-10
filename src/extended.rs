@@ -5,66 +5,24 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Actor {
     #[serde(flatten)]
-    base: Object<Null>,
+    pub base: Object<Null>,
 
     #[serde(rename = "preferredUsername")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    preferred_username: Option<String>,
+    pub preferred_username: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    inbox: Option<String>,
+    pub inbox: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    outbox: Option<String>,
+    pub outbox: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    followers: Option<String>,
+    pub followers: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    following: Option<String>,
+    pub following: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    liked: Option<String>,
+    pub liked: Option<String>,
 }
 
 impl Serde<'_> for Actor {}
-
-impl Actor {
-    pub fn objectType(&self) -> Option<&String> {
-        self.base.objectType()
-    }
-
-    pub fn id(&self) -> Option<&String> {
-        self.base.id()
-    }
-
-    pub fn name(&self) -> Option<&String> {
-        self.base.name()
-    }
-
-    pub fn url(&self) -> Option<&String> {
-        self.base.url()
-    }
-
-    pub fn published(&self) -> Option<DateTime<Utc>> {
-        self.base.published()
-    }
-
-    pub fn image(&self) -> Option<&Link> {
-        self.base.image()
-    }
-
-    pub fn attributedTo(&self) -> &Vec<Null> {
-        self.base.attributedTo()
-    }
-
-    pub fn audience(&self) -> Option<&Object<Null>> {
-        self.base.audience()
-    }
-
-    pub fn content(&self) -> Option<&String> {
-        self.base.content()
-    }
-
-    pub fn summary(&self) -> Option<&String> {
-        self.base.summary()
-    }
-}
 
 #[derive(Clone)]
 pub struct ActorBuilder {
@@ -213,12 +171,12 @@ mod tests {
         );
         let document: Document<Actor> = Document::from_json(&actual).unwrap();
         let actor = document.object as Actor;
-        assert_eq!(actor.objectType(), Some(&"Person".to_string()));
+        assert_eq!(actor.base.object_type, Some("Person".to_string()));
         assert_eq!(
-            actor.id(),
-            Some(&"https://example.com/person/1234".to_string())
+            actor.base.id,
+            Some("https://example.com/person/1234".to_string())
         );
-        assert_eq!(actor.name(), Some(&"name".to_string()));
+        assert_eq!(actor.base.name, Some("name".to_string()));
         assert_eq!(actor.preferred_username, Some("dma".to_string()));
     }
 }

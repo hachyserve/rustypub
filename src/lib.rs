@@ -20,14 +20,14 @@ mod tests {
         }"#,
         );
         let object: Object<Null> = Document::from_json(&listing).unwrap().object;
-        assert_eq!(object.objectType(), Some(&String::from("Object")));
+        assert_eq!(object.object_type, Some(String::from("Object")));
         assert_eq!(
-            object.id(),
-            Some(&String::from("http://www.test.example/object/1"))
+            object.id,
+            Some(String::from("http://www.test.example/object/1"))
         );
         assert_eq!(
-            object.name(),
-            Some(&String::from("A Simple, non-specific object"))
+            object.name,
+            Some(String::from("A Simple, non-specific object"))
         );
     }
 
@@ -75,21 +75,21 @@ mod tests {
         );
 
         let activity: Activity = Document::from_json(&listing).unwrap().object;
-        assert_eq!(activity.objectType(), Some(&String::from("Activity")));
+        assert_eq!(activity.base.object_type, Some(String::from("Activity")));
         assert_eq!(
-            activity.summary(),
-            Some(&String::from("Sally did something to a note"))
+            activity.base.summary,
+            Some(String::from("Sally did something to a note"))
         );
 
-        assert!(activity.actor().is_some());
-        let actor = activity.actor().unwrap();
-        assert_eq!(actor.objectType(), Some(&String::from("Person")));
-        assert_eq!(actor.name(), Some(&String::from("Sally")));
+        assert!(activity.actor.is_some());
+        let actor = activity.actor.unwrap();
+        assert_eq!(actor.base.object_type, Some(String::from("Person")));
+        assert_eq!(actor.base.name, Some(String::from("Sally")));
 
-        assert!(activity.object().is_some());
-        let object = activity.object().unwrap();
-        assert_eq!(object.objectType(), Some(&String::from("Note")));
-        assert_eq!(object.name(), Some(&String::from("A Note")));
+        assert!(activity.object.is_some());
+        let object = activity.object.unwrap();
+        assert_eq!(object.object_type, Some(String::from("Note")));
+        assert_eq!(object.name, Some(String::from("A Note")));
     }
 
     #[test]
@@ -112,22 +112,24 @@ mod tests {
       "#,
         );
 
-        let activity: IntransitiveActivity = Document::from_json(&listing).unwrap().object;
-        assert_eq!(activity.objectType(), Some(&String::from("Travel")));
+        let instransitive_activity: IntransitiveActivity =
+            Document::from_json(&listing).unwrap().object;
+        let activity = instransitive_activity.base;
+        assert_eq!(activity.base.object_type, Some(String::from("Travel")));
         assert_eq!(
-            activity.summary(),
-            Some(&String::from("Sally went to work"))
+            activity.base.summary,
+            Some(String::from("Sally went to work"))
         );
 
-        assert!(activity.actor().is_some());
-        let actor = activity.actor().unwrap();
-        assert_eq!(actor.objectType(), Some(&String::from("Person")));
-        assert_eq!(actor.name(), Some(&String::from("Sally")));
+        assert!(activity.actor.is_some());
+        let actor = activity.actor.unwrap();
+        assert_eq!(actor.base.object_type, Some(String::from("Person")));
+        assert_eq!(actor.base.name, Some(String::from("Sally")));
 
-        assert!(activity.target().is_some());
-        let target = activity.target().unwrap();
-        assert_eq!(target.objectType(), Some(&String::from("Place")));
-        assert_eq!(target.name(), Some(&String::from("Work")));
+        assert!(activity.target.is_some());
+        let target = activity.target.unwrap();
+        assert_eq!(target.object_type, Some(String::from("Place")));
+        assert_eq!(target.name, Some(String::from("Work")));
     }
 
     #[test]
@@ -148,21 +150,21 @@ mod tests {
         );
         let document: Document<Object<Null>> = Document::from_json(&listing).unwrap();
         let object = document.object;
-        assert_eq!(object.name(), Some(&String::from("Holiday announcement")));
-        assert_eq!(object.objectType(), Some(&String::from("Note")));
+        assert_eq!(object.name, Some(String::from("Holiday announcement")));
+        assert_eq!(object.object_type, Some(String::from("Note")));
         assert_eq!(
-            object.content(),
-            Some(&String::from(
+            object.content,
+            Some(String::from(
                 "Thursday will be a company-wide holiday. Enjoy your day off!"
             ))
         );
-        assert!(object.audience().is_some());
-        let audience = object.audience().unwrap();
+        assert!(object.audience.is_some());
+        let audience = object.audience.unwrap();
         assert_eq!(
-            audience.objectType(),
-            Some(&String::from("http://example.org/Organization"))
+            audience.object_type,
+            Some(String::from("http://example.org/Organization"))
         );
-        assert_eq!(audience.name(), Some(&String::from("ExampleCo LLC")));
+        assert_eq!(audience.name, Some(String::from("ExampleCo LLC")));
     }
 
     #[test]
@@ -179,12 +181,9 @@ mod tests {
         );
         let document: Document<Object<Null>> = Document::from_json(&listing).unwrap();
         let object = document.object;
-        assert_eq!(object.summary(), Some(&String::from("A simple note")));
-        assert_eq!(object.objectType(), Some(&String::from("Note")));
-        assert_eq!(
-            object.content(),
-            Some(&String::from("A <em>simple</em> note"))
-        );
+        assert_eq!(object.summary, Some(String::from("A simple note")));
+        assert_eq!(object.object_type, Some(String::from("Note")));
+        assert_eq!(object.content, Some(String::from("A <em>simple</em> note")));
     }
 
     #[test]
@@ -201,12 +200,9 @@ mod tests {
         );
         let document: Document<Object<Null>> = Document::from_json(&listing).unwrap();
         let object = document.object;
-        assert_eq!(
-            object.summary(),
-            Some(&String::from("A simple <em>note</em>"))
-        );
-        assert_eq!(object.objectType(), Some(&String::from("Note")));
-        assert_eq!(object.name(), Some(&String::from("Cane Sugar Processing")));
+        assert_eq!(object.summary, Some(String::from("A simple <em>note</em>")));
+        assert_eq!(object.object_type, Some(String::from("Note")));
+        assert_eq!(object.name, Some(String::from("Cane Sugar Processing")));
     }
 
     // A set of tests from https://www.w3.org/TR/activitystreams-core/ examples
