@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Actor {
     #[serde(flatten)]
-    pub base: Object<Null>,
+    base: Object<Null>,
 
     #[serde(rename = "preferredUsername")]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -24,6 +24,49 @@ pub struct Actor {
 
 impl Serde<'_> for Actor {}
 
+impl Actor {
+    pub fn objectType(&self) -> Option<&String> {
+        self.base.objectType()
+    }
+
+    pub fn id(&self) -> Option<&String> {
+        self.base.id()
+    }
+
+    pub fn name(&self) -> Option<&String> {
+        self.base.name()
+    }
+
+    pub fn url(&self) -> Option<&String> {
+        self.base.url()
+    }
+
+    pub fn published(&self) -> Option<DateTime<Utc>> {
+        self.base.published()
+    }
+
+    pub fn image(&self) -> Option<&Link> {
+        self.base.image()
+    }
+
+    pub fn attributedTo(&self) -> &Vec<Null> {
+        self.base.attributedTo()
+    }
+
+    pub fn audience(&self) -> Option<&Object<Null>> {
+        self.base.audience()
+    }
+
+    pub fn content(&self) -> Option<&String> {
+        self.base.content()
+    }
+
+    pub fn summary(&self) -> Option<&String> {
+        self.base.summary()
+    }
+}
+
+#[derive(Clone)]
 pub struct ActorBuilder {
     base: ObjectBuilder<Null>,
 
@@ -170,12 +213,12 @@ mod tests {
         );
         let document: Document<Actor> = Document::from_json(&actual).unwrap();
         let actor = document.object as Actor;
-        assert_eq!(actor.base.object_type, Some("Person".to_string()));
+        assert_eq!(actor.objectType(), Some(&"Person".to_string()));
         assert_eq!(
-            actor.base.id,
-            Some("https://example.com/person/1234".to_string())
+            actor.id(),
+            Some(&"https://example.com/person/1234".to_string())
         );
-        assert_eq!(actor.base.name, Some("name".to_string()));
+        assert_eq!(actor.name(), Some(&"name".to_string()));
         assert_eq!(actor.preferred_username, Some("dma".to_string()));
     }
 }
