@@ -1,25 +1,26 @@
 use crate::extended::{Actor, ActorBuilder};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use serde_json::Result;
 
 pub trait Serde<'de>
 where
     Self: Serialize + Deserialize<'de>,
 {
-    fn to_json(&self) -> String {
-        let serialized = serde_json::to_string(&self).unwrap();
-        println!("serialized = {}", serialized);
+    fn to_json(&self) -> Result<String> {
+        let serialized = serde_json::to_string(&self);
+        println!("serialized = {:?}", serialized);
         serialized
     }
 
-    fn to_json_pretty(&self) -> String {
-        let serialized = serde_json::to_string_pretty(&self).unwrap();
-        println!("serialized = {}", serialized);
+    fn to_json_pretty(&self) -> Result<String> {
+        let serialized = serde_json::to_string_pretty(&self);
+        println!("serialized = {:?}", serialized);
         serialized
     }
 
-    fn from_json(json: &'de String) -> Self {
-        return serde_json::from_str(&json).unwrap();
+    fn from_json(json: &'de str) -> Result<Self> {
+        serde_json::from_str(json)
     }
 }
 
@@ -256,11 +257,11 @@ impl<'a, AttributedToT: Serde<'a> + Clone> Serde<'a> for Object<AttributedToT> {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Uri {
-    href: String,
+    pub href: String,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "mediaType")]
-    media_type: Option<String>,
+    pub media_type: Option<String>,
 }
 
 impl Serde<'_> for Uri {}
@@ -343,28 +344,28 @@ impl PreviewBuilder {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Link {
     #[serde(rename = "type")]
-    link_type: String,
+    pub link_type: String,
 
     #[serde(flatten)]
-    href: Uri,
+    pub href: Uri,
 
     #[serde(skip_serializing_if = "Vec::is_empty", default = "Vec::new")]
-    rel: Vec<String>, // TODO: RFC5988 validation
+    pub rel: Vec<String>, // TODO: RFC5988 validation
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    name: Option<String>,
+    pub name: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    hreflang: Option<String>, // TODO: BCP47 language tag
+    pub hreflang: Option<String>, // TODO: BCP47 language tag
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    height: Option<u32>,
+    pub height: Option<u32>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    width: Option<u32>,
+    pub width: Option<u32>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    preview: Option<Preview>,
+    pub preview: Option<Preview>,
 }
 
 impl Link {
@@ -565,7 +566,8 @@ mod tests {
   "name": "name"
 }"#,
         );
-        assert_eq!(actual.to_json_pretty(), expected)
+        assert!(actual.to_json_pretty().is_ok());
+        assert_eq!(actual.to_json_pretty().unwrap(), expected)
     }
 
     #[test]
@@ -579,7 +581,7 @@ mod tests {
   "name": "name"
 }"#,
         );
-        let document: Document<Object<Null>> = Document::from_json(&actual);
+        let document: Document<Object<Null>> = Document::from_json(&actual).unwrap();
         assert_eq!(document.context.language, Some("en".to_string()));
         let object = document.object as Object<Null>;
         assert_eq!(object.name, Some("name".to_string()));
@@ -607,7 +609,8 @@ mod tests {
   "hreflang": "en"
 }"#,
         );
-        assert_eq!(actual.to_json_pretty(), expected)
+        assert!(actual.to_json_pretty().is_ok());
+        assert_eq!(actual.to_json_pretty().unwrap(), expected);
     }
 
     #[test]
@@ -623,7 +626,7 @@ mod tests {
   "hreflang": "en"
 }"#,
         );
-        let document: Document<Link> = Document::from_json(&actual);
+        let document: Document<Link> = Document::from_json(&actual).unwrap();
         let link = document.object as Link;
         assert_eq!(link.link_type, "Link");
         assert_eq!(link.href.href, "http://example.org/abc");
@@ -662,7 +665,8 @@ mod tests {
   }
 }"#,
         );
-        assert_eq!(actual.to_json_pretty(), expected);
+        assert!(actual.to_json_pretty().is_ok());
+        assert_eq!(actual.to_json_pretty().unwrap(), expected);
     }
 
     #[test]
@@ -681,7 +685,7 @@ mod tests {
   }
 }"#,
         );
-        let document: Document<Preview> = Document::from_json(&actual);
+        let document: Document<Preview> = Document::from_json(&actual).unwrap();
         let preview = document.object as Preview;
         assert_eq!(preview.base.object_type, Some("Video".to_string()));
         assert_eq!(preview.base.name, Some("Trailer".to_string()));
@@ -731,7 +735,8 @@ mod tests {
   }
 }"#,
         );
-        assert_eq!(actual.to_json_pretty(), expected);
+        assert!(actual.to_json_pretty().is_ok());
+        assert_eq!(actual.to_json_pretty().unwrap(), expected);
     }
 
     #[test]
@@ -753,7 +758,7 @@ mod tests {
   }
 }"#,
         );
-        let document: Document<Activity> = Document::from_json(&actual);
+        let document: Document<Activity> = Document::from_json(&actual).unwrap();
         let activity = document.object as Activity;
         assert_eq!(activity.base.object_type, Some("Activity".to_string()));
         assert_eq!(

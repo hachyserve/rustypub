@@ -151,7 +151,8 @@ mod tests {
   "preferredUsername": "dma"
 }"#,
         );
-        assert_eq!(actual.to_json_pretty(), expected)
+        assert!(actual.to_json_pretty().is_ok());
+        assert_eq!(actual.to_json_pretty().unwrap(), expected)
     }
 
     #[test]
@@ -167,7 +168,7 @@ mod tests {
   "preferredUsername": "dma"
 }"#,
         );
-        let document: Document<Actor> = Document::from_json(&actual);
+        let document: Document<Actor> = Document::from_json(&actual).unwrap();
         let actor = document.object as Actor;
         assert_eq!(actor.base.object_type, Some("Person".to_string()));
         assert_eq!(
