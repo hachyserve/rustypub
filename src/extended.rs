@@ -11,8 +11,6 @@ pub struct Actor {
     #[serde(skip_serializing_if = "Option::is_none")]
     preferred_username: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    summary: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     inbox: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     outbox: Option<String>,
@@ -30,7 +28,6 @@ pub struct ActorBuilder {
     base: ObjectBuilder<Null>,
 
     preferred_username: Option<String>,
-    summary: Option<String>,
     inbox: Option<String>,
     outbox: Option<String>,
     followers: Option<String>,
@@ -43,7 +40,6 @@ impl<'a> ActorBuilder {
         ActorBuilder {
             base: ObjectBuilder::new().object_type(actor_type),
             preferred_username: None,
-            summary: None,
             inbox: None,
             outbox: None,
             followers: None,
@@ -77,13 +73,13 @@ impl<'a> ActorBuilder {
         self
     }
 
-    pub fn preferred_username(mut self, username: String) -> Self {
-        self.preferred_username = Some(username);
+    pub fn summary(mut self, summary: String) -> Self {
+        self.base.summary(summary);
         self
     }
 
-    pub fn summary(mut self, summary: String) -> Self {
-        self.summary = Some(summary);
+    pub fn preferred_username(mut self, username: String) -> Self {
+        self.preferred_username = Some(username);
         self
     }
 
@@ -117,7 +113,6 @@ impl<'a> ActorBuilder {
             base: self.base.build(),
 
             preferred_username: self.preferred_username,
-            summary: self.summary,
             inbox: self.inbox,
             outbox: self.outbox,
             followers: self.followers,
