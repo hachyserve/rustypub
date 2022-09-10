@@ -10,6 +10,51 @@ mod tests {
 
     // A set of tests from https://www.w3.org/TR/activitystreams-vocabulary examples
     #[test]
+    fn example_1() {
+        let listing = String::from(
+            r#"{
+          "@context": { "@vocab": "https://www.w3.org/ns/activitystreams" },
+          "type": "Object",
+          "id": "http://www.test.example/object/1",
+          "name": "A Simple, non-specific object"
+        }"#,
+        );
+        let object: Object<Null> = Document::from_json(&listing).unwrap().object;
+        assert_eq!(object.object_type, Some(String::from("Object")));
+        assert_eq!(
+            object.id,
+            Some(String::from("http://www.test.example/object/1"))
+        );
+        assert_eq!(
+            object.name,
+            Some(String::from("A Simple, non-specific object"))
+        );
+    }
+
+    #[test]
+    fn example_2() {
+        let listing = String::from(
+            r#"
+      {
+        "@context": {"@vocab": "https://www.w3.org/ns/activitystreams"},
+        "type": "Link",
+        "href": "http://example.org/abc",
+        "hreflang": "en",
+        "mediaType": "text/html",
+        "name": "An example link"
+      }
+      "#,
+        );
+
+        let link: Link = Document::from_json(&listing).unwrap().object;
+        assert_eq!(link.link_type, "Link");
+        assert_eq!(link.href.href, "http://example.org/abc");
+        assert_eq!(link.hreflang, Some(String::from("en")));
+        assert_eq!(link.href.media_type, Some(String::from("text/html")));
+        assert_eq!(link.name, Some(String::from("An example link")));
+    }
+
+    #[test]
     fn example_69() {
         let listing = String::from(
             r#"{
@@ -25,7 +70,7 @@ mod tests {
   }
 }"#,
         );
-        let document: Document<Object<Null>> = Document::from_json(&listing);
+        let document: Document<Object<Null>> = Document::from_json(&listing).unwrap();
         let object = document.object;
         assert_eq!(object.name, Some(String::from("Holiday announcement")));
         assert_eq!(object.object_type, Some(String::from("Note")));
@@ -56,7 +101,7 @@ mod tests {
   "content": "A <em>simple</em> note"
 }"#,
         );
-        let document: Document<Object<Null>> = Document::from_json(&listing);
+        let document: Document<Object<Null>> = Document::from_json(&listing).unwrap();
         let object = document.object;
         assert_eq!(object.summary, Some(String::from("A simple note")));
         assert_eq!(object.object_type, Some(String::from("Note")));
@@ -75,7 +120,7 @@ mod tests {
         "summary": "A simple <em>note</em>"
       }"#,
         );
-        let document: Document<Object<Null>> = Document::from_json(&listing);
+        let document: Document<Object<Null>> = Document::from_json(&listing).unwrap();
         let object = document.object;
         assert_eq!(object.summary, Some(String::from("A simple <em>note</em>")));
         assert_eq!(object.object_type, Some(String::from("Note")));
@@ -113,7 +158,8 @@ mod tests {
     "id": "http://example.org/foo.jpg"
   }
 }"#;
-        assert_eq!(actual.to_json_pretty(), expected);
+        assert!(actual.to_json_pretty().is_ok());
+        assert_eq!(actual.to_json_pretty().unwrap(), expected);
     }
 
     #[test]
@@ -196,7 +242,8 @@ mod tests {
     "name": "Martin's Blog"
   }
 }"#;
-        assert_eq!(actual.to_json_pretty(), expected);
+        assert!(actual.to_json_pretty().is_ok());
+        assert_eq!(actual.to_json_pretty().unwrap(), expected);
     }
 
     #[test]
@@ -236,6 +283,7 @@ mod tests {
     }
   ]
 }"#;
-        assert_eq!(actual.to_json_pretty(), expected);
+        assert!(actual.to_json_pretty().is_ok());
+        assert_eq!(actual.to_json_pretty().unwrap(), expected);
     }
 }
