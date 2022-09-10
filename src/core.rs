@@ -588,6 +588,20 @@ mod tests {
     }
 
     #[test]
+    fn deserialize_object_malformed() {
+        let actual = String::from(
+            r#"{
+  "@context": {
+    "@vocab": "https://www.w3.org/ns/activitystreams",
+    "@language": "en"
+  },
+}"#,
+        );
+        let result: Result<Document<Object<Null>>> = Document::from_json(&actual);
+        assert!(result.is_err());
+    }
+
+    #[test]
     fn serialize_link() {
         let actual = Document::new(
             ContextBuilder::new().build(),
