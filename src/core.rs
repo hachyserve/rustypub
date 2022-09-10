@@ -60,7 +60,6 @@ pub struct Context {
     #[serde(rename = "@vocab")]
     namespace: String,
 
-    // TODO: figure out how to extend this per the above array/object options.
     #[serde(skip_serializing_if = "Option::is_none", rename = "@language")]
     language: Option<String>,
 }
