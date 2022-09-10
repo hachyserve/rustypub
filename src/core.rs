@@ -444,21 +444,22 @@ impl<'a> LinkBuilder {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Activity {
+    // TODO: consider getters instead of raw access
     #[serde(flatten)]
-    base: Object<Null>,
+    pub base: Object<Null>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    actor: Option<Actor>,
+    pub actor: Option<Actor>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    object: Option<Object<Null>>,
+    pub object: Option<Object<Null>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    target: Option<Object<Null>>, // TODO: Target
+    pub target: Option<Object<Null>>, // TODO: Target
     #[serde(skip_serializing_if = "Option::is_none")]
-    result: Option<String>, // TODO: Result
+    pub result: Option<String>, // TODO: Result
     #[serde(skip_serializing_if = "Option::is_none")]
-    origin: Option<String>, // TODO: Origin
+    pub origin: Option<String>, // TODO: Origin
     #[serde(skip_serializing_if = "Option::is_none")]
-    instrument: Option<String>, // TODO: Instrument
+    pub instrument: Option<String>, // TODO: Instrument
 }
 
 impl Serde<'_> for Activity {}

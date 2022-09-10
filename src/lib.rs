@@ -55,6 +55,44 @@ mod tests {
     }
 
     #[test]
+    fn example_3() {
+        let listing = String::from(
+            r#"
+      {
+        "@context": { "@vocab": "https://www.w3.org/ns/activitystreams" },
+        "type": "Activity",
+        "summary": "Sally did something to a note",
+        "actor": {
+          "type": "Person",
+          "name": "Sally"
+        },
+        "object": {
+          "type": "Note",
+          "name": "A Note"
+        }
+      } 
+      "#,
+        );
+
+        let activity: Activity = Document::from_json(&listing).unwrap().object;
+        assert_eq!(activity.base.object_type, Some(String::from("Activity")));
+        assert_eq!(
+            activity.base.summary,
+            Some(String::from("Sally did something to a note"))
+        );
+
+        assert!(activity.actor.is_some());
+        let actor = activity.actor.unwrap();
+        assert_eq!(actor.base.object_type, Some(String::from("Person")));
+        assert_eq!(actor.base.name, Some(String::from("Sally")));
+
+        assert!(activity.object.is_some());
+        let object = activity.object.unwrap();
+        assert_eq!(object.object_type, Some(String::from("Note")));
+        assert_eq!(object.name, Some(String::from("A Note")));
+    }
+
+    #[test]
     fn example_69() {
         let listing = String::from(
             r#"{
