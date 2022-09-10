@@ -8,10 +8,78 @@ mod tests {
 
     use crate::{core::*, extended::ActorBuilder};
 
+    // A set of tests from https://www.w3.org/TR/activitystreams-vocabulary examples
     #[test]
-    fn it_works() {
-        let result = 2 + 2;
-        assert_eq!(result, 4);
+    fn example_69() {
+        let listing = String::from(
+            r#"{
+  "@context": {
+    "@vocab": "https://www.w3.org/ns/activitystreams"
+  },
+  "name": "Holiday announcement",
+  "type": "Note",
+  "content": "Thursday will be a company-wide holiday. Enjoy your day off!",
+  "audience": {
+    "type": "http://example.org/Organization",
+    "name": "ExampleCo LLC"
+  }
+}"#,
+        );
+        let document: Document<Object<Null>> = Document::from_json(&listing);
+        let object = document.object;
+        assert_eq!(object.name, Some(String::from("Holiday announcement")));
+        assert_eq!(object.object_type, Some(String::from("Note")));
+        assert_eq!(
+            object.content,
+            Some(String::from(
+                "Thursday will be a company-wide holiday. Enjoy your day off!"
+            ))
+        );
+        assert!(object.audience.is_some());
+        let audience = object.audience.unwrap();
+        assert_eq!(
+            audience.object_type,
+            Some(String::from("http://example.org/Organization"))
+        );
+        assert_eq!(audience.name, Some(String::from("ExampleCo LLC")));
+    }
+
+    #[test]
+    fn example_114() {
+        let listing = String::from(
+            r#"{
+  "@context": {
+    "@vocab": "https://www.w3.org/ns/activitystreams"
+  },
+  "summary": "A simple note",
+  "type": "Note",
+  "content": "A <em>simple</em> note"
+}"#,
+        );
+        let document: Document<Object<Null>> = Document::from_json(&listing);
+        let object = document.object;
+        assert_eq!(object.summary, Some(String::from("A simple note")));
+        assert_eq!(object.object_type, Some(String::from("Note")));
+        assert_eq!(object.content, Some(String::from("A <em>simple</em> note")));
+    }
+
+    #[test]
+    fn example_133() {
+        let listing = String::from(
+            r#"{
+        "@context": {
+          "@vocab": "https://www.w3.org/ns/activitystreams"
+        },
+        "name": "Cane Sugar Processing",
+        "type": "Note",
+        "summary": "A simple <em>note</em>"
+      }"#,
+        );
+        let document: Document<Object<Null>> = Document::from_json(&listing);
+        let object = document.object;
+        assert_eq!(object.summary, Some(String::from("A simple <em>note</em>")));
+        assert_eq!(object.object_type, Some(String::from("Note")));
+        assert_eq!(object.name, Some(String::from("Cane Sugar Processing")));
     }
 
     // A set of tests from https://www.w3.org/TR/activitystreams-core/ examples

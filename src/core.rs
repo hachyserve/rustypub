@@ -60,7 +60,6 @@ pub struct Context {
     #[serde(rename = "@vocab")]
     namespace: String,
 
-    // TODO: figure out how to extend this per the above array/object options.
     #[serde(skip_serializing_if = "Option::is_none", rename = "@language")]
     language: Option<String>,
 }
@@ -132,6 +131,15 @@ pub struct Object<AttributedToT> {
         default = "Vec::new"
     )]
     pub attributed_to: Vec<AttributedToT>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub audience: Option<Box<Object<Null>>>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub content: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub summary: Option<String>,
 }
 
 #[derive(Clone)]
@@ -144,6 +152,9 @@ pub struct ObjectBuilder<AttributedToT> {
     published: Option<DateTime<Utc>>,
     image: Option<LinkBuilder>,
     attributed_to: Vec<AttributedToT>,
+    audience: Option<Box<ObjectBuilder<Null>>>,
+    content: Option<String>,
+    summary: Option<String>,
     // TODO: more fields
 }
 
@@ -157,6 +168,9 @@ impl<'a, AttributedToT: Serde<'a> + Clone> ObjectBuilder<AttributedToT> {
             published: None,
             image: None,
             attributed_to: vec![],
+            audience: None,
+            content: None,
+            summary: None,
         }
     }
 
@@ -195,6 +209,21 @@ impl<'a, AttributedToT: Serde<'a> + Clone> ObjectBuilder<AttributedToT> {
         self
     }
 
+    pub fn audience(&mut self, audience: ObjectBuilder<Null>) -> Self {
+        self.audience = Some(Box::new(audience));
+        self.clone()
+    }
+
+    pub fn content(mut self, content: String) -> Self {
+        self.content = Some(content);
+        self
+    }
+
+    pub fn summary(&mut self, summary: String) -> Self {
+        self.summary = Some(summary);
+        self.clone()
+    }
+
     pub fn build(self) -> Object<AttributedToT> {
         Object {
             object_type: self.object_type,
@@ -213,6 +242,12 @@ impl<'a, AttributedToT: Serde<'a> + Clone> ObjectBuilder<AttributedToT> {
                 i => Some(Box::new(i.unwrap().build())),
             },
             attributed_to: self.attributed_to,
+            audience: match self.audience {
+                None => None,
+                a => Some(Box::new(a.unwrap().build())),
+            },
+            content: self.content,
+            summary: self.summary,
         }
     }
 }
@@ -411,8 +446,6 @@ pub struct Activity {
     #[serde(flatten)]
     base: Object<Null>,
 
-    summary: String,
-
     #[serde(skip_serializing_if = "Option::is_none")]
     actor: Option<Actor>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -431,7 +464,6 @@ impl Serde<'_> for Activity {}
 
 pub struct ActivityBuilder {
     base: ObjectBuilder<Null>,
-    summary: String,
     actor: Option<ActorBuilder>,
     object: Option<ObjectBuilder<Null>>,
     target: Option<ObjectBuilder<Null>>,
@@ -443,8 +475,9 @@ pub struct ActivityBuilder {
 impl ActivityBuilder {
     pub fn new(activity_type: String, summary: String) -> Self {
         ActivityBuilder {
-            base: ObjectBuilder::new().object_type(activity_type),
-            summary,
+            base: ObjectBuilder::new()
+                .object_type(activity_type)
+                .summary(summary),
             actor: None,
             object: None,
             target: None,
@@ -492,7 +525,6 @@ impl ActivityBuilder {
     pub fn build(self) -> Activity {
         Activity {
             base: self.base.build(),
-            summary: self.summary,
             actor: match self.actor {
                 None => None,
                 a => Some(a.unwrap().build()),
@@ -725,8 +757,8 @@ mod tests {
         let activity = document.object as Activity;
         assert_eq!(activity.base.object_type, Some("Activity".to_string()));
         assert_eq!(
-            activity.summary,
-            "Sally did something to a note".to_string()
+            activity.base.summary,
+            Some("Sally did something to a note".to_string())
         );
 
         assert!(activity.actor.is_some());
