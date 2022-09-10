@@ -33,7 +33,7 @@ impl Serde<'_> for Null {}
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Document<T> {
     #[serde(rename = "@context")]
-    context: Context,
+    pub context: Context,
 
     #[serde(flatten)]
     pub object: T,
@@ -296,13 +296,13 @@ impl UriBuilder {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Preview {
     #[serde(flatten)]
-    base: Object<Null>,
+    pub base: Object<Null>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    duration: Option<String>,
+    pub duration: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    url: Option<Uri>,
+    pub url: Option<Uri>,
 }
 
 impl Serde<'_> for Preview {}
@@ -453,9 +453,9 @@ pub struct Activity {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub object: Option<Object<Null>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub target: Option<Object<Null>>, // TODO: Target
+    pub target: Option<Object<Null>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub result: Option<String>, // TODO: Result
+    pub result: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub origin: Option<String>, // TODO: Origin
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -464,6 +464,7 @@ pub struct Activity {
 
 impl Serde<'_> for Activity {}
 
+#[derive(Clone)]
 pub struct ActivityBuilder {
     base: ObjectBuilder<Null>,
     actor: Option<ActorBuilder>,
@@ -489,39 +490,39 @@ impl ActivityBuilder {
         }
     }
 
-    pub fn published(mut self, datetime: DateTime<Utc>) -> Self {
+    pub fn published(&mut self, datetime: DateTime<Utc>) -> Self {
         self.base.published(datetime);
-        self
+        self.clone()
     }
 
-    pub fn actor(mut self, actor: ActorBuilder) -> Self {
+    pub fn actor(&mut self, actor: ActorBuilder) -> Self {
         self.actor = Some(actor);
-        self
+        self.clone()
     }
 
-    pub fn object(mut self, object: ObjectBuilder<Null>) -> Self {
+    pub fn object(&mut self, object: ObjectBuilder<Null>) -> Self {
         self.object = Some(object);
-        self
+        self.clone()
     }
 
-    pub fn target(mut self, target: ObjectBuilder<Null>) -> Self {
+    pub fn target(&mut self, target: ObjectBuilder<Null>) -> Self {
         self.target = Some(target);
-        self
+        self.clone()
     }
 
-    pub fn result(mut self, result: String) -> Self {
+    pub fn result(&mut self, result: String) -> Self {
         self.result = Some(result);
-        self
+        self.clone()
     }
 
-    pub fn origin(mut self, origin: String) -> Self {
+    pub fn origin(&mut self, origin: String) -> Self {
         self.origin = Some(origin);
-        self
+        self.clone()
     }
 
-    pub fn instrument(mut self, instrument: String) -> Self {
+    pub fn instrument(&mut self, instrument: String) -> Self {
         self.instrument = Some(instrument);
-        self
+        self.clone()
     }
 
     pub fn build(self) -> Activity {
@@ -542,6 +543,63 @@ impl ActivityBuilder {
             result: self.result,
             origin: self.origin,
             instrument: self.instrument,
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct IntransitiveActivity {
+    #[serde(flatten)]
+    pub base: Activity,
+}
+
+impl Serde<'_> for IntransitiveActivity {}
+
+#[derive(Clone)]
+pub struct IntransitiveActivityBuilder {
+    base: ActivityBuilder,
+}
+
+impl IntransitiveActivityBuilder {
+    pub fn new(activity_type: String, summary: String) -> Self {
+        IntransitiveActivityBuilder {
+            base: ActivityBuilder::new(activity_type, summary),
+        }
+    }
+
+    pub fn published(mut self, datetime: DateTime<Utc>) -> Self {
+        self.base.published(datetime);
+        self
+    }
+
+    pub fn actor(mut self, actor: ActorBuilder) -> Self {
+        self.base.actor(actor);
+        self
+    }
+
+    pub fn target(mut self, target: ObjectBuilder<Null>) -> Self {
+        self.base.target(target);
+        self
+    }
+
+    pub fn result(mut self, result: String) -> Self {
+        self.base.result(result);
+        self
+    }
+
+    pub fn origin(mut self, origin: String) -> Self {
+        self.base.origin(origin);
+        self
+    }
+
+    pub fn instrument(mut self, instrument: String) -> Self {
+        self.base.instrument(instrument);
+        self
+    }
+
+    pub fn build(self) -> IntransitiveActivity {
+        IntransitiveActivity {
+            base: self.base.build(),
         }
     }
 }

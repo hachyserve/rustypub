@@ -9,21 +9,22 @@ pub struct Actor {
 
     #[serde(rename = "preferredUsername")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    preferred_username: Option<String>,
+    pub preferred_username: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    inbox: Option<String>,
+    pub inbox: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    outbox: Option<String>,
+    pub outbox: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    followers: Option<String>,
+    pub followers: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    following: Option<String>,
+    pub following: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    liked: Option<String>,
+    pub liked: Option<String>,
 }
 
 impl Serde<'_> for Actor {}
 
+#[derive(Clone)]
 pub struct ActorBuilder {
     base: ObjectBuilder<Null>,
 

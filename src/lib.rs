@@ -93,6 +93,46 @@ mod tests {
     }
 
     #[test]
+    fn example_4() {
+        let listing = String::from(
+            r#"
+      {
+        "@context": { "@vocab": "https://www.w3.org/ns/activitystreams" },
+        "type": "Travel",
+        "summary": "Sally went to work",
+        "actor": {
+          "type": "Person",
+          "name": "Sally"
+        },
+        "target": {
+          "type": "Place",
+          "name": "Work"
+        }
+      }
+      "#,
+        );
+
+        let instransitive_activity: IntransitiveActivity =
+            Document::from_json(&listing).unwrap().object;
+        let activity = instransitive_activity.base;
+        assert_eq!(activity.base.object_type, Some(String::from("Travel")));
+        assert_eq!(
+            activity.base.summary,
+            Some(String::from("Sally went to work"))
+        );
+
+        assert!(activity.actor.is_some());
+        let actor = activity.actor.unwrap();
+        assert_eq!(actor.base.object_type, Some(String::from("Person")));
+        assert_eq!(actor.base.name, Some(String::from("Sally")));
+
+        assert!(activity.target.is_some());
+        let target = activity.target.unwrap();
+        assert_eq!(target.object_type, Some(String::from("Place")));
+        assert_eq!(target.name, Some(String::from("Work")));
+    }
+
+    #[test]
     fn example_69() {
         let listing = String::from(
             r#"{
