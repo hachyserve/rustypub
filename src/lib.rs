@@ -75,16 +75,16 @@ mod tests {
         );
 
         let activity: Activity = Document::from_json(&listing).unwrap().object;
-        assert_eq!(activity.base.object_type, Some(String::from("Activity")));
+        assert_eq!(activity.object_type, Some(String::from("Activity")));
         assert_eq!(
-            activity.base.summary,
+            activity.summary,
             Some(String::from("Sally did something to a note"))
         );
 
         assert!(activity.actor.is_some());
         let actor = activity.actor.unwrap();
-        assert_eq!(actor.base.object_type, Some(String::from("Person")));
-        assert_eq!(actor.base.name, Some(String::from("Sally")));
+        assert_eq!(actor.object_type, Some(String::from("Person")));
+        assert_eq!(actor.name, Some(String::from("Sally")));
 
         assert!(activity.object.is_some());
         let object = activity.object.unwrap();
@@ -112,22 +112,17 @@ mod tests {
       "#,
         );
 
-        let instransitive_activity: IntransitiveActivity =
-            Document::from_json(&listing).unwrap().object;
-        let activity = instransitive_activity.base;
-        assert_eq!(activity.base.object_type, Some(String::from("Travel")));
-        assert_eq!(
-            activity.base.summary,
-            Some(String::from("Sally went to work"))
-        );
+        let activity: IntransitiveActivity = Document::from_json(&listing).unwrap().object;
+        assert_eq!(activity.object_type, Some(String::from("Travel")));
+        assert_eq!(activity.summary, Some(String::from("Sally went to work")));
 
         assert!(activity.actor.is_some());
-        let actor = activity.actor.unwrap();
-        assert_eq!(actor.base.object_type, Some(String::from("Person")));
-        assert_eq!(actor.base.name, Some(String::from("Sally")));
+        let actor = activity.actor.as_ref().unwrap();
+        assert_eq!(actor.object_type, Some(String::from("Person")));
+        assert_eq!(actor.name, Some(String::from("Sally")));
 
         assert!(activity.target.is_some());
-        let target = activity.target.unwrap();
+        let target = activity.target.as_ref().unwrap();
         assert_eq!(target.object_type, Some(String::from("Place")));
         assert_eq!(target.name, Some(String::from("Work")));
     }

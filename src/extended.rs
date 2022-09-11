@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Actor {
     #[serde(flatten)]
-    pub base: Object<Null>,
+    base: Object<Null>,
 
     #[serde(rename = "preferredUsername")]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -23,6 +23,14 @@ pub struct Actor {
 }
 
 impl Serde<'_> for Actor {}
+
+impl std::ops::Deref for Actor {
+    type Target = Object<Null>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.base
+    }
+}
 
 #[derive(Clone)]
 pub struct ActorBuilder {
@@ -171,12 +179,12 @@ mod tests {
         );
         let document: Document<Actor> = Document::from_json(&actual).unwrap();
         let actor = document.object as Actor;
-        assert_eq!(actor.base.object_type, Some("Person".to_string()));
+        assert_eq!(actor.object_type, Some("Person".to_string()));
         assert_eq!(
-            actor.base.id,
+            actor.id,
             Some("https://example.com/person/1234".to_string())
         );
-        assert_eq!(actor.base.name, Some("name".to_string()));
+        assert_eq!(actor.name, Some("name".to_string()));
         assert_eq!(actor.preferred_username, Some("dma".to_string()));
     }
 }
