@@ -446,7 +446,7 @@ impl<'a> LinkBuilder {
 pub struct Activity {
     // TODO: consider getters instead of raw access
     #[serde(flatten)]
-    pub base: Object<Null>,
+    base: Object<Null>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub actor: Option<Actor>,
@@ -463,6 +463,14 @@ pub struct Activity {
 }
 
 impl Serde<'_> for Activity {}
+
+impl std::ops::Deref for Activity {
+    type Target = Object<Null>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.base
+    }
+}
 
 #[derive(Clone)]
 pub struct ActivityBuilder {
@@ -550,10 +558,18 @@ impl ActivityBuilder {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct IntransitiveActivity {
     #[serde(flatten)]
-    pub base: Activity,
+    base: Activity,
 }
 
 impl Serde<'_> for IntransitiveActivity {}
+
+impl std::ops::Deref for IntransitiveActivity {
+    type Target = Activity;
+
+    fn deref(&self) -> &Self::Target {
+        &self.base
+    }
+}
 
 #[derive(Clone)]
 pub struct IntransitiveActivityBuilder {
@@ -833,16 +849,16 @@ mod tests {
         );
         let document: Document<Activity> = Document::from_json(&actual).unwrap();
         let activity = document.object as Activity;
-        assert_eq!(activity.base.object_type, Some("Activity".to_string()));
+        assert_eq!(activity.object_type, Some("Activity".to_string()));
         assert_eq!(
-            activity.base.summary,
+            activity.summary,
             Some("Sally did something to a note".to_string())
         );
 
         assert!(activity.actor.is_some());
         let actor = activity.actor.as_ref().unwrap();
-        assert_eq!(actor.base.object_type, Some("Person".to_string()));
-        assert_eq!(actor.base.name, Some("Sally".to_string()));
+        assert_eq!(actor.object_type, Some("Person".to_string()));
+        assert_eq!(actor.name, Some("Sally".to_string()));
 
         assert!(activity.object.is_some());
         let object = activity.object.as_ref().unwrap();
