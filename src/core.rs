@@ -443,13 +443,13 @@ impl<'a> LinkBuilder {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Activity {
+pub struct Activity<'a> {
     // TODO: consider getters instead of raw access
     #[serde(flatten)]
     base: Object<Null>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub actor: Option<Actor>,
+    pub actor: Option<Actor<'a>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub object: Option<Object<Null>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -462,9 +462,9 @@ pub struct Activity {
     pub instrument: Option<String>, // TODO: Instrument
 }
 
-impl Serde<'_> for Activity {}
+impl<'de: 'a, 'a> Serde<'de> for Activity<'a> {}
 
-impl std::ops::Deref for Activity {
+impl std::ops::Deref for Activity<'_> {
     type Target = Object<Null>;
 
     fn deref(&self) -> &Self::Target {
@@ -473,9 +473,9 @@ impl std::ops::Deref for Activity {
 }
 
 #[derive(Clone)]
-pub struct ActivityBuilder {
+pub struct ActivityBuilder<'a> {
     base: ObjectBuilder<Null>,
-    actor: Option<ActorBuilder>,
+    actor: Option<ActorBuilder<'a>>,
     object: Option<ObjectBuilder<Null>>,
     target: Option<ObjectBuilder<Null>>,
     result: Option<String>,
@@ -483,7 +483,7 @@ pub struct ActivityBuilder {
     instrument: Option<String>,
 }
 
-impl ActivityBuilder {
+impl<'a> ActivityBuilder<'a> {
     pub fn new(activity_type: String, summary: String) -> Self {
         ActivityBuilder {
             base: ObjectBuilder::new()
@@ -503,7 +503,7 @@ impl ActivityBuilder {
         self.clone()
     }
 
-    pub fn actor(&mut self, actor: ActorBuilder) -> Self {
+    pub fn actor(&mut self, actor: ActorBuilder<'a>) -> Self {
         self.actor = Some(actor);
         self.clone()
     }
@@ -533,7 +533,7 @@ impl ActivityBuilder {
         self.clone()
     }
 
-    pub fn build(self) -> Activity {
+    pub fn build(self) -> Activity<'a> {
         Activity {
             base: self.base.build(),
             actor: match self.actor {
@@ -556,15 +556,15 @@ impl ActivityBuilder {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct IntransitiveActivity {
+pub struct IntransitiveActivity<'a> {
     #[serde(flatten)]
-    base: Activity,
+    base: Activity<'a>,
 }
 
-impl Serde<'_> for IntransitiveActivity {}
+impl Serde<'_> for IntransitiveActivity<'_> {}
 
-impl std::ops::Deref for IntransitiveActivity {
-    type Target = Activity;
+impl<'a> std::ops::Deref for IntransitiveActivity<'a> {
+    type Target = Activity<'a>;
 
     fn deref(&self) -> &Self::Target {
         &self.base
@@ -572,11 +572,11 @@ impl std::ops::Deref for IntransitiveActivity {
 }
 
 #[derive(Clone)]
-pub struct IntransitiveActivityBuilder {
-    base: ActivityBuilder,
+pub struct IntransitiveActivityBuilder<'a> {
+    base: ActivityBuilder<'a>,
 }
 
-impl IntransitiveActivityBuilder {
+impl<'a> IntransitiveActivityBuilder<'a> {
     pub fn new(activity_type: String, summary: String) -> Self {
         IntransitiveActivityBuilder {
             base: ActivityBuilder::new(activity_type, summary),
@@ -588,7 +588,7 @@ impl IntransitiveActivityBuilder {
         self
     }
 
-    pub fn actor(mut self, actor: ActorBuilder) -> Self {
+    pub fn actor(mut self, actor: ActorBuilder<'a>) -> Self {
         self.base.actor(actor);
         self
     }
@@ -613,7 +613,7 @@ impl IntransitiveActivityBuilder {
         self
     }
 
-    pub fn build(self) -> IntransitiveActivity {
+    pub fn build(self) -> IntransitiveActivity<'a> {
         IntransitiveActivity {
             base: self.base.build(),
         }
@@ -798,7 +798,7 @@ mod tests {
                 "Activity".to_string(),
                 "Sally did something to a note".to_string(),
             )
-            .actor(ActorBuilder::new("Person".to_string()).name("Sally".to_string()))
+            .actor(ActorBuilder::new("Person").name("Sally"))
             .object(
                 ObjectBuilder::new()
                     .object_type("Note".to_string())

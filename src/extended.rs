@@ -3,28 +3,28 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Actor {
+pub struct Actor<'a> {
     #[serde(flatten)]
     base: Object<Null>,
 
     #[serde(rename = "preferredUsername")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub preferred_username: Option<String>,
+    pub preferred_username: Option<&'a str>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub inbox: Option<String>,
+    pub inbox: Option<&'a str>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub outbox: Option<String>,
+    pub outbox: Option<&'a str>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub followers: Option<String>,
+    pub followers: Option<&'a str>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub following: Option<String>,
+    pub following: Option<&'a str>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub liked: Option<String>,
+    pub liked: Option<&'a str>,
 }
 
-impl Serde<'_> for Actor {}
+impl<'de: 'a, 'a> Serde<'de> for Actor<'a> {}
 
-impl std::ops::Deref for Actor {
+impl std::ops::Deref for Actor<'_> {
     type Target = Object<Null>;
 
     fn deref(&self) -> &Self::Target {
@@ -33,21 +33,21 @@ impl std::ops::Deref for Actor {
 }
 
 #[derive(Clone)]
-pub struct ActorBuilder {
+pub struct ActorBuilder<'a> {
     base: ObjectBuilder<Null>,
 
-    preferred_username: Option<String>,
-    inbox: Option<String>,
-    outbox: Option<String>,
-    followers: Option<String>,
-    following: Option<String>,
-    liked: Option<String>,
+    preferred_username: Option<&'a str>,
+    inbox: Option<&'a str>,
+    outbox: Option<&'a str>,
+    followers: Option<&'a str>,
+    following: Option<&'a str>,
+    liked: Option<&'a str>,
 }
 
-impl<'a> ActorBuilder {
-    pub fn new(actor_type: String) -> Self {
+impl<'a> ActorBuilder<'a> {
+    pub fn new(actor_type: &'a str) -> Self {
         ActorBuilder {
-            base: ObjectBuilder::new().object_type(actor_type),
+            base: ObjectBuilder::new().object_type(actor_type.to_string()),
             preferred_username: None,
             inbox: None,
             outbox: None,
@@ -62,8 +62,8 @@ impl<'a> ActorBuilder {
         self
     }
 
-    pub fn name(mut self, name: String) -> Self {
-        self.base.name(name);
+    pub fn name(mut self, name: &'a str) -> Self {
+        self.base.name(name.to_string());
         self
     }
 
@@ -82,42 +82,42 @@ impl<'a> ActorBuilder {
         self
     }
 
-    pub fn summary(mut self, summary: String) -> Self {
-        self.base.summary(summary);
+    pub fn summary(mut self, summary: &'a str) -> Self {
+        self.base.summary(summary.to_string());
         self
     }
 
-    pub fn preferred_username(mut self, username: String) -> Self {
+    pub fn preferred_username(mut self, username: &'a str) -> Self {
         self.preferred_username = Some(username);
         self
     }
 
-    pub fn inbox(mut self, inbox: String) -> Self {
+    pub fn inbox(mut self, inbox: &'a str) -> Self {
         self.inbox = Some(inbox);
         self
     }
 
-    pub fn outbox(mut self, outbox: String) -> Self {
+    pub fn outbox(mut self, outbox: &'a str) -> Self {
         self.outbox = Some(outbox);
         self
     }
 
-    pub fn followers(mut self, followers: String) -> Self {
+    pub fn followers(mut self, followers: &'a str) -> Self {
         self.followers = Some(followers);
         self
     }
 
-    pub fn following(mut self, following: String) -> Self {
+    pub fn following(mut self, following: &'a str) -> Self {
         self.following = Some(following);
         self
     }
 
-    pub fn liked(mut self, liked: String) -> Self {
+    pub fn liked(mut self, liked: &'a str) -> Self {
         self.liked = Some(liked);
         self
     }
 
-    pub fn build(self) -> Actor {
+    pub fn build(self) -> Actor<'a> {
         Actor {
             base: self.base.build(),
 
@@ -141,12 +141,12 @@ mod tests {
     fn serialize_actor() {
         let actual = Document::new(
             ContextBuilder::new().build(),
-            ActorBuilder::new("Person".to_string())
+            ActorBuilder::new("Person")
                 .id("https://example.com/person/1234"
                     .parse::<http::Uri>()
                     .unwrap())
-                .name("name".to_string())
-                .preferred_username("dma".to_string())
+                .name("name")
+                .preferred_username("dma")
                 .build(),
         );
         let expected = String::from(
@@ -185,6 +185,6 @@ mod tests {
             Some("https://example.com/person/1234".to_string())
         );
         assert_eq!(actor.name, Some("name".to_string()));
-        assert_eq!(actor.preferred_username, Some("dma".to_string()));
+        assert_eq!(actor.preferred_username, Some("dma"));
     }
 }
