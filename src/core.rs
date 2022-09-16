@@ -107,7 +107,7 @@ impl<'a> ContextBuilder<'a> {
 /// mediaType | duration
 /// All properties are optional (including the id and type).
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Object<AttributedToT> {
+pub struct Object<'a, AttributedToT> {
     #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
     pub object_type: Option<String>,
 
@@ -123,8 +123,8 @@ pub struct Object<AttributedToT> {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub published: Option<DateTime<Utc>>,
 
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub image: Option<Box<Link>>,
+    #[serde(skip_serializing_if = "Option::is_none", borrow)]
+    pub image: Option<Box<Link<'a>>>,
 
     #[serde(
         rename = "attributedTo",
@@ -133,8 +133,8 @@ pub struct Object<AttributedToT> {
     )]
     pub attributed_to: Vec<AttributedToT>,
 
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub audience: Option<Box<Object<Null>>>,
+    #[serde(skip_serializing_if = "Option::is_none", borrow)]
+    pub audience: Option<Box<Object<'a, Null>>>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub content: Option<String>,
@@ -144,22 +144,22 @@ pub struct Object<AttributedToT> {
 }
 
 #[derive(Clone)]
-pub struct ObjectBuilder<AttributedToT> {
+pub struct ObjectBuilder<'a, AttributedToT> {
     object_type: Option<String>,
     // TODO: actually an IRI: consider https://docs.rs/iref/latest/iref/
     id: Option<http::Uri>,
     name: Option<String>,
     url: Option<http::Uri>,
     published: Option<DateTime<Utc>>,
-    image: Option<LinkBuilder>,
+    image: Option<LinkBuilder<'a>>,
     attributed_to: Vec<AttributedToT>,
-    audience: Option<Box<ObjectBuilder<Null>>>,
+    audience: Option<Box<ObjectBuilder<'a, Null>>>,
     content: Option<String>,
     summary: Option<String>,
     // TODO: more fields
 }
 
-impl<'a, AttributedToT: Serde<'a> + Clone> ObjectBuilder<AttributedToT> {
+impl<'a, AttributedToT: Serde<'a> + Clone> ObjectBuilder<'a, AttributedToT> {
     pub fn new() -> Self {
         ObjectBuilder {
             object_type: None,
@@ -200,7 +200,7 @@ impl<'a, AttributedToT: Serde<'a> + Clone> ObjectBuilder<AttributedToT> {
         self.clone()
     }
 
-    pub fn image(&mut self, image: LinkBuilder) -> Self {
+    pub fn image(&mut self, image: LinkBuilder<'a>) -> Self {
         self.image = Some(image);
         self.clone()
     }
@@ -210,7 +210,7 @@ impl<'a, AttributedToT: Serde<'a> + Clone> ObjectBuilder<AttributedToT> {
         self
     }
 
-    pub fn audience(&mut self, audience: ObjectBuilder<Null>) -> Self {
+    pub fn audience(&mut self, audience: ObjectBuilder<'a, Null>) -> Self {
         self.audience = Some(Box::new(audience));
         self.clone()
     }
@@ -225,7 +225,7 @@ impl<'a, AttributedToT: Serde<'a> + Clone> ObjectBuilder<AttributedToT> {
         self.clone()
     }
 
-    pub fn build(self) -> Object<AttributedToT> {
+    pub fn build(self) -> Object<'a, AttributedToT> {
         Object {
             object_type: self.object_type,
             id: match self.id {
@@ -253,26 +253,29 @@ impl<'a, AttributedToT: Serde<'a> + Clone> ObjectBuilder<AttributedToT> {
     }
 }
 
-impl<'a, AttributedToT: Serde<'a> + Clone> Serde<'a> for Object<AttributedToT> {}
+impl<'de: 'a, 'a, AttributedToT> Serde<'de> for Object<'a, AttributedToT> where
+    AttributedToT: Serde<'de> + Clone
+{
+}
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Uri {
+pub struct Uri<'a> {
     pub href: String,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "mediaType")]
-    pub media_type: Option<String>,
+    pub media_type: Option<&'a str>,
 }
 
-impl Serde<'_> for Uri {}
+impl<'de: 'a, 'a> Serde<'de> for Uri<'a> {}
 
 #[derive(Clone)]
-pub struct UriBuilder {
+pub struct UriBuilder<'a> {
     href: http::Uri,
-    media_type: Option<String>,
+    media_type: Option<&'a str>,
 }
 
-impl UriBuilder {
+impl<'a> UriBuilder<'a> {
     pub fn new(href: http::Uri) -> Self {
         UriBuilder {
             href,
@@ -280,12 +283,12 @@ impl UriBuilder {
         }
     }
 
-    pub fn media_type(mut self, media_type: String) -> Self {
+    pub fn media_type(mut self, media_type: &'a str) -> Self {
         self.media_type = Some(media_type);
         self
     }
 
-    pub fn build(self) -> Uri {
+    pub fn build(self) -> Uri<'a> {
         Uri {
             href: self.href.to_string(),
             media_type: self.media_type,
@@ -294,45 +297,47 @@ impl UriBuilder {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Preview {
+pub struct Preview<'a> {
     #[serde(flatten)]
-    pub base: Object<Null>,
+    pub base: Object<'a, Null>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub duration: Option<String>,
+    pub duration: Option<&'a str>,
 
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub url: Option<Uri>,
+    #[serde(skip_serializing_if = "Option::is_none", borrow)]
+    pub url: Option<Uri<'a>>,
 }
 
-impl Serde<'_> for Preview {}
+impl<'de: 'a, 'a> Serde<'de> for Preview<'a> {}
 
-pub struct PreviewBuilder {
-    base: ObjectBuilder<Null>,
-    duration: Option<String>,
-    url: Option<Uri>,
+pub struct PreviewBuilder<'a> {
+    base: ObjectBuilder<'a, Null>,
+    duration: Option<&'a str>,
+    url: Option<Uri<'a>>,
 }
 
-impl PreviewBuilder {
-    pub fn new(preview_type: String, name: String) -> Self {
+impl<'a> PreviewBuilder<'a> {
+    pub fn new(preview_type: &'a str, name: &'a str) -> Self {
         PreviewBuilder {
-            base: ObjectBuilder::new().object_type(preview_type).name(name),
+            base: ObjectBuilder::new()
+                .object_type(preview_type.to_string())
+                .name(name.to_string()),
             duration: None,
             url: None,
         }
     }
 
-    pub fn duration(mut self, dur: String) -> Self {
+    pub fn duration(mut self, dur: &'a str) -> Self {
         self.duration = Some(dur);
         self
     }
 
-    pub fn url(mut self, url: Uri) -> Self {
+    pub fn url(mut self, url: Uri<'a>) -> Self {
         self.url = Some(url);
         self
     }
 
-    pub fn build(self) -> Preview {
+    pub fn build(self) -> Preview<'a> {
         Preview {
             base: self.base.build(),
             duration: self.duration,
@@ -342,21 +347,21 @@ impl PreviewBuilder {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Link {
+pub struct Link<'a> {
     #[serde(rename = "type")]
-    pub link_type: String,
+    pub link_type: &'a str,
 
-    #[serde(flatten)]
-    pub href: Uri,
+    #[serde(flatten, borrow)]
+    pub href: Uri<'a>,
 
     #[serde(skip_serializing_if = "Vec::is_empty", default = "Vec::new")]
     pub rel: Vec<String>, // TODO: RFC5988 validation
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub name: Option<String>,
+    pub name: Option<&'a str>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub hreflang: Option<String>, // TODO: BCP47 language tag
+    pub hreflang: Option<&'a str>, // TODO: BCP47 language tag
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub height: Option<u32>,
@@ -364,29 +369,29 @@ pub struct Link {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub width: Option<u32>,
 
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub preview: Option<Preview>,
+    #[serde(skip_serializing_if = "Option::is_none", borrow)]
+    pub preview: Option<Preview<'a>>,
 }
 
-impl Link {
+impl Link<'_> {
     pub const TYPE: &'static str = "Link";
 }
 
-impl Serde<'_> for Link {}
+impl<'de: 'a, 'a> Serde<'de> for Link<'a> {}
 
 #[derive(Clone)]
-pub struct LinkBuilder {
-    href: UriBuilder,
+pub struct LinkBuilder<'a> {
+    href: UriBuilder<'a>,
     rel: Vec<String>, // TODO: RFC5988 validation
-    name: Option<String>,
-    hreflang: Option<String>, // TODO: BCP47 language tag
+    name: Option<&'a str>,
+    hreflang: Option<&'a str>, // TODO: BCP47 language tag
     height: Option<u32>,
     width: Option<u32>,
-    preview: Option<Preview>,
+    preview: Option<Preview<'a>>,
 }
 
-impl<'a> LinkBuilder {
-    pub fn new(href: UriBuilder) -> Self {
+impl<'a> LinkBuilder<'a> {
+    pub fn new(href: UriBuilder<'a>) -> Self {
         LinkBuilder {
             href,
             rel: Vec::new(),
@@ -403,12 +408,12 @@ impl<'a> LinkBuilder {
         self
     }
 
-    pub fn name(mut self, name: String) -> Self {
+    pub fn name(mut self, name: &'a str) -> Self {
         self.name = Some(name);
         self
     }
 
-    pub fn hreflang(mut self, hreflang: String) -> Self {
+    pub fn hreflang(mut self, hreflang: &'a str) -> Self {
         self.hreflang = Some(hreflang);
         self
     }
@@ -423,14 +428,14 @@ impl<'a> LinkBuilder {
         self
     }
 
-    pub fn preview(mut self, preview: Preview) -> Self {
+    pub fn preview(mut self, preview: Preview<'a>) -> Self {
         self.preview = Some(preview);
         self
     }
 
-    pub fn build(self) -> Link {
+    pub fn build(self) -> Link<'a> {
         Link {
-            link_type: Link::TYPE.to_string(),
+            link_type: Link::TYPE,
             href: self.href.build(),
             rel: self.rel,
             name: self.name,
@@ -443,17 +448,17 @@ impl<'a> LinkBuilder {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Activity {
+pub struct Activity<'a> {
     // TODO: consider getters instead of raw access
     #[serde(flatten)]
-    base: Object<Null>,
+    base: Object<'a, Null>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub actor: Option<Actor>,
+    pub actor: Option<Actor<'a>>,
+    #[serde(skip_serializing_if = "Option::is_none", borrow)]
+    pub object: Option<Object<'a, Null>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub object: Option<Object<Null>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub target: Option<Object<Null>>,
+    pub target: Option<Object<'a, Null>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub result: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -462,10 +467,10 @@ pub struct Activity {
     pub instrument: Option<String>, // TODO: Instrument
 }
 
-impl Serde<'_> for Activity {}
+impl<'de: 'a, 'a> Serde<'de> for Activity<'a> {}
 
-impl std::ops::Deref for Activity {
-    type Target = Object<Null>;
+impl<'a> std::ops::Deref for Activity<'a> {
+    type Target = Object<'a, Null>;
 
     fn deref(&self) -> &Self::Target {
         &self.base
@@ -473,17 +478,17 @@ impl std::ops::Deref for Activity {
 }
 
 #[derive(Clone)]
-pub struct ActivityBuilder {
-    base: ObjectBuilder<Null>,
-    actor: Option<ActorBuilder>,
-    object: Option<ObjectBuilder<Null>>,
-    target: Option<ObjectBuilder<Null>>,
+pub struct ActivityBuilder<'a> {
+    base: ObjectBuilder<'a, Null>,
+    actor: Option<ActorBuilder<'a>>,
+    object: Option<ObjectBuilder<'a, Null>>,
+    target: Option<ObjectBuilder<'a, Null>>,
     result: Option<String>,
     origin: Option<String>,
     instrument: Option<String>,
 }
 
-impl ActivityBuilder {
+impl<'a> ActivityBuilder<'a> {
     pub fn new(activity_type: String, summary: String) -> Self {
         ActivityBuilder {
             base: ObjectBuilder::new()
@@ -503,17 +508,17 @@ impl ActivityBuilder {
         self.clone()
     }
 
-    pub fn actor(&mut self, actor: ActorBuilder) -> Self {
+    pub fn actor(&mut self, actor: ActorBuilder<'a>) -> Self {
         self.actor = Some(actor);
         self.clone()
     }
 
-    pub fn object(&mut self, object: ObjectBuilder<Null>) -> Self {
+    pub fn object(&mut self, object: ObjectBuilder<'a, Null>) -> Self {
         self.object = Some(object);
         self.clone()
     }
 
-    pub fn target(&mut self, target: ObjectBuilder<Null>) -> Self {
+    pub fn target(&mut self, target: ObjectBuilder<'a, Null>) -> Self {
         self.target = Some(target);
         self.clone()
     }
@@ -533,7 +538,7 @@ impl ActivityBuilder {
         self.clone()
     }
 
-    pub fn build(self) -> Activity {
+    pub fn build(self) -> Activity<'a> {
         Activity {
             base: self.base.build(),
             actor: match self.actor {
@@ -556,15 +561,15 @@ impl ActivityBuilder {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct IntransitiveActivity {
-    #[serde(flatten)]
-    base: Activity,
+pub struct IntransitiveActivity<'a> {
+    #[serde(flatten, borrow)]
+    base: Activity<'a>,
 }
 
-impl Serde<'_> for IntransitiveActivity {}
+impl<'de: 'a, 'a> Serde<'de> for IntransitiveActivity<'a> {}
 
-impl std::ops::Deref for IntransitiveActivity {
-    type Target = Activity;
+impl<'a> std::ops::Deref for IntransitiveActivity<'a> {
+    type Target = Activity<'a>;
 
     fn deref(&self) -> &Self::Target {
         &self.base
@@ -572,11 +577,11 @@ impl std::ops::Deref for IntransitiveActivity {
 }
 
 #[derive(Clone)]
-pub struct IntransitiveActivityBuilder {
-    base: ActivityBuilder,
+pub struct IntransitiveActivityBuilder<'a> {
+    base: ActivityBuilder<'a>,
 }
 
-impl IntransitiveActivityBuilder {
+impl<'a> IntransitiveActivityBuilder<'a> {
     pub fn new(activity_type: String, summary: String) -> Self {
         IntransitiveActivityBuilder {
             base: ActivityBuilder::new(activity_type, summary),
@@ -588,12 +593,12 @@ impl IntransitiveActivityBuilder {
         self
     }
 
-    pub fn actor(mut self, actor: ActorBuilder) -> Self {
+    pub fn actor(mut self, actor: ActorBuilder<'a>) -> Self {
         self.base.actor(actor);
         self
     }
 
-    pub fn target(mut self, target: ObjectBuilder<Null>) -> Self {
+    pub fn target(mut self, target: ObjectBuilder<'a, Null>) -> Self {
         self.base.target(target);
         self
     }
@@ -613,7 +618,7 @@ impl IntransitiveActivityBuilder {
         self
     }
 
-    pub fn build(self) -> IntransitiveActivity {
+    pub fn build(self) -> IntransitiveActivity<'a> {
         IntransitiveActivity {
             base: self.base.build(),
         }
@@ -680,8 +685,8 @@ mod tests {
             LinkBuilder::new(UriBuilder::new(
                 "http://example.org/abc".parse::<http::Uri>().unwrap(),
             ))
-            .name("An example link".to_string())
-            .hreflang("en".to_string())
+            .name("An example link")
+            .hreflang("en")
             .build(),
         );
         let expected = String::from(
@@ -716,23 +721,23 @@ mod tests {
         let link = document.object as Link;
         assert_eq!(link.link_type, "Link");
         assert_eq!(link.href.href, "http://example.org/abc");
-        assert_eq!(link.name, Some("An example link".to_string()));
-        assert_eq!(link.hreflang, Some("en".to_string()));
+        assert_eq!(link.name, Some("An example link"));
+        assert_eq!(link.hreflang, Some("en"));
     }
 
     #[test]
     fn serialize_preview() {
         let actual = Document::new(
             ContextBuilder::new().build(),
-            PreviewBuilder::new("Video".to_string(), "Trailer".to_string())
-                .duration("PT1M".to_string())
+            PreviewBuilder::new("Video", "Trailer")
+                .duration("PT1M")
                 .url(
                     UriBuilder::new(
                         "http://example.org/trailer.mkv"
                             .parse::<http::Uri>()
                             .unwrap(),
                     )
-                    .media_type("video/mkv".to_string())
+                    .media_type("video/mkv")
                     .build(),
                 )
                 .build(),
@@ -775,16 +780,13 @@ mod tests {
         let preview = document.object as Preview;
         assert_eq!(preview.base.object_type, Some("Video".to_string()));
         assert_eq!(preview.base.name, Some("Trailer".to_string()));
-        assert_eq!(preview.duration, Some("PT1M".to_string()));
+        assert_eq!(preview.duration, Some("PT1M"));
         assert!(preview.url.is_some());
         assert_eq!(
             preview.url.as_ref().unwrap().href,
             "http://example.org/trailer.mkv".to_string()
         );
-        assert_eq!(
-            preview.url.as_ref().unwrap().media_type,
-            Some("video/mkv".to_string())
-        );
+        assert_eq!(preview.url.as_ref().unwrap().media_type, Some("video/mkv"));
     }
 
     #[test]
