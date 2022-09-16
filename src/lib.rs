@@ -49,9 +49,9 @@ mod tests {
         let link: Link = Document::from_json(&listing).unwrap().object;
         assert_eq!(link.link_type, "Link");
         assert_eq!(link.href.href, "http://example.org/abc");
-        assert_eq!(link.hreflang, Some(String::from("en")));
-        assert_eq!(link.href.media_type, Some(String::from("text/html")));
-        assert_eq!(link.name, Some(String::from("An example link")));
+        assert_eq!(link.hreflang, Some("en"));
+        assert_eq!(link.href.media_type, Some("text/html"));
+        assert_eq!(link.name, Some("An example link"));
     }
 
     #[test]
@@ -261,7 +261,7 @@ mod tests {
                                 .parse::<http::Uri>()
                                 .unwrap(),
                         )
-                        .media_type("image/jpeg".to_string()),
+                        .media_type("image/jpeg"),
                     )),
             )
             .object(

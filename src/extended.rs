@@ -3,9 +3,9 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Actor {
-    #[serde(flatten)]
-    base: Object<Null>,
+pub struct Actor<'a> {
+    #[serde(flatten, borrow)]
+    base: Object<'a, Null>,
 
     #[serde(rename = "preferredUsername")]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -22,10 +22,10 @@ pub struct Actor {
     pub liked: Option<String>,
 }
 
-impl Serde<'_> for Actor {}
+impl<'de: 'a, 'a> Serde<'de> for Actor<'a> {}
 
-impl std::ops::Deref for Actor {
-    type Target = Object<Null>;
+impl<'a> std::ops::Deref for Actor<'a> {
+    type Target = Object<'a, Null>;
 
     fn deref(&self) -> &Self::Target {
         &self.base
@@ -33,8 +33,8 @@ impl std::ops::Deref for Actor {
 }
 
 #[derive(Clone)]
-pub struct ActorBuilder {
-    base: ObjectBuilder<Null>,
+pub struct ActorBuilder<'a> {
+    base: ObjectBuilder<'a, Null>,
 
     preferred_username: Option<String>,
     inbox: Option<String>,
@@ -44,7 +44,7 @@ pub struct ActorBuilder {
     liked: Option<String>,
 }
 
-impl<'a> ActorBuilder {
+impl<'a> ActorBuilder<'a> {
     pub fn new(actor_type: String) -> Self {
         ActorBuilder {
             base: ObjectBuilder::new().object_type(actor_type),
@@ -77,7 +77,7 @@ impl<'a> ActorBuilder {
         self
     }
 
-    pub fn image(mut self, image: LinkBuilder) -> Self {
+    pub fn image(mut self, image: LinkBuilder<'a>) -> Self {
         self.base.image(image);
         self
     }
@@ -117,7 +117,7 @@ impl<'a> ActorBuilder {
         self
     }
 
-    pub fn build(self) -> Actor {
+    pub fn build(self) -> Actor<'a> {
         Actor {
             base: self.base.build(),
 
