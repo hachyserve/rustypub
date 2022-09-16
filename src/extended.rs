@@ -45,7 +45,7 @@ pub struct ActorBuilder<'a> {
 }
 
 impl<'a> ActorBuilder<'a> {
-    pub fn new(actor_type: String) -> Self {
+    pub fn new(actor_type: &'a str) -> Self {
         ActorBuilder {
             base: ObjectBuilder::new().object_type(actor_type),
             preferred_username: None,
@@ -62,7 +62,7 @@ impl<'a> ActorBuilder<'a> {
         self
     }
 
-    pub fn name(mut self, name: String) -> Self {
+    pub fn name(mut self, name: &'a str) -> Self {
         self.base.name(name);
         self
     }
@@ -82,7 +82,7 @@ impl<'a> ActorBuilder<'a> {
         self
     }
 
-    pub fn summary(mut self, summary: String) -> Self {
+    pub fn summary(mut self, summary: &'a str) -> Self {
         self.base.summary(summary);
         self
     }
@@ -141,11 +141,11 @@ mod tests {
     fn serialize_actor() {
         let actual = Document::new(
             ContextBuilder::new().build(),
-            ActorBuilder::new("Person".to_string())
+            ActorBuilder::new("Person")
                 .id("https://example.com/person/1234"
                     .parse::<http::Uri>()
                     .unwrap())
-                .name("name".to_string())
+                .name("name")
                 .preferred_username("dma".to_string())
                 .build(),
         );
@@ -179,12 +179,12 @@ mod tests {
         );
         let document: Document<Actor> = Document::from_json(&actual).unwrap();
         let actor = document.object as Actor;
-        assert_eq!(actor.object_type, Some("Person".to_string()));
+        assert_eq!(actor.object_type, Some("Person"));
         assert_eq!(
             actor.id,
-            Some("https://example.com/person/1234".to_string())
+            Some(String::from("https://example.com/person/1234"))
         );
-        assert_eq!(actor.name, Some("name".to_string()));
+        assert_eq!(actor.name, Some("name"));
         assert_eq!(actor.preferred_username, Some("dma".to_string()));
     }
 }

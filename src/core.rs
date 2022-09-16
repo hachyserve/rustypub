@@ -109,13 +109,13 @@ impl<'a> ContextBuilder<'a> {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Object<'a, AttributedToT> {
     #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
-    pub object_type: Option<String>,
+    pub object_type: Option<&'a str>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub name: Option<String>,
+    pub name: Option<&'a str>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub url: Option<String>,
@@ -137,25 +137,25 @@ pub struct Object<'a, AttributedToT> {
     pub audience: Option<Box<Object<'a, Null>>>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub content: Option<String>,
+    pub content: Option<&'a str>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub summary: Option<String>,
+    pub summary: Option<&'a str>,
 }
 
 #[derive(Clone)]
 pub struct ObjectBuilder<'a, AttributedToT> {
-    object_type: Option<String>,
+    object_type: Option<&'a str>,
     // TODO: actually an IRI: consider https://docs.rs/iref/latest/iref/
     id: Option<http::Uri>,
-    name: Option<String>,
+    name: Option<&'a str>,
     url: Option<http::Uri>,
     published: Option<DateTime<Utc>>,
     image: Option<LinkBuilder<'a>>,
     attributed_to: Vec<AttributedToT>,
     audience: Option<Box<ObjectBuilder<'a, Null>>>,
-    content: Option<String>,
-    summary: Option<String>,
+    content: Option<&'a str>,
+    summary: Option<&'a str>,
     // TODO: more fields
 }
 
@@ -175,7 +175,7 @@ impl<'a, AttributedToT: Serde<'a> + Clone> ObjectBuilder<'a, AttributedToT> {
         }
     }
 
-    pub fn object_type(mut self, object_type: String) -> Self {
+    pub fn object_type(mut self, object_type: &'a str) -> Self {
         self.object_type = Some(object_type);
         self
     }
@@ -185,7 +185,7 @@ impl<'a, AttributedToT: Serde<'a> + Clone> ObjectBuilder<'a, AttributedToT> {
         self.clone()
     }
 
-    pub fn name(&mut self, name: String) -> Self {
+    pub fn name(&mut self, name: &'a str) -> Self {
         self.name = Some(name);
         self.clone()
     }
@@ -215,12 +215,12 @@ impl<'a, AttributedToT: Serde<'a> + Clone> ObjectBuilder<'a, AttributedToT> {
         self.clone()
     }
 
-    pub fn content(mut self, content: String) -> Self {
+    pub fn content(mut self, content: &'a str) -> Self {
         self.content = Some(content);
         self
     }
 
-    pub fn summary(&mut self, summary: String) -> Self {
+    pub fn summary(&mut self, summary: &'a str) -> Self {
         self.summary = Some(summary);
         self.clone()
     }
@@ -319,9 +319,7 @@ pub struct PreviewBuilder<'a> {
 impl<'a> PreviewBuilder<'a> {
     pub fn new(preview_type: &'a str, name: &'a str) -> Self {
         PreviewBuilder {
-            base: ObjectBuilder::new()
-                .object_type(preview_type.to_string())
-                .name(name.to_string()),
+            base: ObjectBuilder::new().object_type(preview_type).name(name),
             duration: None,
             url: None,
         }
@@ -460,11 +458,11 @@ pub struct Activity<'a> {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub target: Option<Object<'a, Null>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub result: Option<String>,
+    pub result: Option<&'a str>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub origin: Option<String>, // TODO: Origin
+    pub origin: Option<&'a str>, // TODO: Origin
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub instrument: Option<String>, // TODO: Instrument
+    pub instrument: Option<&'a str>, // TODO: Instrument
 }
 
 impl<'de: 'a, 'a> Serde<'de> for Activity<'a> {}
@@ -483,13 +481,13 @@ pub struct ActivityBuilder<'a> {
     actor: Option<ActorBuilder<'a>>,
     object: Option<ObjectBuilder<'a, Null>>,
     target: Option<ObjectBuilder<'a, Null>>,
-    result: Option<String>,
-    origin: Option<String>,
-    instrument: Option<String>,
+    result: Option<&'a str>,
+    origin: Option<&'a str>,
+    instrument: Option<&'a str>,
 }
 
 impl<'a> ActivityBuilder<'a> {
-    pub fn new(activity_type: String, summary: String) -> Self {
+    pub fn new(activity_type: &'a str, summary: &'a str) -> Self {
         ActivityBuilder {
             base: ObjectBuilder::new()
                 .object_type(activity_type)
@@ -523,17 +521,17 @@ impl<'a> ActivityBuilder<'a> {
         self.clone()
     }
 
-    pub fn result(&mut self, result: String) -> Self {
+    pub fn result(&mut self, result: &'a str) -> Self {
         self.result = Some(result);
         self.clone()
     }
 
-    pub fn origin(&mut self, origin: String) -> Self {
+    pub fn origin(&mut self, origin: &'a str) -> Self {
         self.origin = Some(origin);
         self.clone()
     }
 
-    pub fn instrument(&mut self, instrument: String) -> Self {
+    pub fn instrument(&mut self, instrument: &'a str) -> Self {
         self.instrument = Some(instrument);
         self.clone()
     }
@@ -582,7 +580,7 @@ pub struct IntransitiveActivityBuilder<'a> {
 }
 
 impl<'a> IntransitiveActivityBuilder<'a> {
-    pub fn new(activity_type: String, summary: String) -> Self {
+    pub fn new(activity_type: &'a str, summary: &'a str) -> Self {
         IntransitiveActivityBuilder {
             base: ActivityBuilder::new(activity_type, summary),
         }
@@ -603,17 +601,17 @@ impl<'a> IntransitiveActivityBuilder<'a> {
         self
     }
 
-    pub fn result(mut self, result: String) -> Self {
+    pub fn result(mut self, result: &'a str) -> Self {
         self.base.result(result);
         self
     }
 
-    pub fn origin(mut self, origin: String) -> Self {
+    pub fn origin(mut self, origin: &'a str) -> Self {
         self.base.origin(origin);
         self
     }
 
-    pub fn instrument(mut self, instrument: String) -> Self {
+    pub fn instrument(mut self, instrument: &'a str) -> Self {
         self.base.instrument(instrument);
         self
     }
@@ -632,7 +630,7 @@ mod tests {
 
     #[test]
     fn serialize_object() {
-        let object: Object<Null> = ObjectBuilder::new().name("name".to_string()).build();
+        let object: Object<Null> = ObjectBuilder::new().name("name").build();
         let actual = Document::new(ContextBuilder::new().language("en").build(), object);
         let expected = String::from(
             r#"{
@@ -661,7 +659,7 @@ mod tests {
         let document: Document<Object<Null>> = Document::from_json(&actual).unwrap();
         assert_eq!(document.context.language, Some("en"));
         let object = document.object as Object<Null>;
-        assert_eq!(object.name, Some("name".to_string()));
+        assert_eq!(object.name, Some("name"));
     }
 
     #[test]
@@ -778,8 +776,8 @@ mod tests {
         );
         let document: Document<Preview> = Document::from_json(&actual).unwrap();
         let preview = document.object as Preview;
-        assert_eq!(preview.base.object_type, Some("Video".to_string()));
-        assert_eq!(preview.base.name, Some("Trailer".to_string()));
+        assert_eq!(preview.base.object_type, Some("Video"));
+        assert_eq!(preview.base.name, Some("Trailer"));
         assert_eq!(preview.duration, Some("PT1M"));
         assert!(preview.url.is_some());
         assert_eq!(
@@ -793,17 +791,10 @@ mod tests {
     fn serialize_activity() {
         let actual = Document::new(
             ContextBuilder::new().build(),
-            ActivityBuilder::new(
-                "Activity".to_string(),
-                "Sally did something to a note".to_string(),
-            )
-            .actor(ActorBuilder::new("Person".to_string()).name("Sally".to_string()))
-            .object(
-                ObjectBuilder::new()
-                    .object_type("Note".to_string())
-                    .name("A Note".to_string()),
-            )
-            .build(),
+            ActivityBuilder::new("Activity", "Sally did something to a note")
+                .actor(ActorBuilder::new("Person").name("Sally"))
+                .object(ObjectBuilder::new().object_type("Note").name("A Note"))
+                .build(),
         );
 
         let expected = String::from(
@@ -848,20 +839,17 @@ mod tests {
         );
         let document: Document<Activity> = Document::from_json(&actual).unwrap();
         let activity = document.object as Activity;
-        assert_eq!(activity.object_type, Some("Activity".to_string()));
-        assert_eq!(
-            activity.summary,
-            Some("Sally did something to a note".to_string())
-        );
+        assert_eq!(activity.object_type, Some("Activity"));
+        assert_eq!(activity.summary, Some("Sally did something to a note"));
 
         assert!(activity.actor.is_some());
         let actor = activity.actor.as_ref().unwrap();
-        assert_eq!(actor.object_type, Some("Person".to_string()));
-        assert_eq!(actor.name, Some("Sally".to_string()));
+        assert_eq!(actor.object_type, Some("Person"));
+        assert_eq!(actor.name, Some("Sally"));
 
         assert!(activity.object.is_some());
         let object = activity.object.as_ref().unwrap();
-        assert_eq!(object.object_type, Some("Note".to_string()));
-        assert_eq!(object.name, Some("A Note".to_string()));
+        assert_eq!(object.object_type, Some("Note"));
+        assert_eq!(object.name, Some("A Note"));
     }
 }
