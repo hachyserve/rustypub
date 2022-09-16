@@ -31,18 +31,18 @@ pub struct Null {}
 impl Serde<'_> for Null {}
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Document<T> {
-    #[serde(rename = "@context")]
-    pub context: Context,
+pub struct Document<'a, T> {
+    #[serde(rename = "@context", borrow)]
+    pub context: Context<'a>,
 
     #[serde(flatten)]
     pub object: T,
 }
 
-impl<'a, T: Serde<'a>> Serde<'a> for Document<T> {}
+impl<'de: 'a, 'a, T> Serde<'de> for Document<'a, T> where T: Serde<'de> {}
 
-impl<'a, T: Serde<'a>> Document<T> {
-    pub fn new(context: Context, object: T) -> Self {
+impl<'a, T: Serde<'a>> Document<'a, T> {
+    pub fn new(context: Context<'a>, object: T) -> Self {
         Document { context, object }
     }
 }
@@ -57,37 +57,37 @@ impl<'a, T: Serde<'a>> Document<T> {
 /// done using a string, object, or array.
 /// https://www.w3.org/TR/activitystreams-core/#jsonld
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Context {
+pub struct Context<'a> {
     #[serde(rename = "@vocab")]
-    namespace: String,
+    namespace: &'a str,
 
     #[serde(skip_serializing_if = "Option::is_none", rename = "@language")]
-    language: Option<String>,
+    language: Option<&'a str>,
 }
 
 #[derive(Clone)]
-pub struct ContextBuilder {
-    namespace: String,
-    language: Option<String>,
+pub struct ContextBuilder<'a> {
+    namespace: &'a str,
+    language: Option<&'a str>,
 }
 
-impl ContextBuilder {
+impl<'a> ContextBuilder<'a> {
     const NAMESPACE: &'static str = "https://www.w3.org/ns/activitystreams";
 
     pub fn new() -> Self {
         ContextBuilder {
-            namespace: ContextBuilder::NAMESPACE.to_string(),
+            namespace: ContextBuilder::NAMESPACE,
             language: None,
         }
     }
 
     // TODO: extend this to other options per the docs
-    pub fn language(mut self, language: String) -> Self {
+    pub fn language(mut self, language: &'a str) -> Self {
         self.language = Some(language);
         self
     }
 
-    pub fn build(self) -> Context {
+    pub fn build(self) -> Context<'a> {
         Context {
             namespace: self.namespace,
             language: self.language,
@@ -628,10 +628,7 @@ mod tests {
     #[test]
     fn serialize_object() {
         let object: Object<Null> = ObjectBuilder::new().name("name".to_string()).build();
-        let actual = Document::new(
-            ContextBuilder::new().language("en".to_string()).build(),
-            object,
-        );
+        let actual = Document::new(ContextBuilder::new().language("en").build(), object);
         let expected = String::from(
             r#"{
   "@context": {
@@ -657,7 +654,7 @@ mod tests {
 }"#,
         );
         let document: Document<Object<Null>> = Document::from_json(&actual).unwrap();
-        assert_eq!(document.context.language, Some("en".to_string()));
+        assert_eq!(document.context.language, Some("en"));
         let object = document.object as Object<Null>;
         assert_eq!(object.name, Some("name".to_string()));
     }
