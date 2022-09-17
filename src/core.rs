@@ -341,7 +341,7 @@ pub struct Link<'a> {
     pub href: Uri<'a>,
 
     #[serde(skip_serializing_if = "Vec::is_empty", default = "Vec::new")]
-    pub rel: Vec<String>, // TODO: RFC5988 validation
+    pub rel: Vec<&'a str>, // TODO: RFC5988 validation
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<&'a str>,
@@ -368,7 +368,7 @@ impl<'de: 'a, 'a> Serde<'de> for Link<'a> {}
 #[derive(Clone)]
 pub struct LinkBuilder<'a> {
     href: UriBuilder<'a>,
-    rel: Vec<String>, // TODO: RFC5988 validation
+    rel: Vec<&'a str>, // TODO: RFC5988 validation
     name: Option<&'a str>,
     hreflang: Option<&'a str>, // TODO: BCP47 language tag
     height: Option<u32>,
@@ -389,7 +389,7 @@ impl<'a> LinkBuilder<'a> {
         }
     }
 
-    pub fn add_rel(mut self, rel: String) -> Self {
+    pub fn add_rel(mut self, rel: &'a str) -> Self {
         self.rel.push(rel);
         self
     }
@@ -620,30 +620,26 @@ mod tests {
     fn serialize_object() {
         let object: Object<Null> = ObjectBuilder::new().name("name").build();
         let actual = Document::new(ContextBuilder::new().language("en").build(), object);
-        let expected = String::from(
-            r#"{
+        let expected = r#"{
   "@context": {
     "@vocab": "https://www.w3.org/ns/activitystreams",
     "@language": "en"
   },
   "name": "name"
-}"#,
-        );
+}"#;
         assert!(actual.to_json_pretty().is_ok());
         assert_eq!(actual.to_json_pretty().unwrap(), expected)
     }
 
     #[test]
     fn deserialize_object() {
-        let actual = String::from(
-            r#"{
+        let actual = r#"{
   "@context": {
     "@vocab": "https://www.w3.org/ns/activitystreams",
     "@language": "en"
   },
   "name": "name"
-}"#,
-        );
+}"#;
         let document: Document<Object<Null>> = Document::from_json(&actual).unwrap();
         assert_eq!(document.context.language, Some("en"));
         let object = document.object as Object<Null>;
@@ -652,14 +648,12 @@ mod tests {
 
     #[test]
     fn deserialize_object_malformed() {
-        let actual = String::from(
-            r#"{
+        let actual = r#"{
   "@context": {
     "@vocab": "https://www.w3.org/ns/activitystreams",
     "@language": "en"
   },
-}"#,
-        );
+}"#;
         let result: Result<Document<Object<Null>>> = Document::from_json(&actual);
         assert!(result.is_err());
     }
@@ -675,8 +669,7 @@ mod tests {
             .hreflang("en")
             .build(),
         );
-        let expected = String::from(
-            r#"{
+        let expected = r#"{
   "@context": {
     "@vocab": "https://www.w3.org/ns/activitystreams"
   },
@@ -684,16 +677,14 @@ mod tests {
   "href": "http://example.org/abc",
   "name": "An example link",
   "hreflang": "en"
-}"#,
-        );
+}"#;
         assert!(actual.to_json_pretty().is_ok());
         assert_eq!(actual.to_json_pretty().unwrap(), expected);
     }
 
     #[test]
     fn deserialize_link() {
-        let actual = String::from(
-            r#"{
+        let actual = r#"{
   "@context": {
     "@vocab": "https://www.w3.org/ns/activitystreams"
   },
@@ -701,8 +692,7 @@ mod tests {
   "href": "http://example.org/abc",
   "name": "An example link",
   "hreflang": "en"
-}"#,
-        );
+}"#;
         let document: Document<Link> = Document::from_json(&actual).unwrap();
         let link = document.object as Link;
         assert_eq!(link.link_type, "Link");
@@ -728,8 +718,7 @@ mod tests {
                 )
                 .build(),
         );
-        let expected = String::from(
-            r#"{
+        let expected = r#"{
   "@context": {
     "@vocab": "https://www.w3.org/ns/activitystreams"
   },
@@ -740,16 +729,14 @@ mod tests {
     "href": "http://example.org/trailer.mkv",
     "mediaType": "video/mkv"
   }
-}"#,
-        );
+}"#;
         assert!(actual.to_json_pretty().is_ok());
         assert_eq!(actual.to_json_pretty().unwrap(), expected);
     }
 
     #[test]
     fn deserialize_preview() {
-        let actual = String::from(
-            r#"{
+        let actual = r#"{
   "@context": {
     "@vocab": "https://www.w3.org/ns/activitystreams"
   },
@@ -760,8 +747,7 @@ mod tests {
     "href": "http://example.org/trailer.mkv",
     "mediaType": "video/mkv"
   }
-}"#,
-        );
+}"#;
         let document: Document<Preview> = Document::from_json(&actual).unwrap();
         let preview = document.object as Preview;
         assert_eq!(preview.base.object_type, Some("Video"));
@@ -785,8 +771,7 @@ mod tests {
                 .build(),
         );
 
-        let expected = String::from(
-            r#"{
+        let expected = r#"{
   "@context": {
     "@vocab": "https://www.w3.org/ns/activitystreams"
   },
@@ -800,16 +785,14 @@ mod tests {
     "type": "Note",
     "name": "A Note"
   }
-}"#,
-        );
+}"#;
         assert!(actual.to_json_pretty().is_ok());
         assert_eq!(actual.to_json_pretty().unwrap(), expected);
     }
 
     #[test]
     fn deserialize_activity() {
-        let actual = String::from(
-            r#"{
+        let actual = r#"{
   "@context": {
     "@vocab": "https://www.w3.org/ns/activitystreams"
   },
@@ -823,9 +806,8 @@ mod tests {
     "type": "Note",
     "name": "A Note"
   }
-}"#,
-        );
-        let document: Document<Activity> = Document::from_json(&actual).unwrap();
+}"#;
+        let document: Document<Activity> = Document::from_json(actual).unwrap();
         let activity = document.object as Activity;
         assert_eq!(activity.object_type, Some("Activity"));
         assert_eq!(activity.summary, Some("Sally did something to a note"));

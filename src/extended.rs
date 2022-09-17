@@ -9,17 +9,17 @@ pub struct Actor<'a> {
 
     #[serde(rename = "preferredUsername")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub preferred_username: Option<String>,
+    pub preferred_username: Option<&'a str>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub inbox: Option<String>,
+    pub inbox: Option<&'a str>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub outbox: Option<String>,
+    pub outbox: Option<&'a str>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub followers: Option<String>,
+    pub followers: Option<&'a str>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub following: Option<String>,
+    pub following: Option<&'a str>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub liked: Option<String>,
+    pub liked: Option<&'a str>,
 }
 
 impl<'de: 'a, 'a> Serde<'de> for Actor<'a> {}
@@ -36,12 +36,12 @@ impl<'a> std::ops::Deref for Actor<'a> {
 pub struct ActorBuilder<'a> {
     base: ObjectBuilder<'a, Null>,
 
-    preferred_username: Option<String>,
-    inbox: Option<String>,
-    outbox: Option<String>,
-    followers: Option<String>,
-    following: Option<String>,
-    liked: Option<String>,
+    preferred_username: Option<&'a str>,
+    inbox: Option<&'a str>,
+    outbox: Option<&'a str>,
+    followers: Option<&'a str>,
+    following: Option<&'a str>,
+    liked: Option<&'a str>,
 }
 
 impl<'a> ActorBuilder<'a> {
@@ -87,32 +87,32 @@ impl<'a> ActorBuilder<'a> {
         self
     }
 
-    pub fn preferred_username(mut self, username: String) -> Self {
+    pub fn preferred_username(mut self, username: &'a str) -> Self {
         self.preferred_username = Some(username);
         self
     }
 
-    pub fn inbox(mut self, inbox: String) -> Self {
+    pub fn inbox(mut self, inbox: &'a str) -> Self {
         self.inbox = Some(inbox);
         self
     }
 
-    pub fn outbox(mut self, outbox: String) -> Self {
+    pub fn outbox(mut self, outbox: &'a str) -> Self {
         self.outbox = Some(outbox);
         self
     }
 
-    pub fn followers(mut self, followers: String) -> Self {
+    pub fn followers(mut self, followers: &'a str) -> Self {
         self.followers = Some(followers);
         self
     }
 
-    pub fn following(mut self, following: String) -> Self {
+    pub fn following(mut self, following: &'a str) -> Self {
         self.following = Some(following);
         self
     }
 
-    pub fn liked(mut self, liked: String) -> Self {
+    pub fn liked(mut self, liked: &'a str) -> Self {
         self.liked = Some(liked);
         self
     }
@@ -146,11 +146,10 @@ mod tests {
                     .parse::<http::Uri>()
                     .unwrap())
                 .name("name")
-                .preferred_username("dma".to_string())
+                .preferred_username("dma")
                 .build(),
         );
-        let expected = String::from(
-            r#"{
+        let expected = r#"{
   "@context": {
     "@vocab": "https://www.w3.org/ns/activitystreams"
   },
@@ -158,16 +157,14 @@ mod tests {
   "id": "https://example.com/person/1234",
   "name": "name",
   "preferredUsername": "dma"
-}"#,
-        );
+}"#;
         assert!(actual.to_json_pretty().is_ok());
         assert_eq!(actual.to_json_pretty().unwrap(), expected)
     }
 
     #[test]
     fn deserialize_actor() {
-        let actual = String::from(
-            r#"{
+        let actual = r#"{
   "@context": {
     "@vocab": "https://www.w3.org/ns/activitystreams"
   },
@@ -175,9 +172,8 @@ mod tests {
   "id": "https://example.com/person/1234",
   "name": "name",
   "preferredUsername": "dma"
-}"#,
-        );
-        let document: Document<Actor> = Document::from_json(&actual).unwrap();
+}"#;
+        let document: Document<Actor> = Document::from_json(actual).unwrap();
         let actor = document.object as Actor;
         assert_eq!(actor.object_type, Some("Person"));
         assert_eq!(
@@ -185,6 +181,6 @@ mod tests {
             Some(String::from("https://example.com/person/1234"))
         );
         assert_eq!(actor.name, Some("name"));
-        assert_eq!(actor.preferred_username, Some("dma".to_string()));
+        assert_eq!(actor.preferred_username, Some("dma"));
     }
 }
