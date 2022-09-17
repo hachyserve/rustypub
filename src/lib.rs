@@ -11,15 +11,13 @@ mod tests {
     // A set of tests from https://www.w3.org/TR/activitystreams-vocabulary examples
     #[test]
     fn example_1() {
-        let listing = String::from(
-            r#"{
+        let listing = r#"{
           "@context": { "@vocab": "https://www.w3.org/ns/activitystreams" },
           "type": "Object",
           "id": "http://www.test.example/object/1",
           "name": "A Simple, non-specific object"
-        }"#,
-        );
-        let object: Object<Null> = Document::from_json(&listing).unwrap().object;
+        }"#;
+        let object: Object<Null> = Document::from_json(listing).unwrap().object;
         assert_eq!(object.object_type, Some("Object"));
         assert_eq!(
             object.id,
@@ -30,8 +28,7 @@ mod tests {
 
     #[test]
     fn example_2() {
-        let listing = String::from(
-            r#"
+        let listing = r#"
       {
         "@context": {"@vocab": "https://www.w3.org/ns/activitystreams"},
         "type": "Link",
@@ -40,10 +37,9 @@ mod tests {
         "mediaType": "text/html",
         "name": "An example link"
       }
-      "#,
-        );
+      "#;
 
-        let link: Link = Document::from_json(&listing).unwrap().object;
+        let link: Link = Document::from_json(listing).unwrap().object;
         assert_eq!(link.link_type, "Link");
         assert_eq!(link.href.href, "http://example.org/abc");
         assert_eq!(link.hreflang, Some("en"));
@@ -53,8 +49,7 @@ mod tests {
 
     #[test]
     fn example_3() {
-        let listing = String::from(
-            r#"
+        let listing = r#"
       {
         "@context": { "@vocab": "https://www.w3.org/ns/activitystreams" },
         "type": "Activity",
@@ -68,10 +63,9 @@ mod tests {
           "name": "A Note"
         }
       } 
-      "#,
-        );
+      "#;
 
-        let activity: Activity = Document::from_json(&listing).unwrap().object;
+        let activity: Activity = Document::from_json(listing).unwrap().object;
         assert_eq!(activity.object_type, Some("Activity"));
         assert_eq!(activity.summary, Some("Sally did something to a note"));
 
@@ -88,8 +82,7 @@ mod tests {
 
     #[test]
     fn example_4() {
-        let listing = String::from(
-            r#"
+        let listing = r#"
       {
         "@context": { "@vocab": "https://www.w3.org/ns/activitystreams" },
         "type": "Travel",
@@ -103,10 +96,9 @@ mod tests {
           "name": "Work"
         }
       }
-      "#,
-        );
+      "#;
 
-        let activity: IntransitiveActivity = Document::from_json(&listing).unwrap().object;
+        let activity: IntransitiveActivity = Document::from_json(listing).unwrap().object;
         assert_eq!(activity.object_type, Some("Travel"));
         assert_eq!(activity.summary, Some("Sally went to work"));
 
@@ -123,8 +115,7 @@ mod tests {
 
     #[test]
     fn example_69() {
-        let listing = String::from(
-            r#"{
+        let listing = r#"{
   "@context": {
     "@vocab": "https://www.w3.org/ns/activitystreams"
   },
@@ -135,9 +126,8 @@ mod tests {
     "type": "http://example.org/Organization",
     "name": "ExampleCo LLC"
   }
-}"#,
-        );
-        let document: Document<Object<Null>> = Document::from_json(&listing).unwrap();
+}"#;
+        let document: Document<Object<Null>> = Document::from_json(listing).unwrap();
         let object = document.object;
         assert_eq!(object.name, Some("Holiday announcement"));
         assert_eq!(object.object_type, Some("Note"));
@@ -156,17 +146,15 @@ mod tests {
 
     #[test]
     fn example_114() {
-        let listing = String::from(
-            r#"{
+        let listing = r#"{
   "@context": {
     "@vocab": "https://www.w3.org/ns/activitystreams"
   },
   "summary": "A simple note",
   "type": "Note",
   "content": "A <em>simple</em> note"
-}"#,
-        );
-        let document: Document<Object<Null>> = Document::from_json(&listing).unwrap();
+}"#;
+        let document: Document<Object<Null>> = Document::from_json(listing).unwrap();
         let object = document.object;
         assert_eq!(object.summary, Some("A simple note"));
         assert_eq!(object.object_type, Some("Note"));
@@ -175,17 +163,15 @@ mod tests {
 
     #[test]
     fn example_133() {
-        let listing = String::from(
-            r#"{
+        let listing = r#"{
         "@context": {
           "@vocab": "https://www.w3.org/ns/activitystreams"
         },
         "name": "Cane Sugar Processing",
         "type": "Note",
         "summary": "A simple <em>note</em>"
-      }"#,
-        );
-        let document: Document<Object<Null>> = Document::from_json(&listing).unwrap();
+      }"#;
+        let document: Document<Object<Null>> = Document::from_json(listing).unwrap();
         let object = document.object;
         assert_eq!(object.summary, Some("A simple <em>note</em>"));
         assert_eq!(object.object_type, Some("Note"));
