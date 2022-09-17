@@ -228,25 +228,13 @@ impl<'a, AttributedToT: Serde<'a> + Clone> ObjectBuilder<'a, AttributedToT> {
     pub fn build(self) -> Object<'a, AttributedToT> {
         Object {
             object_type: self.object_type,
-            id: match self.id {
-                None => None,
-                uri => Some(uri.unwrap().to_string()),
-            },
+            id: self.id.map(|uri| uri.to_string()),
             name: self.name,
-            url: match self.url {
-                None => None,
-                uri => Some(uri.unwrap().to_string()),
-            },
+            url: self.url.map(|uri| uri.to_string()),
             published: self.published,
-            image: match self.image {
-                None => None,
-                i => Some(Box::new(i.unwrap().build())),
-            },
+            image: self.image.map(|i| Box::new(i.build())),
             attributed_to: self.attributed_to,
-            audience: match self.audience {
-                None => None,
-                a => Some(Box::new(a.unwrap().build())),
-            },
+            audience: self.audience.map(|a| Box::new(a.build())),
             content: self.content,
             summary: self.summary,
         }
