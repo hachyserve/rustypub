@@ -55,7 +55,7 @@ impl<'a, T: Serde<'a>> Document<'a, T> {
 /// "https://www.w3.org/ns/activitystreams". Implementations may use the
 /// alternative URL "http://www.w3.org/ns/activitystreams" instead. This can be
 /// done using a string, object, or array.
-/// https://www.w3.org/TR/activitystreams-core/#jsonld
+/// <https://www.w3.org/TR/activitystreams-core/#jsonld>
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Context<'a> {
     #[serde(rename = "@vocab")]
