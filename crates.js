@@ -1,1 +1,1 @@
-window.ALL_CRATES = ["activitypub"];
+window.ALL_CRATES = ["rustypub"];

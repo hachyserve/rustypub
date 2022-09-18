@@ -1,3 +1,3 @@
 var sourcesIndex = {};
-sourcesIndex["activitypub"] = {"name":"","files":["core.rs","extended.rs","lib.rs"]};
+sourcesIndex["rustypub"] = {"name":"","files":["core.rs","extended.rs","lib.rs"]};
 createSourceSidebar();
