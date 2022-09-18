@@ -24,7 +24,7 @@ where
     }
 }
 
-/// Null-type object that implements `Serde` for convenience
+/// [Null]-type object that implements [Serde] for convenience
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Null {}
 
@@ -55,7 +55,7 @@ impl<'a, T: Serde<'a>> Document<'a, T> {
 /// "https://www.w3.org/ns/activitystreams". Implementations may use the
 /// alternative URL "http://www.w3.org/ns/activitystreams" instead. This can be
 /// done using a string, object, or array.
-/// https://www.w3.org/TR/activitystreams-core/#jsonld
+/// <https://www.w3.org/TR/activitystreams-core/#jsonld>
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Context<'a> {
     #[serde(rename = "@vocab")]
@@ -95,7 +95,7 @@ impl<'a> ContextBuilder<'a> {
     }
 }
 
-/// The Object is the primary base type for the Activity Streams vocabulary.
+/// The [Object] is the primary base type for the Activity Streams vocabulary.
 /// In addition to having a global identifier (expressed as an absolute IRI
 /// using the id property) and an "object type" (expressed using the type
 /// property), all instances of the Object type share a common set of
@@ -141,6 +141,11 @@ pub struct Object<'a, AttributedToT> {
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub summary: Option<&'a str>,
+}
+
+impl<'de: 'a, 'a, AttributedToT> Serde<'de> for Object<'a, AttributedToT> where
+    AttributedToT: Serde<'de> + Clone
+{
 }
 
 #[derive(Clone)]
@@ -239,11 +244,6 @@ impl<'a, AttributedToT: Serde<'a> + Clone> ObjectBuilder<'a, AttributedToT> {
             summary: self.summary,
         }
     }
-}
-
-impl<'de: 'a, 'a, AttributedToT> Serde<'de> for Object<'a, AttributedToT> where
-    AttributedToT: Serde<'de> + Clone
-{
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -433,9 +433,13 @@ impl<'a> LinkBuilder<'a> {
     }
 }
 
+/// An [Activity] is a subtype of [Object] that describes some form of action
+/// that may happen, is currently happening, or has already happened. The
+/// [Activity] type itself serves as an abstract base type for all types of
+/// activities. It is important to note that the [Activity] type itself does
+/// not carry any specific semantics about the kind of action being taken.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Activity<'a> {
-    // TODO: consider getters instead of raw access
     #[serde(flatten)]
     base: Object<'a, Null>,
 
@@ -546,6 +550,9 @@ impl<'a> ActivityBuilder<'a> {
     }
 }
 
+/// Instances of [IntransitiveActivity] are a subtype of [Activity] representing
+/// intransitive actions. The object property is therefore inappropriate for
+/// these activities.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct IntransitiveActivity<'a> {
     #[serde(flatten, borrow)]
@@ -607,6 +614,66 @@ impl<'a> IntransitiveActivityBuilder<'a> {
     pub fn build(self) -> IntransitiveActivity<'a> {
         IntransitiveActivity {
             base: self.base.build(),
+        }
+    }
+}
+
+/// A [Collection] is a subtype of [Object] that represents ordered or unordered
+/// sets of [Object] or [Link] instances.
+/// Refer to the Activity Streams 2.0 Core specification for a complete
+/// description of the [Collection] type.
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Collection<'a, CollectionT> {
+    #[serde(flatten, borrow)]
+    base: Object<'a, Null>,
+
+    #[serde(rename = "totalItems")]
+    pub total_items: usize,
+
+    pub items: Vec<CollectionT>,
+}
+
+impl<'de: 'a, 'a, CollectionT> Serde<'de> for Collection<'de, CollectionT> where
+    CollectionT: Serde<'de>
+{
+}
+
+impl<'a, CollectionT> std::ops::Deref for Collection<'a, CollectionT>
+where
+    CollectionT: Serde<'a>,
+{
+    type Target = Object<'a, Null>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.base
+    }
+}
+
+//#[derive(Clone)]
+pub struct CollectionBuilder<'a, CollectionT>
+where
+    CollectionT: Serde<'a>,
+{
+    base: ObjectBuilder<'a, Null>,
+    items: Vec<CollectionT>,
+}
+
+impl<'a, CollectionT> CollectionBuilder<'a, CollectionT>
+where
+    CollectionT: Serde<'a>,
+{
+    pub fn new(collection_type: &'a str, items: Vec<CollectionT>) -> Self {
+        CollectionBuilder {
+            base: ObjectBuilder::new().object_type(collection_type),
+            items,
+        }
+    }
+
+    pub fn build(self) -> Collection<'a, CollectionT> {
+        Collection {
+            base: self.base.build(),
+            total_items: self.items.len(),
+            items: self.items,
         }
     }
 }

@@ -114,6 +114,40 @@ mod tests {
     }
 
     #[test]
+    fn example_5() {
+        let listing = r#"
+        {
+          "@context": { "@vocab": "https://www.w3.org/ns/activitystreams" },
+          "summary": "Sally's notes",
+          "type": "Collection",
+          "totalItems": 2,
+          "items": [
+            {
+              "type": "Note",
+              "name": "A Simple Note"
+            },
+            {
+              "type": "Note",
+              "name": "Another Simple Note"
+            }
+          ]
+        }
+      "#;
+
+        let collection: Collection<Object<Null>> = Document::from_json(listing).unwrap().object;
+        assert_eq!(collection.object_type, Some("Collection"));
+        assert_eq!(collection.summary, Some("Sally's notes"));
+        assert_eq!(collection.total_items, 2);
+
+        let items = collection.items;
+        assert_eq!(items.len(), collection.total_items);
+        assert_eq!(items[0].object_type, Some("Note"));
+        assert_eq!(items[0].name, Some("A Simple Note"));
+        assert_eq!(items[1].object_type, Some("Note"));
+        assert_eq!(items[1].name, Some("Another Simple Note"));
+    }
+
+    #[test]
     fn example_69() {
         let listing = r#"{
   "@context": {

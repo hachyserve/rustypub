@@ -2,6 +2,7 @@ use crate::core::*;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
+// TODO: expand to actor types: https://www.w3.org/TR/activitystreams-vocabulary/#actor-types
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Actor<'a> {
     #[serde(flatten, borrow)]
