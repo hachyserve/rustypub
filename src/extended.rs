@@ -1,4 +1,5 @@
-use crate::core::*;
+use crate::core::{LinkBuilder, Null, Object, ObjectBuilder};
+use crate::Serde;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
@@ -33,6 +34,7 @@ impl<'a> std::ops::Deref for Actor<'a> {
     }
 }
 
+/// Builder for an [Actor].
 #[derive(Clone)]
 pub struct ActorBuilder<'a> {
     base: ObjectBuilder<'a, Null>,
@@ -134,8 +136,8 @@ impl<'a> ActorBuilder<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::*;
-    use crate::extended::{Actor, ActorBuilder};
+    use super::*;
+    use crate::core::{ContextBuilder, Document};
     use pretty_assertions::assert_eq;
 
     #[test]

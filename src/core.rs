@@ -1,28 +1,7 @@
 use crate::extended::{Actor, ActorBuilder};
+use crate::Serde;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use serde_json::Result;
-
-pub trait Serde<'de>
-where
-    Self: Serialize + Deserialize<'de>,
-{
-    fn to_json(&self) -> Result<String> {
-        let serialized = serde_json::to_string(&self);
-        println!("serialized = {:?}", serialized);
-        serialized
-    }
-
-    fn to_json_pretty(&self) -> Result<String> {
-        let serialized = serde_json::to_string_pretty(&self);
-        println!("serialized = {:?}", serialized);
-        serialized
-    }
-
-    fn from_json(json: &'de str) -> Result<Self> {
-        serde_json::from_str(json)
-    }
-}
 
 /// [Null]-type object that implements [Serde] for convenience
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -30,6 +9,10 @@ pub struct Null {}
 
 impl Serde<'_> for Null {}
 
+// TODO: rename to something else as there's a [Document] in the Activity
+// Streams spec.
+/// Outer object for serialization and deserialization. Not an Activity Streams
+/// 2.0 object.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Document<'a, T> {
     #[serde(rename = "@context", borrow)]
@@ -56,7 +39,7 @@ impl<'a, T: Serde<'a>> Document<'a, T> {
 /// alternative URL "http://www.w3.org/ns/activitystreams" instead. This can be
 /// done using a string, object, or array.
 /// <https://www.w3.org/TR/activitystreams-core/#jsonld>
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Context<'a> {
     #[serde(rename = "@vocab")]
     namespace: &'a str,
@@ -65,7 +48,7 @@ pub struct Context<'a> {
     language: Option<&'a str>,
 }
 
-#[derive(Clone)]
+/// Builder struct for [Context].
 pub struct ContextBuilder<'a> {
     namespace: &'a str,
     language: Option<&'a str>,
@@ -148,6 +131,7 @@ impl<'de: 'a, 'a, AttributedToT> Serde<'de> for Object<'a, AttributedToT> where
 {
 }
 
+/// Builder for [Object].
 #[derive(Clone)]
 pub struct ObjectBuilder<'a, AttributedToT> {
     object_type: Option<&'a str>,
@@ -246,6 +230,7 @@ impl<'a, AttributedToT: Serde<'a> + Clone> ObjectBuilder<'a, AttributedToT> {
     }
 }
 
+/// A utility struct to describe a URI.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Uri<'a> {
     pub href: String,
@@ -257,6 +242,7 @@ pub struct Uri<'a> {
 
 impl<'de: 'a, 'a> Serde<'de> for Uri<'a> {}
 
+/// Builder struct for [Uri].
 #[derive(Clone)]
 pub struct UriBuilder<'a> {
     href: http::Uri,
@@ -284,6 +270,7 @@ impl<'a> UriBuilder<'a> {
     }
 }
 
+/// Identifies an entity that provides a preview of this object.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Preview<'a> {
     #[serde(flatten)]
@@ -298,6 +285,7 @@ pub struct Preview<'a> {
 
 impl<'de: 'a, 'a> Serde<'de> for Preview<'a> {}
 
+/// Builder for [Preview].
 pub struct PreviewBuilder<'a> {
     base: ObjectBuilder<'a, Null>,
     duration: Option<&'a str>,
@@ -332,6 +320,14 @@ impl<'a> PreviewBuilder<'a> {
     }
 }
 
+/// A [Link] is an indirect, qualified reference to a resource identified by a
+/// URL. The fundamental model for links is established by
+/// [RFC5988](https://www.w3.org/TR/activitystreams-vocabulary/#bib-RFC5988).
+/// Many of the properties defined by the Activity Vocabulary allow values that
+/// are either instances of [Object] or [Link]. When a [Link] is used, it
+/// establishes a qualified relation connecting the subject (the containing
+/// object) to the resource identified by the href. Properties of the [Link]
+/// are properties of the reference as opposed to properties of the resource.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Link<'a> {
     #[serde(rename = "type")]
@@ -365,6 +361,7 @@ impl Link<'_> {
 
 impl<'de: 'a, 'a> Serde<'de> for Link<'a> {}
 
+/// Builder for a [Link] struct.
 #[derive(Clone)]
 pub struct LinkBuilder<'a> {
     href: UriBuilder<'a>,
@@ -467,6 +464,7 @@ impl<'a> std::ops::Deref for Activity<'a> {
     }
 }
 
+/// Builder for an [Activity].
 #[derive(Clone)]
 pub struct ActivityBuilder<'a> {
     base: ObjectBuilder<'a, Null>,
@@ -569,6 +567,7 @@ impl<'a> std::ops::Deref for IntransitiveActivity<'a> {
     }
 }
 
+/// Builder for an [IntransitiveActivity].
 #[derive(Clone)]
 pub struct IntransitiveActivityBuilder<'a> {
     base: ActivityBuilder<'a>,
@@ -619,9 +618,8 @@ impl<'a> IntransitiveActivityBuilder<'a> {
 }
 
 /// A [Collection] is a subtype of [Object] that represents ordered or unordered
-/// sets of [Object] or [Link] instances.
-/// Refer to the Activity Streams 2.0 Core specification for a complete
-/// description of the [Collection] type.
+/// sets of [Object] or [Link] instances. Refer to the Activity Streams 2.0 Core
+/// specification for a complete description of the [Collection] type.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Collection<'a, CollectionT> {
     #[serde(flatten, borrow)]
@@ -649,7 +647,7 @@ where
     }
 }
 
-//#[derive(Clone)]
+/// Builder for a [Collection].
 pub struct CollectionBuilder<'a, CollectionT>
 where
     CollectionT: Serde<'a>,
@@ -680,8 +678,9 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::{core::*, extended::ActorBuilder};
+    use super::*;
     use pretty_assertions::assert_eq;
+    use serde_json::Result;
 
     #[test]
     fn serialize_object() {
