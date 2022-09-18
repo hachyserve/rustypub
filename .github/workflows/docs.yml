@@ -1,0 +1,35 @@
+name: docs
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+
+      - name: generate docs
+        run: cargo doc --verbose --no-deps --all-features
+
+      - name: finalize docs
+        run: |
+          CRATE_NAME=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]' | cut -f2 -d"/")
+          echo "<meta http-equiv=\"refresh\" content=\"0; url=${CRATE_NAME/-/_}\">" > target/doc/index.html
+          touch target/doc/.nojekyll
+
+      - name: upload docs
+        uses: actions/upload-artifact@v2
+        with:
+          name: docs
+          path: target/doc
+
+      - name: deploy docs
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: target/doc
+          clean: true
