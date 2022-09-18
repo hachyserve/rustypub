@@ -1,12 +1,37 @@
-mod core;
-mod extended;
+pub mod core;
+pub mod extended;
+
+use serde::{Deserialize, Serialize};
+use serde_json::Result;
+
+pub trait Serde<'de>
+where
+    Self: Serialize + Deserialize<'de>,
+{
+    fn to_json(&self) -> Result<String> {
+        let serialized = serde_json::to_string(&self);
+        println!("serialized = {:?}", serialized);
+        serialized
+    }
+
+    fn to_json_pretty(&self) -> Result<String> {
+        let serialized = serde_json::to_string_pretty(&self);
+        println!("serialized = {:?}", serialized);
+        serialized
+    }
+
+    fn from_json(json: &'de str) -> Result<Self> {
+        serde_json::from_str(json)
+    }
+}
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use chrono::{DateTime, NaiveDate, Utc};
     use pretty_assertions::assert_eq;
 
-    use crate::{core::*, extended::ActorBuilder};
+    use crate::{core::*, extended::*};
 
     // A set of tests from https://www.w3.org/TR/activitystreams-vocabulary examples
     #[test]
