@@ -249,6 +249,48 @@ mod tests {
     }
 
     #[test]
+    fn example_8() {
+        let listing = r#"
+{
+  "@context": {"@vocab": "https://www.w3.org/ns/activitystreams"},
+  "summary": "Page 1 of Sally's notes",
+  "type": "OrderedCollectionPage",
+  "id": "http://example.org/foo?page=1",
+  "partOf": "http://example.org/foo",
+  "orderedItems": [
+    {
+      "type": "Note",
+      "name": "A Simple Note"
+    },
+    {
+      "type": "Note",
+      "name": "Another Simple Note"
+    }
+  ]
+}
+"#;
+        let collection_page: OrderedCollectionPage<Object<Null>> =
+            Document::from_json(listing).unwrap().object;
+        assert_eq!(collection_page.object_type, Some("OrderedCollectionPage"));
+        assert_eq!(
+            collection_page.id,
+            Some("http://example.org/foo?page=1".to_string())
+        );
+        assert_eq!(collection_page.summary, Some("Page 1 of Sally's notes"));
+        assert_eq!(
+            collection_page.part_of,
+            "http://example.org/foo".to_string()
+        );
+        assert_eq!(collection_page.total_items, None);
+
+        let items = &collection_page.ordered_items;
+        assert_eq!(items[0].object_type, Some("Note"));
+        assert_eq!(items[0].name, Some("A Simple Note"));
+        assert_eq!(items[1].object_type, Some("Note"));
+        assert_eq!(items[1].name, Some("Another Simple Note"));
+    }
+
+    #[test]
     fn example_69() {
         let listing = r#"{
   "@context": {

@@ -810,6 +810,82 @@ where
     }
 }
 
+/// Used to represent ordered subsets of items from an [OrderedCollection].
+/// Refer to the Activity Streams 2.0 Core for a complete description of
+/// the [OrderedCollectionPage] object.
+#[derive(Serialize, Deserialize, Debug)]
+pub struct OrderedCollectionPage<'a, CollectionT> {
+    #[serde(flatten, borrow)]
+    base: OrderedCollection<'a, CollectionT>,
+
+    #[serde(rename = "partOf")]
+    pub part_of: String,
+
+    pub next: Option<String>,
+
+    pub prev: Option<String>,
+}
+
+impl<'de: 'a, 'a, CollectionT> Serde<'de> for OrderedCollectionPage<'de, CollectionT> where
+    CollectionT: Serde<'de>
+{
+}
+
+impl<'a, CollectionT> std::ops::Deref for OrderedCollectionPage<'a, CollectionT>
+where
+    CollectionT: Serde<'a>,
+{
+    type Target = OrderedCollection<'a, CollectionT>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.base
+    }
+}
+
+/// Builder for a [OrderedCollectionPage].
+pub struct OrderedCollectionPageBuilder<'a, CollectionT>
+where
+    CollectionT: Serde<'a>,
+{
+    base: OrderedCollectionBuilder<'a, CollectionT>,
+    part_of: &'a http::Uri,
+    next: Option<&'a http::Uri>,
+    prev: Option<&'a http::Uri>,
+}
+
+impl<'a, CollectionT> OrderedCollectionPageBuilder<'a, CollectionT>
+where
+    CollectionT: Serde<'a>,
+{
+    pub fn new(collection_type: &'a str, items: Vec<CollectionT>, part_of: &'a http::Uri) -> Self {
+        OrderedCollectionPageBuilder {
+            base: OrderedCollectionBuilder::new(collection_type, items),
+            part_of,
+            next: None,
+            prev: None,
+        }
+    }
+
+    pub fn next(mut self, next: &'a http::Uri) -> Self {
+        self.next = Some(next);
+        self
+    }
+
+    pub fn prev(mut self, prev: &'a http::Uri) -> Self {
+        self.prev = Some(prev);
+        self
+    }
+
+    pub fn build(self) -> OrderedCollectionPage<'a, CollectionT> {
+        OrderedCollectionPage {
+            base: self.base.build(),
+            part_of: self.part_of.to_string(),
+            next: self.next.map(|n| n.to_string()),
+            prev: self.prev.map(|p| p.to_string()),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
