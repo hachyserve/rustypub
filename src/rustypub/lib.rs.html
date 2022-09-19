@@ -476,6 +476,48 @@
 <span id="470">470</span>
 <span id="471">471</span>
 <span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
 </pre><pre class="rust"><code><span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">core</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">extended</span>;
 
@@ -720,6 +762,48 @@
         <span class="macro">assert_eq!</span>(<span class="ident">collection_page</span>.<span class="ident">total_items</span>, <span class="prelude-val">None</span>);
 
         <span class="kw">let</span> <span class="ident">items</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">collection_page</span>.<span class="ident">items</span>;
+        <span class="macro">assert_eq!</span>(<span class="ident">items</span>[<span class="number">0</span>].<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">items</span>[<span class="number">0</span>].<span class="ident">name</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;A Simple Note&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">items</span>[<span class="number">1</span>].<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">items</span>[<span class="number">1</span>].<span class="ident">name</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Another Simple Note&quot;</span>));
+    }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">example_8</span>() {
+        <span class="kw">let</span> <span class="ident">listing</span> <span class="op">=</span> <span class="string">r#&quot;
+{
+  &quot;@context&quot;: {&quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;},
+  &quot;summary&quot;: &quot;Page 1 of Sally&#39;s notes&quot;,
+  &quot;type&quot;: &quot;OrderedCollectionPage&quot;,
+  &quot;id&quot;: &quot;http://example.org/foo?page=1&quot;,
+  &quot;partOf&quot;: &quot;http://example.org/foo&quot;,
+  &quot;orderedItems&quot;: [
+    {
+      &quot;type&quot;: &quot;Note&quot;,
+      &quot;name&quot;: &quot;A Simple Note&quot;
+    },
+    {
+      &quot;type&quot;: &quot;Note&quot;,
+      &quot;name&quot;: &quot;Another Simple Note&quot;
+    }
+  ]
+}
+&quot;#</span>;
+        <span class="kw">let</span> <span class="ident">collection_page</span>: <span class="ident">OrderedCollectionPage</span><span class="op">&lt;</span><span class="ident">Object</span><span class="op">&lt;</span><span class="ident">Null</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span>
+            <span class="ident">Document::from_json</span>(<span class="ident">listing</span>).<span class="ident">unwrap</span>().<span class="ident">object</span>;
+        <span class="macro">assert_eq!</span>(<span class="ident">collection_page</span>.<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;OrderedCollectionPage&quot;</span>));
+        <span class="macro">assert_eq!</span>(
+            <span class="ident">collection_page</span>.<span class="ident">id</span>,
+            <span class="prelude-val">Some</span>(<span class="string">&quot;http://example.org/foo?page=1&quot;</span>.<span class="ident">to_string</span>())
+        );
+        <span class="macro">assert_eq!</span>(<span class="ident">collection_page</span>.<span class="ident">summary</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Page 1 of Sally&#39;s notes&quot;</span>));
+        <span class="macro">assert_eq!</span>(
+            <span class="ident">collection_page</span>.<span class="ident">part_of</span>,
+            <span class="string">&quot;http://example.org/foo&quot;</span>.<span class="ident">to_string</span>()
+        );
+        <span class="macro">assert_eq!</span>(<span class="ident">collection_page</span>.<span class="ident">total_items</span>, <span class="prelude-val">None</span>);
+
+        <span class="kw">let</span> <span class="ident">items</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">collection_page</span>.<span class="ident">ordered_items</span>;
         <span class="macro">assert_eq!</span>(<span class="ident">items</span>[<span class="number">0</span>].<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>));
         <span class="macro">assert_eq!</span>(<span class="ident">items</span>[<span class="number">0</span>].<span class="ident">name</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;A Simple Note&quot;</span>));
         <span class="macro">assert_eq!</span>(<span class="ident">items</span>[<span class="number">1</span>].<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>));
