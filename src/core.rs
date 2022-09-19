@@ -529,18 +529,9 @@ impl<'a> ActivityBuilder<'a> {
     pub fn build(self) -> Activity<'a> {
         Activity {
             base: self.base.build(),
-            actor: match self.actor {
-                None => None,
-                a => Some(a.unwrap().build()),
-            },
-            object: match self.object {
-                None => None,
-                o => Some(o.unwrap().build()),
-            },
-            target: match self.target {
-                None => None,
-                t => Some(t.unwrap().build()),
-            },
+            actor: self.actor.map(|a| a.build()),
+            object: self.object.map(|o| o.build()),
+            target: self.target.map(|t| t.build()),
             result: self.result,
             origin: self.origin,
             instrument: self.instrument,
@@ -625,9 +616,10 @@ pub struct Collection<'a, CollectionT> {
     #[serde(flatten, borrow)]
     base: Object<'a, Null>,
 
-    #[serde(rename = "totalItems")]
-    pub total_items: usize,
+    #[serde(rename = "totalItems", skip_serializing_if = "Option::is_none")]
+    pub total_items: Option<usize>,
 
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub items: Vec<CollectionT>,
 }
 
@@ -670,7 +662,10 @@ where
     pub fn build(self) -> Collection<'a, CollectionT> {
         Collection {
             base: self.base.build(),
-            total_items: self.items.len(),
+            total_items: match self.items.is_empty() {
+                true => None,
+                false => Some(self.items.len()),
+            },
             items: self.items,
         }
     }
@@ -683,9 +678,10 @@ pub struct OrderedCollection<'a, CollectionT> {
     #[serde(flatten, borrow)]
     base: Object<'a, Null>,
 
-    #[serde(rename = "totalItems")]
-    pub total_items: usize,
+    #[serde(rename = "totalItems", skip_serializing_if = "Option::is_none")]
+    pub total_items: Option<usize>,
 
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     #[serde(rename = "orderedItems")]
     pub ordered_items: Vec<CollectionT>,
 }
@@ -729,8 +725,87 @@ where
     pub fn build(self) -> OrderedCollection<'a, CollectionT> {
         OrderedCollection {
             base: self.base.build(),
-            total_items: self.ordered_items.len(),
+            total_items: match self.ordered_items.is_empty() {
+                true => None,
+                false => Some(self.ordered_items.len()),
+            },
             ordered_items: self.ordered_items,
+        }
+    }
+}
+
+/// Used to represent distinct subsets of items from a [Collection]. Refer to
+/// the Activity Streams 2.0 Core for a complete description of the
+/// [CollectionPage] object.
+#[derive(Serialize, Deserialize, Debug)]
+pub struct CollectionPage<'a, CollectionT> {
+    #[serde(flatten, borrow)]
+    base: Collection<'a, CollectionT>,
+
+    #[serde(rename = "partOf")]
+    pub part_of: String,
+
+    pub next: Option<String>,
+
+    pub prev: Option<String>,
+}
+
+impl<'de: 'a, 'a, CollectionT> Serde<'de> for CollectionPage<'de, CollectionT> where
+    CollectionT: Serde<'de>
+{
+}
+
+impl<'a, CollectionT> std::ops::Deref for CollectionPage<'a, CollectionT>
+where
+    CollectionT: Serde<'a>,
+{
+    type Target = Collection<'a, CollectionT>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.base
+    }
+}
+
+/// Builder for a [CollectionPage].
+pub struct CollectionPageBuilder<'a, CollectionT>
+where
+    CollectionT: Serde<'a>,
+{
+    base: CollectionBuilder<'a, CollectionT>,
+    part_of: &'a http::Uri,
+    next: Option<&'a http::Uri>,
+    prev: Option<&'a http::Uri>,
+}
+
+impl<'a, CollectionT> CollectionPageBuilder<'a, CollectionT>
+where
+    CollectionT: Serde<'a>,
+{
+    pub fn new(collection_type: &'a str, items: Vec<CollectionT>, part_of: &'a http::Uri) -> Self {
+        CollectionPageBuilder {
+            base: CollectionBuilder::new(collection_type, items),
+            part_of,
+            next: None,
+            prev: None,
+        }
+    }
+
+    pub fn next(mut self, next: &'a http::Uri) -> Self {
+        self.next = Some(next);
+        self
+    }
+
+    pub fn prev(mut self, prev: &'a http::Uri) -> Self {
+        self.prev = Some(prev);
+        self
+    }
+
+    pub fn build(self) -> CollectionPage<'a, CollectionT> {
+        CollectionPage {
+            base: self.base.build(),
+            part_of: self.part_of.to_string(),
+            next: self.next.map(|n| n.to_string()),
+            prev: self.prev.map(|p| p.to_string()),
         }
     }
 }
