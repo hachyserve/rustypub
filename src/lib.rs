@@ -162,10 +162,10 @@ mod tests {
         let collection: Collection<Object<Null>> = Document::from_json(listing).unwrap().object;
         assert_eq!(collection.object_type, Some("Collection"));
         assert_eq!(collection.summary, Some("Sally's notes"));
-        assert_eq!(collection.total_items, 2);
+        assert_eq!(collection.total_items, Some(2));
 
-        let items = collection.items;
-        assert_eq!(items.len(), collection.total_items);
+        let items = &collection.items;
+        assert_eq!(items.len(), collection.total_items.unwrap());
         assert_eq!(items[0].object_type, Some("Note"));
         assert_eq!(items[0].name, Some("A Simple Note"));
         assert_eq!(items[1].object_type, Some("Note"));
@@ -196,10 +196,52 @@ mod tests {
             Document::from_json(listing).unwrap().object;
         assert_eq!(collection.object_type, Some("OrderedCollection"));
         assert_eq!(collection.summary, Some("Sally's notes"));
-        assert_eq!(collection.total_items, 2);
+        assert_eq!(collection.total_items, Some(2));
 
-        let items = collection.ordered_items;
-        assert_eq!(items.len(), collection.total_items);
+        let items = &collection.ordered_items;
+        assert_eq!(items.len(), collection.total_items.unwrap());
+        assert_eq!(items[0].object_type, Some("Note"));
+        assert_eq!(items[0].name, Some("A Simple Note"));
+        assert_eq!(items[1].object_type, Some("Note"));
+        assert_eq!(items[1].name, Some("Another Simple Note"));
+    }
+
+    #[test]
+    fn example_7() {
+        let listing = r#"
+      {
+        "@context": { "@vocab": "https://www.w3.org/ns/activitystreams" },
+        "summary": "Page 1 of Sally's notes",
+        "type": "CollectionPage",
+        "id": "http://example.org/foo?page=1",
+        "partOf": "http://example.org/foo",
+        "items": [
+          {
+            "type": "Note",
+            "name": "A Simple Note"
+          },
+          {
+            "type": "Note",
+            "name": "Another Simple Note"
+          }
+        ]
+      }
+      "#;
+        let collection_page: CollectionPage<Object<Null>> =
+            Document::from_json(listing).unwrap().object;
+        assert_eq!(collection_page.object_type, Some("CollectionPage"));
+        assert_eq!(
+            collection_page.id,
+            Some("http://example.org/foo?page=1".to_string())
+        );
+        assert_eq!(collection_page.summary, Some("Page 1 of Sally's notes"));
+        assert_eq!(
+            collection_page.part_of,
+            "http://example.org/foo".to_string()
+        );
+        assert_eq!(collection_page.total_items, None);
+
+        let items = &collection_page.items;
         assert_eq!(items[0].object_type, Some("Note"));
         assert_eq!(items[0].name, Some("A Simple Note"));
         assert_eq!(items[1].object_type, Some("Note"));
