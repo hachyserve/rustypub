@@ -7,14 +7,14 @@ Types:
 From https://www.w3.org/TR/activitystreams-vocabulary/#types
 
 # Core Types
-- [ ] Object
-- [ ] Link
-- [ ] Activity
-- [ ] IntransitiveActivity
-- [ ] Collection
-- [ ] OrderedCollection
-- [ ] CollectionPage
-- [ ] OrderedCollectionPage
+- [x] Object
+- [x] Link
+- [x] Activity
+- [x] IntransitiveActivity
+- [x] Collection
+- [x] OrderedCollection
+- [x] CollectionPage
+- [x] OrderedCollectionPage
 
 # Extended Types
 
