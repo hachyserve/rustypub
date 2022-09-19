@@ -676,6 +676,65 @@ where
     }
 }
 
+/// A subtype of [Collection] in which members of the logical collection are
+/// assumed to always be strictly ordered.
+#[derive(Serialize, Deserialize, Debug)]
+pub struct OrderedCollection<'a, CollectionT> {
+    #[serde(flatten, borrow)]
+    base: Object<'a, Null>,
+
+    #[serde(rename = "totalItems")]
+    pub total_items: usize,
+
+    #[serde(rename = "orderedItems")]
+    pub ordered_items: Vec<CollectionT>,
+}
+
+impl<'de: 'a, 'a, CollectionT> Serde<'de> for OrderedCollection<'de, CollectionT> where
+    CollectionT: Serde<'de>
+{
+}
+
+impl<'a, CollectionT> std::ops::Deref for OrderedCollection<'a, CollectionT>
+where
+    CollectionT: Serde<'a>,
+{
+    type Target = Object<'a, Null>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.base
+    }
+}
+
+/// Builder for an [OrderedCollection].
+pub struct OrderedCollectionBuilder<'a, CollectionT>
+where
+    CollectionT: Serde<'a>,
+{
+    base: ObjectBuilder<'a, Null>,
+    ordered_items: Vec<CollectionT>,
+}
+
+impl<'a, CollectionT> OrderedCollectionBuilder<'a, CollectionT>
+where
+    CollectionT: Serde<'a>,
+{
+    pub fn new(collection_type: &'a str, ordered_items: Vec<CollectionT>) -> Self {
+        OrderedCollectionBuilder {
+            base: ObjectBuilder::new().object_type(collection_type),
+            ordered_items,
+        }
+    }
+
+    pub fn build(self) -> OrderedCollection<'a, CollectionT> {
+        OrderedCollection {
+            base: self.base.build(),
+            total_items: self.ordered_items.len(),
+            ordered_items: self.ordered_items,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
