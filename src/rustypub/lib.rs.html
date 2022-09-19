@@ -434,6 +434,48 @@
 <span id="428">428</span>
 <span id="429">429</span>
 <span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
 </pre><pre class="rust"><code><span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">core</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">extended</span>;
 
@@ -598,10 +640,10 @@
         <span class="kw">let</span> <span class="ident">collection</span>: <span class="ident">Collection</span><span class="op">&lt;</span><span class="ident">Object</span><span class="op">&lt;</span><span class="ident">Null</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Document::from_json</span>(<span class="ident">listing</span>).<span class="ident">unwrap</span>().<span class="ident">object</span>;
         <span class="macro">assert_eq!</span>(<span class="ident">collection</span>.<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Collection&quot;</span>));
         <span class="macro">assert_eq!</span>(<span class="ident">collection</span>.<span class="ident">summary</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Sally&#39;s notes&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">collection</span>.<span class="ident">total_items</span>, <span class="number">2</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">collection</span>.<span class="ident">total_items</span>, <span class="prelude-val">Some</span>(<span class="number">2</span>));
 
-        <span class="kw">let</span> <span class="ident">items</span> <span class="op">=</span> <span class="ident">collection</span>.<span class="ident">items</span>;
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>.<span class="ident">len</span>(), <span class="ident">collection</span>.<span class="ident">total_items</span>);
+        <span class="kw">let</span> <span class="ident">items</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">collection</span>.<span class="ident">items</span>;
+        <span class="macro">assert_eq!</span>(<span class="ident">items</span>.<span class="ident">len</span>(), <span class="ident">collection</span>.<span class="ident">total_items</span>.<span class="ident">unwrap</span>());
         <span class="macro">assert_eq!</span>(<span class="ident">items</span>[<span class="number">0</span>].<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>));
         <span class="macro">assert_eq!</span>(<span class="ident">items</span>[<span class="number">0</span>].<span class="ident">name</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;A Simple Note&quot;</span>));
         <span class="macro">assert_eq!</span>(<span class="ident">items</span>[<span class="number">1</span>].<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>));
@@ -632,10 +674,52 @@
             <span class="ident">Document::from_json</span>(<span class="ident">listing</span>).<span class="ident">unwrap</span>().<span class="ident">object</span>;
         <span class="macro">assert_eq!</span>(<span class="ident">collection</span>.<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;OrderedCollection&quot;</span>));
         <span class="macro">assert_eq!</span>(<span class="ident">collection</span>.<span class="ident">summary</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Sally&#39;s notes&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">collection</span>.<span class="ident">total_items</span>, <span class="number">2</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">collection</span>.<span class="ident">total_items</span>, <span class="prelude-val">Some</span>(<span class="number">2</span>));
 
-        <span class="kw">let</span> <span class="ident">items</span> <span class="op">=</span> <span class="ident">collection</span>.<span class="ident">ordered_items</span>;
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>.<span class="ident">len</span>(), <span class="ident">collection</span>.<span class="ident">total_items</span>);
+        <span class="kw">let</span> <span class="ident">items</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">collection</span>.<span class="ident">ordered_items</span>;
+        <span class="macro">assert_eq!</span>(<span class="ident">items</span>.<span class="ident">len</span>(), <span class="ident">collection</span>.<span class="ident">total_items</span>.<span class="ident">unwrap</span>());
+        <span class="macro">assert_eq!</span>(<span class="ident">items</span>[<span class="number">0</span>].<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">items</span>[<span class="number">0</span>].<span class="ident">name</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;A Simple Note&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">items</span>[<span class="number">1</span>].<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">items</span>[<span class="number">1</span>].<span class="ident">name</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Another Simple Note&quot;</span>));
+    }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">example_7</span>() {
+        <span class="kw">let</span> <span class="ident">listing</span> <span class="op">=</span> <span class="string">r#&quot;
+      {
+        &quot;@context&quot;: { &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot; },
+        &quot;summary&quot;: &quot;Page 1 of Sally&#39;s notes&quot;,
+        &quot;type&quot;: &quot;CollectionPage&quot;,
+        &quot;id&quot;: &quot;http://example.org/foo?page=1&quot;,
+        &quot;partOf&quot;: &quot;http://example.org/foo&quot;,
+        &quot;items&quot;: [
+          {
+            &quot;type&quot;: &quot;Note&quot;,
+            &quot;name&quot;: &quot;A Simple Note&quot;
+          },
+          {
+            &quot;type&quot;: &quot;Note&quot;,
+            &quot;name&quot;: &quot;Another Simple Note&quot;
+          }
+        ]
+      }
+      &quot;#</span>;
+        <span class="kw">let</span> <span class="ident">collection_page</span>: <span class="ident">CollectionPage</span><span class="op">&lt;</span><span class="ident">Object</span><span class="op">&lt;</span><span class="ident">Null</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span>
+            <span class="ident">Document::from_json</span>(<span class="ident">listing</span>).<span class="ident">unwrap</span>().<span class="ident">object</span>;
+        <span class="macro">assert_eq!</span>(<span class="ident">collection_page</span>.<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;CollectionPage&quot;</span>));
+        <span class="macro">assert_eq!</span>(
+            <span class="ident">collection_page</span>.<span class="ident">id</span>,
+            <span class="prelude-val">Some</span>(<span class="string">&quot;http://example.org/foo?page=1&quot;</span>.<span class="ident">to_string</span>())
+        );
+        <span class="macro">assert_eq!</span>(<span class="ident">collection_page</span>.<span class="ident">summary</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Page 1 of Sally&#39;s notes&quot;</span>));
+        <span class="macro">assert_eq!</span>(
+            <span class="ident">collection_page</span>.<span class="ident">part_of</span>,
+            <span class="string">&quot;http://example.org/foo&quot;</span>.<span class="ident">to_string</span>()
+        );
+        <span class="macro">assert_eq!</span>(<span class="ident">collection_page</span>.<span class="ident">total_items</span>, <span class="prelude-val">None</span>);
+
+        <span class="kw">let</span> <span class="ident">items</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">collection_page</span>.<span class="ident">items</span>;
         <span class="macro">assert_eq!</span>(<span class="ident">items</span>[<span class="number">0</span>].<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>));
         <span class="macro">assert_eq!</span>(<span class="ident">items</span>[<span class="number">0</span>].<span class="ident">name</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;A Simple Note&quot;</span>));
         <span class="macro">assert_eq!</span>(<span class="ident">items</span>[<span class="number">1</span>].<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>));
