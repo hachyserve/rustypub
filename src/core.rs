@@ -78,6 +78,12 @@ impl<'a> ContextBuilder<'a> {
     }
 }
 
+impl<'a> Default for ContextBuilder<'a> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 /// The [Object] is the primary base type for the Activity Streams vocabulary.
 /// In addition to having a global identifier (expressed as an absolute IRI
 /// using the id property) and an "object type" (expressed using the type
@@ -227,6 +233,12 @@ impl<'a, AttributedToT: Serde<'a> + Clone> ObjectBuilder<'a, AttributedToT> {
             content: self.content,
             summary: self.summary,
         }
+    }
+}
+
+impl<'a, AttributedToT: Serde<'a> + Clone> Default for ObjectBuilder<'a, AttributedToT> {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
