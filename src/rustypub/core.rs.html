@@ -1099,6 +1099,18 @@
 <span id="1099">1099</span>
 <span id="1100">1100</span>
 <span id="1101">1101</span>
+<span id="1102">1102</span>
+<span id="1103">1103</span>
+<span id="1104">1104</span>
+<span id="1105">1105</span>
+<span id="1106">1106</span>
+<span id="1107">1107</span>
+<span id="1108">1108</span>
+<span id="1109">1109</span>
+<span id="1110">1110</span>
+<span id="1111">1111</span>
+<span id="1112">1112</span>
+<span id="1113">1113</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::extended</span>::{<span class="ident">Actor</span>, <span class="ident">ActorBuilder</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::Serde</span>;
 <span class="kw">use</span> <span class="ident">chrono</span>::{<span class="ident">DateTime</span>, <span class="ident">Utc</span>};
@@ -1176,6 +1188,12 @@
             <span class="ident">namespace</span>: <span class="self">self</span>.<span class="ident">namespace</span>,
             <span class="ident">language</span>: <span class="self">self</span>.<span class="ident">language</span>,
         }
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">ContextBuilder</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::new</span>()
     }
 }
 
@@ -1328,6 +1346,12 @@
             <span class="ident">content</span>: <span class="self">self</span>.<span class="ident">content</span>,
             <span class="ident">summary</span>: <span class="self">self</span>.<span class="ident">summary</span>,
         }
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">AttributedToT</span>: <span class="ident">Serde</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span><span class="op">&gt;</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">ObjectBuilder</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">AttributedToT</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::new</span>()
     }
 }
 
