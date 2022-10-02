@@ -291,6 +291,24 @@ mod tests {
     }
 
     #[test]
+    fn example_53() {
+        let listing = r#"{
+          "@context": { "@vocab": "https://www.w3.org/ns/activitystreams" },
+          "type": "Note",
+          "name": "A Word of Warning",
+          "content": "Looks like it is going to rain today. Bring an umbrella!"
+        }"#;
+        let document: Document<Note> = Document::from_json(listing).unwrap();
+        let note = document.object;
+        assert_eq!(note.object_type, Some("Note"));
+        assert_eq!(note.name, Some("A Word of Warning"));
+        assert_eq!(
+            note.content,
+            Some("Looks like it is going to rain today. Bring an umbrella!")
+        );
+    }
+
+    #[test]
     fn example_69() {
         let listing = r#"{
   "@context": {

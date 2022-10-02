@@ -3,6 +3,35 @@ use crate::Serde;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
+/// https://www.w3.org/TR/activitystreams-vocabulary/#dfn-note
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Note<'a> {
+    #[serde(flatten, borrow)]
+    base: Object<'a, Null>,
+}
+
+impl<'a> Note<'a> {
+    pub fn new(name: &'a str, content: &'a str) -> Self {
+        Note {
+            base: ObjectBuilder::new()
+                .object_type("Note")
+                .name(name)
+                .content(content)
+                .build(),
+        }
+    }
+}
+
+impl<'de: 'a, 'a> Serde<'de> for Note<'a> {}
+
+impl<'a> std::ops::Deref for Note<'a> {
+    type Target = Object<'a, Null>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.base
+    }
+}
+
 // TODO: expand to actor types: https://www.w3.org/TR/activitystreams-vocabulary/#actor-types
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Actor<'a> {
@@ -185,5 +214,37 @@ mod tests {
         );
         assert_eq!(actor.name, Some("name"));
         assert_eq!(actor.preferred_username, Some("dma"));
+    }
+
+    #[test]
+    fn serialize_note() {
+        let actual = Document::new(ContextBuilder::new().build(), Note::new("Name", "Content"));
+        let expected = r#"{
+  "@context": {
+    "@vocab": "https://www.w3.org/ns/activitystreams"
+  },
+  "type": "Note",
+  "name": "Name",
+  "content": "Content"
+}"#;
+        assert!(actual.to_json_pretty().is_ok());
+        assert_eq!(actual.to_json_pretty().unwrap(), expected)
+    }
+
+    #[test]
+    fn deserialize_note() {
+        let actual = r#"{
+  "@context": {
+    "@vocab": "https://www.w3.org/ns/activitystreams"
+  },
+  "type": "Note",
+  "name": "Name",
+  "content": "Content"
+}"#;
+        let document: Document<Note> = Document::from_json(actual).unwrap();
+        let actor = document.object as Note;
+        assert_eq!(actor.object_type, Some("Note"));
+        assert_eq!(actor.name, Some("Name"));
+        assert_eq!(actor.content, Some("Content"));
     }
 }
