@@ -7,25 +7,26 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Null {}
 
-impl Serde<'_> for Null {}
+// TODO: create a derive macro for this
+impl Serde for Null {}
 
 // TODO: rename to something else as there's a [Document] in the Activity
 // Streams spec.
 /// Outer object for serialization and deserialization. Not an Activity Streams
 /// 2.0 object.
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Document<'a, T> {
-    #[serde(rename = "@context", borrow)]
-    pub context: Context<'a>,
+pub struct Document<T> {
+    #[serde(rename = "@context")]
+    pub context: Context,
 
     #[serde(flatten)]
     pub object: T,
 }
 
-impl<'de: 'a, 'a, T> Serde<'de> for Document<'a, T> where T: Serde<'de> {}
+impl<T> Serde for Document<T> where T: Serde {}
 
-impl<'a, T: Serde<'a>> Document<'a, T> {
-    pub fn new(context: Context<'a>, object: T) -> Self {
+impl<T: Serde> Document<T> {
+    pub fn new(context: Context, object: T) -> Self {
         Document { context, object }
     }
 }
@@ -40,37 +41,37 @@ impl<'a, T: Serde<'a>> Document<'a, T> {
 /// done using a string, object, or array.
 /// <https://www.w3.org/TR/activitystreams-core/#jsonld>
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Context<'a> {
+pub struct Context {
     #[serde(rename = "@vocab")]
-    namespace: &'a str,
+    namespace: String,
 
     #[serde(skip_serializing_if = "Option::is_none", rename = "@language")]
-    language: Option<&'a str>,
+    language: Option<String>,
 }
 
 /// Builder struct for [Context].
-pub struct ContextBuilder<'a> {
-    namespace: &'a str,
-    language: Option<&'a str>,
+pub struct ContextBuilder {
+    namespace: String,
+    language: Option<String>,
 }
 
-impl<'a> ContextBuilder<'a> {
+impl ContextBuilder {
     const NAMESPACE: &'static str = "https://www.w3.org/ns/activitystreams";
 
     pub fn new() -> Self {
         ContextBuilder {
-            namespace: ContextBuilder::NAMESPACE,
+            namespace: ContextBuilder::NAMESPACE.to_string(),
             language: None,
         }
     }
 
     // TODO: extend this to other options per the docs
-    pub fn language(mut self, language: &'a str) -> Self {
+    pub fn language(mut self, language: String) -> Self {
         self.language = Some(language);
         self
     }
 
-    pub fn build(self) -> Context<'a> {
+    pub fn build(self) -> Context {
         Context {
             namespace: self.namespace,
             language: self.language,
@@ -78,7 +79,7 @@ impl<'a> ContextBuilder<'a> {
     }
 }
 
-impl<'a> Default for ContextBuilder<'a> {
+impl Default for ContextBuilder {
     fn default() -> Self {
         Self::new()
     }
@@ -96,15 +97,15 @@ impl<'a> Default for ContextBuilder<'a> {
 /// mediaType | duration
 /// All properties are optional (including the id and type).
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Object<'a, AttributedToT> {
+pub struct Object<AttributedToT> {
     #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
-    pub object_type: Option<&'a str>,
+    pub object_type: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub name: Option<&'a str>,
+    pub name: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub url: Option<String>,
@@ -112,8 +113,8 @@ pub struct Object<'a, AttributedToT> {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub published: Option<DateTime<Utc>>,
 
-    #[serde(skip_serializing_if = "Option::is_none", borrow)]
-    pub image: Option<Box<Link<'a>>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub image: Option<Box<Link>>,
 
     #[serde(
         rename = "attributedTo",
@@ -122,39 +123,36 @@ pub struct Object<'a, AttributedToT> {
     )]
     pub attributed_to: Vec<AttributedToT>,
 
-    #[serde(skip_serializing_if = "Option::is_none", borrow)]
-    pub audience: Option<Box<Object<'a, Null>>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub audience: Option<Box<Object<Null>>>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub content: Option<&'a str>,
+    pub content: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub summary: Option<&'a str>,
+    pub summary: Option<String>,
 }
 
-impl<'de: 'a, 'a, AttributedToT> Serde<'de> for Object<'a, AttributedToT> where
-    AttributedToT: Serde<'de> + Clone
-{
-}
+impl<AttributedToT> Serde for Object<AttributedToT> where AttributedToT: Serde + Clone {}
 
 /// Builder for [Object].
 #[derive(Clone)]
-pub struct ObjectBuilder<'a, AttributedToT> {
-    object_type: Option<&'a str>,
+pub struct ObjectBuilder<AttributedToT> {
+    object_type: Option<String>,
     // TODO: actually an IRI: consider https://docs.rs/iref/latest/iref/
     id: Option<http::Uri>,
-    name: Option<&'a str>,
+    name: Option<String>,
     url: Option<http::Uri>,
     published: Option<DateTime<Utc>>,
-    image: Option<LinkBuilder<'a>>,
+    image: Option<LinkBuilder>,
     attributed_to: Vec<AttributedToT>,
-    audience: Option<Box<ObjectBuilder<'a, Null>>>,
-    content: Option<&'a str>,
-    summary: Option<&'a str>,
+    audience: Option<Box<ObjectBuilder<Null>>>,
+    content: Option<String>,
+    summary: Option<String>,
     // TODO: more fields
 }
 
-impl<'a, AttributedToT: Serde<'a> + Clone> ObjectBuilder<'a, AttributedToT> {
+impl<AttributedToT: Serde + Clone> ObjectBuilder<AttributedToT> {
     pub fn new() -> Self {
         ObjectBuilder {
             object_type: None,
@@ -170,7 +168,7 @@ impl<'a, AttributedToT: Serde<'a> + Clone> ObjectBuilder<'a, AttributedToT> {
         }
     }
 
-    pub fn object_type(mut self, object_type: &'a str) -> Self {
+    pub fn object_type(mut self, object_type: String) -> Self {
         self.object_type = Some(object_type);
         self
     }
@@ -180,7 +178,7 @@ impl<'a, AttributedToT: Serde<'a> + Clone> ObjectBuilder<'a, AttributedToT> {
         self.clone()
     }
 
-    pub fn name(&mut self, name: &'a str) -> Self {
+    pub fn name(&mut self, name: String) -> Self {
         self.name = Some(name);
         self.clone()
     }
@@ -195,7 +193,7 @@ impl<'a, AttributedToT: Serde<'a> + Clone> ObjectBuilder<'a, AttributedToT> {
         self.clone()
     }
 
-    pub fn image(&mut self, image: LinkBuilder<'a>) -> Self {
+    pub fn image(&mut self, image: LinkBuilder) -> Self {
         self.image = Some(image);
         self.clone()
     }
@@ -205,22 +203,22 @@ impl<'a, AttributedToT: Serde<'a> + Clone> ObjectBuilder<'a, AttributedToT> {
         self
     }
 
-    pub fn audience(&mut self, audience: ObjectBuilder<'a, Null>) -> Self {
+    pub fn audience(&mut self, audience: ObjectBuilder<Null>) -> Self {
         self.audience = Some(Box::new(audience));
         self.clone()
     }
 
-    pub fn content(mut self, content: &'a str) -> Self {
+    pub fn content(mut self, content: String) -> Self {
         self.content = Some(content);
         self
     }
 
-    pub fn summary(&mut self, summary: &'a str) -> Self {
+    pub fn summary(&mut self, summary: String) -> Self {
         self.summary = Some(summary);
         self.clone()
     }
 
-    pub fn build(self) -> Object<'a, AttributedToT> {
+    pub fn build(self) -> Object<AttributedToT> {
         Object {
             object_type: self.object_type,
             id: self.id.map(|uri| uri.to_string()),
@@ -236,7 +234,7 @@ impl<'a, AttributedToT: Serde<'a> + Clone> ObjectBuilder<'a, AttributedToT> {
     }
 }
 
-impl<'a, AttributedToT: Serde<'a> + Clone> Default for ObjectBuilder<'a, AttributedToT> {
+impl<AttributedToT: Serde + Clone> Default for ObjectBuilder<AttributedToT> {
     fn default() -> Self {
         Self::new()
     }
@@ -244,24 +242,24 @@ impl<'a, AttributedToT: Serde<'a> + Clone> Default for ObjectBuilder<'a, Attribu
 
 /// A utility struct to describe a URI.
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Uri<'a> {
+pub struct Uri {
     pub href: String,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "mediaType")]
-    pub media_type: Option<&'a str>,
+    pub media_type: Option<String>,
 }
 
-impl<'de: 'a, 'a> Serde<'de> for Uri<'a> {}
+impl Serde for Uri {}
 
 /// Builder struct for [Uri].
 #[derive(Clone)]
-pub struct UriBuilder<'a> {
+pub struct UriBuilder {
     href: http::Uri,
-    media_type: Option<&'a str>,
+    media_type: Option<String>,
 }
 
-impl<'a> UriBuilder<'a> {
+impl UriBuilder {
     pub fn new(href: http::Uri) -> Self {
         UriBuilder {
             href,
@@ -269,12 +267,12 @@ impl<'a> UriBuilder<'a> {
         }
     }
 
-    pub fn media_type(mut self, media_type: &'a str) -> Self {
+    pub fn media_type(mut self, media_type: String) -> Self {
         self.media_type = Some(media_type);
         self
     }
 
-    pub fn build(self) -> Uri<'a> {
+    pub fn build(self) -> Uri {
         Uri {
             href: self.href.to_string(),
             media_type: self.media_type,
@@ -284,28 +282,28 @@ impl<'a> UriBuilder<'a> {
 
 /// Identifies an entity that provides a preview of this object.
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Preview<'a> {
+pub struct Preview {
     #[serde(flatten)]
-    pub base: Object<'a, Null>,
+    pub base: Object<Null>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub duration: Option<&'a str>,
+    pub duration: Option<String>,
 
-    #[serde(skip_serializing_if = "Option::is_none", borrow)]
-    pub url: Option<Uri<'a>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub url: Option<Uri>,
 }
 
-impl<'de: 'a, 'a> Serde<'de> for Preview<'a> {}
+impl Serde for Preview {}
 
 /// Builder for [Preview].
-pub struct PreviewBuilder<'a> {
-    base: ObjectBuilder<'a, Null>,
-    duration: Option<&'a str>,
-    url: Option<Uri<'a>>,
+pub struct PreviewBuilder {
+    base: ObjectBuilder<Null>,
+    duration: Option<String>,
+    url: Option<Uri>,
 }
 
-impl<'a> PreviewBuilder<'a> {
-    pub fn new(preview_type: &'a str, name: &'a str) -> Self {
+impl PreviewBuilder {
+    pub fn new(preview_type: String, name: String) -> Self {
         PreviewBuilder {
             base: ObjectBuilder::new().object_type(preview_type).name(name),
             duration: None,
@@ -313,17 +311,17 @@ impl<'a> PreviewBuilder<'a> {
         }
     }
 
-    pub fn duration(mut self, dur: &'a str) -> Self {
+    pub fn duration(mut self, dur: String) -> Self {
         self.duration = Some(dur);
         self
     }
 
-    pub fn url(mut self, url: Uri<'a>) -> Self {
+    pub fn url(mut self, url: Uri) -> Self {
         self.url = Some(url);
         self
     }
 
-    pub fn build(self) -> Preview<'a> {
+    pub fn build(self) -> Preview {
         Preview {
             base: self.base.build(),
             duration: self.duration,
@@ -341,21 +339,21 @@ impl<'a> PreviewBuilder<'a> {
 /// object) to the resource identified by the href. Properties of the [Link]
 /// are properties of the reference as opposed to properties of the resource.
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Link<'a> {
+pub struct Link {
     #[serde(rename = "type")]
-    pub link_type: &'a str,
+    pub link_type: String,
 
-    #[serde(flatten, borrow)]
-    pub href: Uri<'a>,
+    #[serde(flatten)]
+    pub href: Uri,
 
     #[serde(skip_serializing_if = "Vec::is_empty", default = "Vec::new")]
-    pub rel: Vec<&'a str>, // TODO: RFC5988 validation
+    pub rel: Vec<String>, // TODO: RFC5988 validation
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub name: Option<&'a str>,
+    pub name: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub hreflang: Option<&'a str>, // TODO: BCP47 language tag
+    pub hreflang: Option<String>, // TODO: BCP47 language tag
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub height: Option<u32>,
@@ -363,30 +361,30 @@ pub struct Link<'a> {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub width: Option<u32>,
 
-    #[serde(skip_serializing_if = "Option::is_none", borrow)]
-    pub preview: Option<Preview<'a>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub preview: Option<Preview>,
 }
 
-impl Link<'_> {
+impl Link {
     pub const TYPE: &'static str = "Link";
 }
 
-impl<'de: 'a, 'a> Serde<'de> for Link<'a> {}
+impl Serde for Link {}
 
 /// Builder for a [Link] struct.
 #[derive(Clone)]
-pub struct LinkBuilder<'a> {
-    href: UriBuilder<'a>,
-    rel: Vec<&'a str>, // TODO: RFC5988 validation
-    name: Option<&'a str>,
-    hreflang: Option<&'a str>, // TODO: BCP47 language tag
+pub struct LinkBuilder {
+    href: UriBuilder,
+    rel: Vec<String>, // TODO: RFC5988 validation
+    name: Option<String>,
+    hreflang: Option<String>, // TODO: BCP47 language tag
     height: Option<u32>,
     width: Option<u32>,
-    preview: Option<Preview<'a>>,
+    preview: Option<Preview>,
 }
 
-impl<'a> LinkBuilder<'a> {
-    pub fn new(href: UriBuilder<'a>) -> Self {
+impl LinkBuilder {
+    pub fn new(href: UriBuilder) -> Self {
         LinkBuilder {
             href,
             rel: Vec::new(),
@@ -398,17 +396,17 @@ impl<'a> LinkBuilder<'a> {
         }
     }
 
-    pub fn add_rel(mut self, rel: &'a str) -> Self {
+    pub fn add_rel(mut self, rel: String) -> Self {
         self.rel.push(rel);
         self
     }
 
-    pub fn name(mut self, name: &'a str) -> Self {
+    pub fn name(mut self, name: String) -> Self {
         self.name = Some(name);
         self
     }
 
-    pub fn hreflang(mut self, hreflang: &'a str) -> Self {
+    pub fn hreflang(mut self, hreflang: String) -> Self {
         self.hreflang = Some(hreflang);
         self
     }
@@ -423,14 +421,14 @@ impl<'a> LinkBuilder<'a> {
         self
     }
 
-    pub fn preview(mut self, preview: Preview<'a>) -> Self {
+    pub fn preview(mut self, preview: Preview) -> Self {
         self.preview = Some(preview);
         self
     }
 
-    pub fn build(self) -> Link<'a> {
+    pub fn build(self) -> Link {
         Link {
-            link_type: Link::TYPE,
+            link_type: Link::TYPE.to_string(),
             href: self.href.build(),
             rel: self.rel,
             name: self.name,
@@ -448,28 +446,28 @@ impl<'a> LinkBuilder<'a> {
 /// activities. It is important to note that the [Activity] type itself does
 /// not carry any specific semantics about the kind of action being taken.
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Activity<'a> {
+pub struct Activity {
     #[serde(flatten)]
-    base: Object<'a, Null>,
+    base: Object<Null>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub actor: Option<Actor<'a>>,
-    #[serde(skip_serializing_if = "Option::is_none", borrow)]
-    pub object: Option<Object<'a, Null>>,
+    pub actor: Option<Actor>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub target: Option<Object<'a, Null>>,
+    pub object: Option<Object<Null>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub result: Option<&'a str>,
+    pub target: Option<Object<Null>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub origin: Option<&'a str>, // TODO: Origin
+    pub result: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub instrument: Option<&'a str>, // TODO: Instrument
+    pub origin: Option<String>, // TODO: Origin
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub instrument: Option<String>, // TODO: Instrument
 }
 
-impl<'de: 'a, 'a> Serde<'de> for Activity<'a> {}
+impl Serde for Activity {}
 
-impl<'a> std::ops::Deref for Activity<'a> {
-    type Target = Object<'a, Null>;
+impl std::ops::Deref for Activity {
+    type Target = Object<Null>;
 
     fn deref(&self) -> &Self::Target {
         &self.base
@@ -478,18 +476,18 @@ impl<'a> std::ops::Deref for Activity<'a> {
 
 /// Builder for an [Activity].
 #[derive(Clone)]
-pub struct ActivityBuilder<'a> {
-    base: ObjectBuilder<'a, Null>,
-    actor: Option<ActorBuilder<'a>>,
-    object: Option<ObjectBuilder<'a, Null>>,
-    target: Option<ObjectBuilder<'a, Null>>,
-    result: Option<&'a str>,
-    origin: Option<&'a str>,
-    instrument: Option<&'a str>,
+pub struct ActivityBuilder {
+    base: ObjectBuilder<Null>,
+    actor: Option<ActorBuilder>,
+    object: Option<ObjectBuilder<Null>>,
+    target: Option<ObjectBuilder<Null>>,
+    result: Option<String>,
+    origin: Option<String>,
+    instrument: Option<String>,
 }
 
-impl<'a> ActivityBuilder<'a> {
-    pub fn new(activity_type: &'a str, summary: &'a str) -> Self {
+impl ActivityBuilder {
+    pub fn new(activity_type: String, summary: String) -> Self {
         ActivityBuilder {
             base: ObjectBuilder::new()
                 .object_type(activity_type)
@@ -508,37 +506,37 @@ impl<'a> ActivityBuilder<'a> {
         self.clone()
     }
 
-    pub fn actor(&mut self, actor: ActorBuilder<'a>) -> Self {
+    pub fn actor(&mut self, actor: ActorBuilder) -> Self {
         self.actor = Some(actor);
         self.clone()
     }
 
-    pub fn object(&mut self, object: ObjectBuilder<'a, Null>) -> Self {
+    pub fn object(&mut self, object: ObjectBuilder<Null>) -> Self {
         self.object = Some(object);
         self.clone()
     }
 
-    pub fn target(&mut self, target: ObjectBuilder<'a, Null>) -> Self {
+    pub fn target(&mut self, target: ObjectBuilder<Null>) -> Self {
         self.target = Some(target);
         self.clone()
     }
 
-    pub fn result(&mut self, result: &'a str) -> Self {
+    pub fn result(&mut self, result: String) -> Self {
         self.result = Some(result);
         self.clone()
     }
 
-    pub fn origin(&mut self, origin: &'a str) -> Self {
+    pub fn origin(&mut self, origin: String) -> Self {
         self.origin = Some(origin);
         self.clone()
     }
 
-    pub fn instrument(&mut self, instrument: &'a str) -> Self {
+    pub fn instrument(&mut self, instrument: String) -> Self {
         self.instrument = Some(instrument);
         self.clone()
     }
 
-    pub fn build(self) -> Activity<'a> {
+    pub fn build(self) -> Activity {
         Activity {
             base: self.base.build(),
             actor: self.actor.map(|a| a.build()),
@@ -555,15 +553,15 @@ impl<'a> ActivityBuilder<'a> {
 /// intransitive actions. The object property is therefore inappropriate for
 /// these activities.
 #[derive(Serialize, Deserialize, Debug)]
-pub struct IntransitiveActivity<'a> {
-    #[serde(flatten, borrow)]
-    base: Activity<'a>,
+pub struct IntransitiveActivity {
+    #[serde(flatten)]
+    base: Activity,
 }
 
-impl<'de: 'a, 'a> Serde<'de> for IntransitiveActivity<'a> {}
+impl Serde for IntransitiveActivity {}
 
-impl<'a> std::ops::Deref for IntransitiveActivity<'a> {
-    type Target = Activity<'a>;
+impl std::ops::Deref for IntransitiveActivity {
+    type Target = Activity;
 
     fn deref(&self) -> &Self::Target {
         &self.base
@@ -572,12 +570,12 @@ impl<'a> std::ops::Deref for IntransitiveActivity<'a> {
 
 /// Builder for an [IntransitiveActivity].
 #[derive(Clone)]
-pub struct IntransitiveActivityBuilder<'a> {
-    base: ActivityBuilder<'a>,
+pub struct IntransitiveActivityBuilder {
+    base: ActivityBuilder,
 }
 
-impl<'a> IntransitiveActivityBuilder<'a> {
-    pub fn new(activity_type: &'a str, summary: &'a str) -> Self {
+impl IntransitiveActivityBuilder {
+    pub fn new(activity_type: String, summary: String) -> Self {
         IntransitiveActivityBuilder {
             base: ActivityBuilder::new(activity_type, summary),
         }
@@ -588,32 +586,32 @@ impl<'a> IntransitiveActivityBuilder<'a> {
         self
     }
 
-    pub fn actor(mut self, actor: ActorBuilder<'a>) -> Self {
+    pub fn actor(mut self, actor: ActorBuilder) -> Self {
         self.base.actor(actor);
         self
     }
 
-    pub fn target(mut self, target: ObjectBuilder<'a, Null>) -> Self {
+    pub fn target(mut self, target: ObjectBuilder<Null>) -> Self {
         self.base.target(target);
         self
     }
 
-    pub fn result(mut self, result: &'a str) -> Self {
+    pub fn result(mut self, result: String) -> Self {
         self.base.result(result);
         self
     }
 
-    pub fn origin(mut self, origin: &'a str) -> Self {
+    pub fn origin(mut self, origin: String) -> Self {
         self.base.origin(origin);
         self
     }
 
-    pub fn instrument(mut self, instrument: &'a str) -> Self {
+    pub fn instrument(mut self, instrument: String) -> Self {
         self.base.instrument(instrument);
         self
     }
 
-    pub fn build(self) -> IntransitiveActivity<'a> {
+    pub fn build(self) -> IntransitiveActivity {
         IntransitiveActivity {
             base: self.base.build(),
         }
@@ -624,9 +622,9 @@ impl<'a> IntransitiveActivityBuilder<'a> {
 /// sets of [Object] or [Link] instances. Refer to the Activity Streams 2.0 Core
 /// specification for a complete description of the [Collection] type.
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Collection<'a, CollectionT> {
-    #[serde(flatten, borrow)]
-    base: Object<'a, Null>,
+pub struct Collection<CollectionT> {
+    #[serde(flatten)]
+    base: Object<Null>,
 
     #[serde(rename = "totalItems", skip_serializing_if = "Option::is_none")]
     pub total_items: Option<usize>,
@@ -635,16 +633,13 @@ pub struct Collection<'a, CollectionT> {
     pub items: Vec<CollectionT>,
 }
 
-impl<'de: 'a, 'a, CollectionT> Serde<'de> for Collection<'de, CollectionT> where
-    CollectionT: Serde<'de>
-{
-}
+impl<CollectionT> Serde for Collection<CollectionT> where CollectionT: Serde {}
 
-impl<'a, CollectionT> std::ops::Deref for Collection<'a, CollectionT>
+impl<CollectionT> std::ops::Deref for Collection<CollectionT>
 where
-    CollectionT: Serde<'a>,
+    CollectionT: Serde,
 {
-    type Target = Object<'a, Null>;
+    type Target = Object<Null>;
 
     fn deref(&self) -> &Self::Target {
         &self.base
@@ -652,26 +647,26 @@ where
 }
 
 /// Builder for a [Collection].
-pub struct CollectionBuilder<'a, CollectionT>
+pub struct CollectionBuilder<CollectionT>
 where
-    CollectionT: Serde<'a>,
+    CollectionT: Serde,
 {
-    base: ObjectBuilder<'a, Null>,
+    base: ObjectBuilder<Null>,
     items: Vec<CollectionT>,
 }
 
-impl<'a, CollectionT> CollectionBuilder<'a, CollectionT>
+impl<CollectionT> CollectionBuilder<CollectionT>
 where
-    CollectionT: Serde<'a>,
+    CollectionT: Serde,
 {
-    pub fn new(collection_type: &'a str, items: Vec<CollectionT>) -> Self {
+    pub fn new(collection_type: String, items: Vec<CollectionT>) -> Self {
         CollectionBuilder {
             base: ObjectBuilder::new().object_type(collection_type),
             items,
         }
     }
 
-    pub fn build(self) -> Collection<'a, CollectionT> {
+    pub fn build(self) -> Collection<CollectionT> {
         Collection {
             base: self.base.build(),
             total_items: match self.items.is_empty() {
@@ -686,9 +681,9 @@ where
 /// A subtype of [Collection] in which members of the logical collection are
 /// assumed to always be strictly ordered.
 #[derive(Serialize, Deserialize, Debug)]
-pub struct OrderedCollection<'a, CollectionT> {
-    #[serde(flatten, borrow)]
-    base: Object<'a, Null>,
+pub struct OrderedCollection<CollectionT> {
+    #[serde(flatten)]
+    base: Object<Null>,
 
     #[serde(rename = "totalItems", skip_serializing_if = "Option::is_none")]
     pub total_items: Option<usize>,
@@ -698,16 +693,13 @@ pub struct OrderedCollection<'a, CollectionT> {
     pub ordered_items: Vec<CollectionT>,
 }
 
-impl<'de: 'a, 'a, CollectionT> Serde<'de> for OrderedCollection<'de, CollectionT> where
-    CollectionT: Serde<'de>
-{
-}
+impl<CollectionT> Serde for OrderedCollection<CollectionT> where CollectionT: Serde {}
 
-impl<'a, CollectionT> std::ops::Deref for OrderedCollection<'a, CollectionT>
+impl<CollectionT> std::ops::Deref for OrderedCollection<CollectionT>
 where
-    CollectionT: Serde<'a>,
+    CollectionT: Serde,
 {
-    type Target = Object<'a, Null>;
+    type Target = Object<Null>;
 
     fn deref(&self) -> &Self::Target {
         &self.base
@@ -715,26 +707,26 @@ where
 }
 
 /// Builder for an [OrderedCollection].
-pub struct OrderedCollectionBuilder<'a, CollectionT>
+pub struct OrderedCollectionBuilder<CollectionT>
 where
-    CollectionT: Serde<'a>,
+    CollectionT: Serde,
 {
-    base: ObjectBuilder<'a, Null>,
+    base: ObjectBuilder<Null>,
     ordered_items: Vec<CollectionT>,
 }
 
-impl<'a, CollectionT> OrderedCollectionBuilder<'a, CollectionT>
+impl<CollectionT> OrderedCollectionBuilder<CollectionT>
 where
-    CollectionT: Serde<'a>,
+    CollectionT: Serde,
 {
-    pub fn new(collection_type: &'a str, ordered_items: Vec<CollectionT>) -> Self {
+    pub fn new(collection_type: String, ordered_items: Vec<CollectionT>) -> Self {
         OrderedCollectionBuilder {
             base: ObjectBuilder::new().object_type(collection_type),
             ordered_items,
         }
     }
 
-    pub fn build(self) -> OrderedCollection<'a, CollectionT> {
+    pub fn build(self) -> OrderedCollection<CollectionT> {
         OrderedCollection {
             base: self.base.build(),
             total_items: match self.ordered_items.is_empty() {
@@ -750,9 +742,9 @@ where
 /// the Activity Streams 2.0 Core for a complete description of the
 /// [CollectionPage] object.
 #[derive(Serialize, Deserialize, Debug)]
-pub struct CollectionPage<'a, CollectionT> {
-    #[serde(flatten, borrow)]
-    base: Collection<'a, CollectionT>,
+pub struct CollectionPage<CollectionT> {
+    #[serde(flatten)]
+    base: Collection<CollectionT>,
 
     #[serde(rename = "partOf")]
     pub part_of: String,
@@ -762,16 +754,13 @@ pub struct CollectionPage<'a, CollectionT> {
     pub prev: Option<String>,
 }
 
-impl<'de: 'a, 'a, CollectionT> Serde<'de> for CollectionPage<'de, CollectionT> where
-    CollectionT: Serde<'de>
-{
-}
+impl<CollectionT> Serde for CollectionPage<CollectionT> where CollectionT: Serde {}
 
-impl<'a, CollectionT> std::ops::Deref for CollectionPage<'a, CollectionT>
+impl<CollectionT> std::ops::Deref for CollectionPage<CollectionT>
 where
-    CollectionT: Serde<'a>,
+    CollectionT: Serde,
 {
-    type Target = Collection<'a, CollectionT>;
+    type Target = Collection<CollectionT>;
 
     fn deref(&self) -> &Self::Target {
         &self.base
@@ -779,21 +768,21 @@ where
 }
 
 /// Builder for a [CollectionPage].
-pub struct CollectionPageBuilder<'a, CollectionT>
+pub struct CollectionPageBuilder<CollectionT>
 where
-    CollectionT: Serde<'a>,
+    CollectionT: Serde,
 {
-    base: CollectionBuilder<'a, CollectionT>,
-    part_of: &'a http::Uri,
-    next: Option<&'a http::Uri>,
-    prev: Option<&'a http::Uri>,
+    base: CollectionBuilder<CollectionT>,
+    part_of: http::Uri,
+    next: Option<http::Uri>,
+    prev: Option<http::Uri>,
 }
 
-impl<'a, CollectionT> CollectionPageBuilder<'a, CollectionT>
+impl<CollectionT> CollectionPageBuilder<CollectionT>
 where
-    CollectionT: Serde<'a>,
+    CollectionT: Serde,
 {
-    pub fn new(collection_type: &'a str, items: Vec<CollectionT>, part_of: &'a http::Uri) -> Self {
+    pub fn new(collection_type: String, items: Vec<CollectionT>, part_of: http::Uri) -> Self {
         CollectionPageBuilder {
             base: CollectionBuilder::new(collection_type, items),
             part_of,
@@ -802,17 +791,17 @@ where
         }
     }
 
-    pub fn next(mut self, next: &'a http::Uri) -> Self {
+    pub fn next(mut self, next: http::Uri) -> Self {
         self.next = Some(next);
         self
     }
 
-    pub fn prev(mut self, prev: &'a http::Uri) -> Self {
+    pub fn prev(mut self, prev: http::Uri) -> Self {
         self.prev = Some(prev);
         self
     }
 
-    pub fn build(self) -> CollectionPage<'a, CollectionT> {
+    pub fn build(self) -> CollectionPage<CollectionT> {
         CollectionPage {
             base: self.base.build(),
             part_of: self.part_of.to_string(),
@@ -826,9 +815,9 @@ where
 /// Refer to the Activity Streams 2.0 Core for a complete description of
 /// the [OrderedCollectionPage] object.
 #[derive(Serialize, Deserialize, Debug)]
-pub struct OrderedCollectionPage<'a, CollectionT> {
-    #[serde(flatten, borrow)]
-    base: OrderedCollection<'a, CollectionT>,
+pub struct OrderedCollectionPage<CollectionT> {
+    #[serde(flatten)]
+    base: OrderedCollection<CollectionT>,
 
     #[serde(rename = "partOf")]
     pub part_of: String,
@@ -838,16 +827,13 @@ pub struct OrderedCollectionPage<'a, CollectionT> {
     pub prev: Option<String>,
 }
 
-impl<'de: 'a, 'a, CollectionT> Serde<'de> for OrderedCollectionPage<'de, CollectionT> where
-    CollectionT: Serde<'de>
-{
-}
+impl<CollectionT> Serde for OrderedCollectionPage<CollectionT> where CollectionT: Serde {}
 
-impl<'a, CollectionT> std::ops::Deref for OrderedCollectionPage<'a, CollectionT>
+impl<CollectionT> std::ops::Deref for OrderedCollectionPage<CollectionT>
 where
-    CollectionT: Serde<'a>,
+    CollectionT: Serde,
 {
-    type Target = OrderedCollection<'a, CollectionT>;
+    type Target = OrderedCollection<CollectionT>;
 
     fn deref(&self) -> &Self::Target {
         &self.base
@@ -855,21 +841,21 @@ where
 }
 
 /// Builder for a [OrderedCollectionPage].
-pub struct OrderedCollectionPageBuilder<'a, CollectionT>
+pub struct OrderedCollectionPageBuilder<CollectionT>
 where
-    CollectionT: Serde<'a>,
+    CollectionT: Serde,
 {
-    base: OrderedCollectionBuilder<'a, CollectionT>,
-    part_of: &'a http::Uri,
-    next: Option<&'a http::Uri>,
-    prev: Option<&'a http::Uri>,
+    base: OrderedCollectionBuilder<CollectionT>,
+    part_of: http::Uri,
+    next: Option<http::Uri>,
+    prev: Option<http::Uri>,
 }
 
-impl<'a, CollectionT> OrderedCollectionPageBuilder<'a, CollectionT>
+impl<CollectionT> OrderedCollectionPageBuilder<CollectionT>
 where
-    CollectionT: Serde<'a>,
+    CollectionT: Serde,
 {
-    pub fn new(collection_type: &'a str, items: Vec<CollectionT>, part_of: &'a http::Uri) -> Self {
+    pub fn new(collection_type: String, items: Vec<CollectionT>, part_of: http::Uri) -> Self {
         OrderedCollectionPageBuilder {
             base: OrderedCollectionBuilder::new(collection_type, items),
             part_of,
@@ -878,17 +864,17 @@ where
         }
     }
 
-    pub fn next(mut self, next: &'a http::Uri) -> Self {
+    pub fn next(mut self, next: http::Uri) -> Self {
         self.next = Some(next);
         self
     }
 
-    pub fn prev(mut self, prev: &'a http::Uri) -> Self {
+    pub fn prev(mut self, prev: http::Uri) -> Self {
         self.prev = Some(prev);
         self
     }
 
-    pub fn build(self) -> OrderedCollectionPage<'a, CollectionT> {
+    pub fn build(self) -> OrderedCollectionPage<CollectionT> {
         OrderedCollectionPage {
             base: self.base.build(),
             part_of: self.part_of.to_string(),
@@ -906,8 +892,11 @@ mod tests {
 
     #[test]
     fn serialize_object() {
-        let object: Object<Null> = ObjectBuilder::new().name("name").build();
-        let actual = Document::new(ContextBuilder::new().language("en").build(), object);
+        let object: Object<Null> = ObjectBuilder::new().name(String::from("name")).build();
+        let actual = Document::new(
+            ContextBuilder::new().language(String::from("en")).build(),
+            object,
+        );
         let expected = r#"{
   "@context": {
     "@vocab": "https://www.w3.org/ns/activitystreams",
@@ -921,28 +910,32 @@ mod tests {
 
     #[test]
     fn deserialize_object() {
-        let actual = r#"{
+        let actual = String::from(
+            r#"{
   "@context": {
     "@vocab": "https://www.w3.org/ns/activitystreams",
     "@language": "en"
   },
   "name": "name"
-}"#;
-        let document: Document<Object<Null>> = Document::from_json(&actual).unwrap();
-        assert_eq!(document.context.language, Some("en"));
+}"#,
+        );
+        let document: Document<Object<Null>> = Document::from_json(actual).unwrap();
+        assert_eq!(document.context.language, Some(String::from("en")));
         let object = document.object as Object<Null>;
-        assert_eq!(object.name, Some("name"));
+        assert_eq!(object.name, Some(String::from("name")));
     }
 
     #[test]
     fn deserialize_object_malformed() {
-        let actual = r#"{
+        let actual = String::from(
+            r#"{
   "@context": {
     "@vocab": "https://www.w3.org/ns/activitystreams",
     "@language": "en"
   },
-}"#;
-        let result: Result<Document<Object<Null>>> = Document::from_json(&actual);
+}"#,
+        );
+        let result: Result<Document<Object<Null>>> = Document::from_json(actual);
         assert!(result.is_err());
     }
 
@@ -953,11 +946,12 @@ mod tests {
             LinkBuilder::new(UriBuilder::new(
                 "http://example.org/abc".parse::<http::Uri>().unwrap(),
             ))
-            .name("An example link")
-            .hreflang("en")
+            .name(String::from("An example link"))
+            .hreflang(String::from("en"))
             .build(),
         );
-        let expected = r#"{
+        let expected = String::from(
+            r#"{
   "@context": {
     "@vocab": "https://www.w3.org/ns/activitystreams"
   },
@@ -965,14 +959,16 @@ mod tests {
   "href": "http://example.org/abc",
   "name": "An example link",
   "hreflang": "en"
-}"#;
+}"#,
+        );
         assert!(actual.to_json_pretty().is_ok());
         assert_eq!(actual.to_json_pretty().unwrap(), expected);
     }
 
     #[test]
     fn deserialize_link() {
-        let actual = r#"{
+        let actual = String::from(
+            r#"{
   "@context": {
     "@vocab": "https://www.w3.org/ns/activitystreams"
   },
@@ -980,33 +976,35 @@ mod tests {
   "href": "http://example.org/abc",
   "name": "An example link",
   "hreflang": "en"
-}"#;
-        let document: Document<Link> = Document::from_json(&actual).unwrap();
+}"#,
+        );
+        let document: Document<Link> = Document::from_json(actual).unwrap();
         let link = document.object as Link;
         assert_eq!(link.link_type, "Link");
         assert_eq!(link.href.href, "http://example.org/abc");
-        assert_eq!(link.name, Some("An example link"));
-        assert_eq!(link.hreflang, Some("en"));
+        assert_eq!(link.name, Some(String::from("An example link")));
+        assert_eq!(link.hreflang, Some(String::from("en")));
     }
 
     #[test]
     fn serialize_preview() {
         let actual = Document::new(
             ContextBuilder::new().build(),
-            PreviewBuilder::new("Video", "Trailer")
-                .duration("PT1M")
+            PreviewBuilder::new(String::from("Video"), String::from("Trailer"))
+                .duration(String::from("PT1M"))
                 .url(
                     UriBuilder::new(
                         "http://example.org/trailer.mkv"
                             .parse::<http::Uri>()
                             .unwrap(),
                     )
-                    .media_type("video/mkv")
+                    .media_type(String::from("video/mkv"))
                     .build(),
                 )
                 .build(),
         );
-        let expected = r#"{
+        let expected = String::from(
+            r#"{
   "@context": {
     "@vocab": "https://www.w3.org/ns/activitystreams"
   },
@@ -1017,14 +1015,16 @@ mod tests {
     "href": "http://example.org/trailer.mkv",
     "mediaType": "video/mkv"
   }
-}"#;
+}"#,
+        );
         assert!(actual.to_json_pretty().is_ok());
         assert_eq!(actual.to_json_pretty().unwrap(), expected);
     }
 
     #[test]
     fn deserialize_preview() {
-        let actual = r#"{
+        let actual = String::from(
+            r#"{
   "@context": {
     "@vocab": "https://www.w3.org/ns/activitystreams"
   },
@@ -1035,31 +1035,43 @@ mod tests {
     "href": "http://example.org/trailer.mkv",
     "mediaType": "video/mkv"
   }
-}"#;
-        let document: Document<Preview> = Document::from_json(&actual).unwrap();
+}"#,
+        );
+        let document: Document<Preview> = Document::from_json(actual).unwrap();
         let preview = document.object as Preview;
-        assert_eq!(preview.base.object_type, Some("Video"));
-        assert_eq!(preview.base.name, Some("Trailer"));
-        assert_eq!(preview.duration, Some("PT1M"));
+        assert_eq!(preview.base.object_type, Some(String::from("Video")));
+        assert_eq!(preview.base.name, Some(String::from("Trailer")));
+        assert_eq!(preview.duration, Some(String::from("PT1M")));
         assert!(preview.url.is_some());
         assert_eq!(
             preview.url.as_ref().unwrap().href,
             "http://example.org/trailer.mkv".to_string()
         );
-        assert_eq!(preview.url.as_ref().unwrap().media_type, Some("video/mkv"));
+        assert_eq!(
+            preview.url.as_ref().unwrap().media_type,
+            Some(String::from("video/mkv"))
+        );
     }
 
     #[test]
     fn serialize_activity() {
         let actual = Document::new(
             ContextBuilder::new().build(),
-            ActivityBuilder::new("Activity", "Sally did something to a note")
-                .actor(ActorBuilder::new("Person").name("Sally"))
-                .object(ObjectBuilder::new().object_type("Note").name("A Note"))
-                .build(),
+            ActivityBuilder::new(
+                String::from("Activity"),
+                String::from("Sally did something to a note"),
+            )
+            .actor(ActorBuilder::new(String::from("Person")).name(String::from("Sally")))
+            .object(
+                ObjectBuilder::new()
+                    .object_type(String::from("Note"))
+                    .name(String::from("A Note")),
+            )
+            .build(),
         );
 
-        let expected = r#"{
+        let expected = String::from(
+            r#"{
   "@context": {
     "@vocab": "https://www.w3.org/ns/activitystreams"
   },
@@ -1073,14 +1085,16 @@ mod tests {
     "type": "Note",
     "name": "A Note"
   }
-}"#;
+}"#,
+        );
         assert!(actual.to_json_pretty().is_ok());
         assert_eq!(actual.to_json_pretty().unwrap(), expected);
     }
 
     #[test]
     fn deserialize_activity() {
-        let actual = r#"{
+        let actual = String::from(
+            r#"{
   "@context": {
     "@vocab": "https://www.w3.org/ns/activitystreams"
   },
@@ -1094,20 +1108,24 @@ mod tests {
     "type": "Note",
     "name": "A Note"
   }
-}"#;
+}"#,
+        );
         let document: Document<Activity> = Document::from_json(actual).unwrap();
         let activity = document.object as Activity;
-        assert_eq!(activity.object_type, Some("Activity"));
-        assert_eq!(activity.summary, Some("Sally did something to a note"));
+        assert_eq!(activity.object_type, Some(String::from("Activity")));
+        assert_eq!(
+            activity.summary,
+            Some(String::from("Sally did something to a note"))
+        );
 
         assert!(activity.actor.is_some());
         let actor = activity.actor.as_ref().unwrap();
-        assert_eq!(actor.object_type, Some("Person"));
-        assert_eq!(actor.name, Some("Sally"));
+        assert_eq!(actor.object_type, Some(String::from("Person")));
+        assert_eq!(actor.name, Some(String::from("Sally")));
 
         assert!(activity.object.is_some());
         let object = activity.object.as_ref().unwrap();
-        assert_eq!(object.object_type, Some("Note"));
-        assert_eq!(object.name, Some("A Note"));
+        assert_eq!(object.object_type, Some(String::from("Note")));
+        assert_eq!(object.name, Some(String::from("A Note")));
     }
 }
