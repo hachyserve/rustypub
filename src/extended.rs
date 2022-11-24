@@ -5,16 +5,16 @@ use serde::{Deserialize, Serialize};
 
 /// https://www.w3.org/TR/activitystreams-vocabulary/#dfn-note
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Note<'a> {
-    #[serde(flatten, borrow)]
-    base: Object<'a, Null>,
+pub struct Note {
+    #[serde(flatten)]
+    base: Object<Null>,
 }
 
-impl<'a> Note<'a> {
-    pub fn new(name: &'a str, content: &'a str) -> Self {
+impl Note {
+    pub fn new(name: String, content: String) -> Self {
         Note {
             base: ObjectBuilder::new()
-                .object_type("Note")
+                .object_type("Note".to_string())
                 .name(name)
                 .content(content)
                 .build(),
@@ -22,10 +22,10 @@ impl<'a> Note<'a> {
     }
 }
 
-impl<'de: 'a, 'a> Serde<'de> for Note<'a> {}
+impl Serde for Note {}
 
-impl<'a> std::ops::Deref for Note<'a> {
-    type Target = Object<'a, Null>;
+impl std::ops::Deref for Note {
+    type Target = Object<Null>;
 
     fn deref(&self) -> &Self::Target {
         &self.base
@@ -34,29 +34,29 @@ impl<'a> std::ops::Deref for Note<'a> {
 
 // TODO: expand to actor types: https://www.w3.org/TR/activitystreams-vocabulary/#actor-types
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Actor<'a> {
-    #[serde(flatten, borrow)]
-    base: Object<'a, Null>,
+pub struct Actor {
+    #[serde(flatten)]
+    base: Object<Null>,
 
     #[serde(rename = "preferredUsername")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub preferred_username: Option<&'a str>,
+    pub preferred_username: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub inbox: Option<&'a str>,
+    pub inbox: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub outbox: Option<&'a str>,
+    pub outbox: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub followers: Option<&'a str>,
+    pub followers: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub following: Option<&'a str>,
+    pub following: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub liked: Option<&'a str>,
+    pub liked: Option<String>,
 }
 
-impl<'de: 'a, 'a> Serde<'de> for Actor<'a> {}
+impl Serde for Actor {}
 
-impl<'a> std::ops::Deref for Actor<'a> {
-    type Target = Object<'a, Null>;
+impl std::ops::Deref for Actor {
+    type Target = Object<Null>;
 
     fn deref(&self) -> &Self::Target {
         &self.base
@@ -65,19 +65,19 @@ impl<'a> std::ops::Deref for Actor<'a> {
 
 /// Builder for an [Actor].
 #[derive(Clone)]
-pub struct ActorBuilder<'a> {
-    base: ObjectBuilder<'a, Null>,
+pub struct ActorBuilder {
+    base: ObjectBuilder<Null>,
 
-    preferred_username: Option<&'a str>,
-    inbox: Option<&'a str>,
-    outbox: Option<&'a str>,
-    followers: Option<&'a str>,
-    following: Option<&'a str>,
-    liked: Option<&'a str>,
+    preferred_username: Option<String>,
+    inbox: Option<String>,
+    outbox: Option<String>,
+    followers: Option<String>,
+    following: Option<String>,
+    liked: Option<String>,
 }
 
-impl<'a> ActorBuilder<'a> {
-    pub fn new(actor_type: &'a str) -> Self {
+impl ActorBuilder {
+    pub fn new(actor_type: String) -> Self {
         ActorBuilder {
             base: ObjectBuilder::new().object_type(actor_type),
             preferred_username: None,
@@ -94,7 +94,7 @@ impl<'a> ActorBuilder<'a> {
         self
     }
 
-    pub fn name(mut self, name: &'a str) -> Self {
+    pub fn name(mut self, name: String) -> Self {
         self.base.name(name);
         self
     }
@@ -109,47 +109,47 @@ impl<'a> ActorBuilder<'a> {
         self
     }
 
-    pub fn image(mut self, image: LinkBuilder<'a>) -> Self {
+    pub fn image(mut self, image: LinkBuilder) -> Self {
         self.base.image(image);
         self
     }
 
-    pub fn summary(mut self, summary: &'a str) -> Self {
+    pub fn summary(mut self, summary: String) -> Self {
         self.base.summary(summary);
         self
     }
 
-    pub fn preferred_username(mut self, username: &'a str) -> Self {
+    pub fn preferred_username(mut self, username: String) -> Self {
         self.preferred_username = Some(username);
         self
     }
 
-    pub fn inbox(mut self, inbox: &'a str) -> Self {
+    pub fn inbox(mut self, inbox: String) -> Self {
         self.inbox = Some(inbox);
         self
     }
 
-    pub fn outbox(mut self, outbox: &'a str) -> Self {
+    pub fn outbox(mut self, outbox: String) -> Self {
         self.outbox = Some(outbox);
         self
     }
 
-    pub fn followers(mut self, followers: &'a str) -> Self {
+    pub fn followers(mut self, followers: String) -> Self {
         self.followers = Some(followers);
         self
     }
 
-    pub fn following(mut self, following: &'a str) -> Self {
+    pub fn following(mut self, following: String) -> Self {
         self.following = Some(following);
         self
     }
 
-    pub fn liked(mut self, liked: &'a str) -> Self {
+    pub fn liked(mut self, liked: String) -> Self {
         self.liked = Some(liked);
         self
     }
 
-    pub fn build(self) -> Actor<'a> {
+    pub fn build(self) -> Actor {
         Actor {
             base: self.base.build(),
 
@@ -173,12 +173,12 @@ mod tests {
     fn serialize_actor() {
         let actual = Document::new(
             ContextBuilder::new().build(),
-            ActorBuilder::new("Person")
+            ActorBuilder::new(String::from("Person"))
                 .id("https://example.com/person/1234"
                     .parse::<http::Uri>()
                     .unwrap())
-                .name("name")
-                .preferred_username("dma")
+                .name(String::from("name"))
+                .preferred_username(String::from("dma"))
                 .build(),
         );
         let expected = r#"{
@@ -205,20 +205,23 @@ mod tests {
   "name": "name",
   "preferredUsername": "dma"
 }"#;
-        let document: Document<Actor> = Document::from_json(actual).unwrap();
+        let document: Document<Actor> = Document::from_json(String::from(actual)).unwrap();
         let actor = document.object as Actor;
-        assert_eq!(actor.object_type, Some("Person"));
+        assert_eq!(actor.object_type, Some(String::from("Person")));
         assert_eq!(
             actor.id,
             Some(String::from("https://example.com/person/1234"))
         );
-        assert_eq!(actor.name, Some("name"));
-        assert_eq!(actor.preferred_username, Some("dma"));
+        assert_eq!(actor.name, Some(String::from("name")));
+        assert_eq!(actor.preferred_username, Some(String::from("dma")));
     }
 
     #[test]
     fn serialize_note() {
-        let actual = Document::new(ContextBuilder::new().build(), Note::new("Name", "Content"));
+        let actual = Document::new(
+            ContextBuilder::new().build(),
+            Note::new(String::from("Name"), String::from("Content")),
+        );
         let expected = r#"{
   "@context": {
     "@vocab": "https://www.w3.org/ns/activitystreams"
@@ -241,10 +244,10 @@ mod tests {
   "name": "Name",
   "content": "Content"
 }"#;
-        let document: Document<Note> = Document::from_json(actual).unwrap();
+        let document: Document<Note> = Document::from_json(String::from(actual)).unwrap();
         let actor = document.object as Note;
-        assert_eq!(actor.object_type, Some("Note"));
-        assert_eq!(actor.name, Some("Name"));
-        assert_eq!(actor.content, Some("Content"));
+        assert_eq!(actor.object_type, Some(String::from("Note")));
+        assert_eq!(actor.name, Some(String::from("Name")));
+        assert_eq!(actor.content, Some(String::from("Content")));
     }
 }

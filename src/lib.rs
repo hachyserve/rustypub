@@ -1,12 +1,12 @@
 pub mod core;
 pub mod extended;
 
-use serde::{Deserialize, Serialize};
+use serde::{de::DeserializeOwned, Serialize};
 use serde_json::Result;
 
-pub trait Serde<'de>
+pub trait Serde
 where
-    Self: Serialize + Deserialize<'de>,
+    Self: Serialize + DeserializeOwned,
 {
     fn to_json(&self) -> Result<String> {
         let serialized = serde_json::to_string(&self);
@@ -20,8 +20,8 @@ where
         serialized
     }
 
-    fn from_json(json: &'de str) -> Result<Self> {
-        serde_json::from_str(json)
+    fn from_json(json: String) -> Result<Self> {
+        serde_json::from_str(json.as_str())
     }
 }
 
@@ -42,13 +42,16 @@ mod tests {
           "id": "http://www.test.example/object/1",
           "name": "A Simple, non-specific object"
         }"#;
-        let object: Object<Null> = Document::from_json(listing).unwrap().object;
-        assert_eq!(object.object_type, Some("Object"));
+        let object: Object<Null> = Document::from_json(String::from(listing)).unwrap().object;
+        assert_eq!(object.object_type, Some(String::from("Object")));
         assert_eq!(
             object.id,
             Some(String::from("http://www.test.example/object/1"))
         );
-        assert_eq!(object.name, Some("A Simple, non-specific object"));
+        assert_eq!(
+            object.name,
+            Some(String::from("A Simple, non-specific object"))
+        );
     }
 
     #[test]
@@ -64,12 +67,12 @@ mod tests {
       }
       "#;
 
-        let link: Link = Document::from_json(listing).unwrap().object;
+        let link: Link = Document::from_json(String::from(listing)).unwrap().object;
         assert_eq!(link.link_type, "Link");
         assert_eq!(link.href.href, "http://example.org/abc");
-        assert_eq!(link.hreflang, Some("en"));
-        assert_eq!(link.href.media_type, Some("text/html"));
-        assert_eq!(link.name, Some("An example link"));
+        assert_eq!(link.hreflang, Some(String::from("en")));
+        assert_eq!(link.href.media_type, Some(String::from("text/html")));
+        assert_eq!(link.name, Some(String::from("An example link")));
     }
 
     #[test]
@@ -90,19 +93,22 @@ mod tests {
       } 
       "#;
 
-        let activity: Activity = Document::from_json(listing).unwrap().object;
-        assert_eq!(activity.object_type, Some("Activity"));
-        assert_eq!(activity.summary, Some("Sally did something to a note"));
+        let activity: Activity = Document::from_json(String::from(listing)).unwrap().object;
+        assert_eq!(activity.object_type, Some(String::from("Activity")));
+        assert_eq!(
+            activity.summary,
+            Some(String::from("Sally did something to a note"))
+        );
 
         assert!(activity.actor.is_some());
         let actor = activity.actor.unwrap();
-        assert_eq!(actor.object_type, Some("Person"));
-        assert_eq!(actor.name, Some("Sally"));
+        assert_eq!(actor.object_type, Some(String::from("Person")));
+        assert_eq!(actor.name, Some(String::from("Sally")));
 
         assert!(activity.object.is_some());
         let object = activity.object.unwrap();
-        assert_eq!(object.object_type, Some("Note"));
-        assert_eq!(object.name, Some("A Note"));
+        assert_eq!(object.object_type, Some(String::from("Note")));
+        assert_eq!(object.name, Some(String::from("A Note")));
     }
 
     #[test]
@@ -123,19 +129,20 @@ mod tests {
       }
       "#;
 
-        let activity: IntransitiveActivity = Document::from_json(listing).unwrap().object;
-        assert_eq!(activity.object_type, Some("Travel"));
-        assert_eq!(activity.summary, Some("Sally went to work"));
+        let activity: IntransitiveActivity =
+            Document::from_json(String::from(listing)).unwrap().object;
+        assert_eq!(activity.object_type, Some(String::from("Travel")));
+        assert_eq!(activity.summary, Some(String::from("Sally went to work")));
 
         assert!(activity.actor.is_some());
         let actor = activity.actor.as_ref().unwrap();
-        assert_eq!(actor.object_type, Some("Person"));
-        assert_eq!(actor.name, Some("Sally"));
+        assert_eq!(actor.object_type, Some(String::from("Person")));
+        assert_eq!(actor.name, Some(String::from("Sally")));
 
         assert!(activity.target.is_some());
         let target = activity.target.as_ref().unwrap();
-        assert_eq!(target.object_type, Some("Place"));
-        assert_eq!(target.name, Some("Work"));
+        assert_eq!(target.object_type, Some(String::from("Place")));
+        assert_eq!(target.name, Some(String::from("Work")));
     }
 
     #[test]
@@ -159,17 +166,18 @@ mod tests {
         }
       "#;
 
-        let collection: Collection<Object<Null>> = Document::from_json(listing).unwrap().object;
-        assert_eq!(collection.object_type, Some("Collection"));
-        assert_eq!(collection.summary, Some("Sally's notes"));
+        let collection: Collection<Object<Null>> =
+            Document::from_json(String::from(listing)).unwrap().object;
+        assert_eq!(collection.object_type, Some(String::from("Collection")));
+        assert_eq!(collection.summary, Some(String::from("Sally's notes")));
         assert_eq!(collection.total_items, Some(2));
 
         let items = &collection.items;
         assert_eq!(items.len(), collection.total_items.unwrap());
-        assert_eq!(items[0].object_type, Some("Note"));
-        assert_eq!(items[0].name, Some("A Simple Note"));
-        assert_eq!(items[1].object_type, Some("Note"));
-        assert_eq!(items[1].name, Some("Another Simple Note"));
+        assert_eq!(items[0].object_type, Some(String::from("Note")));
+        assert_eq!(items[0].name, Some(String::from("A Simple Note")));
+        assert_eq!(items[1].object_type, Some(String::from("Note")));
+        assert_eq!(items[1].name, Some(String::from("Another Simple Note")));
     }
 
     #[test]
@@ -193,17 +201,20 @@ mod tests {
       }
       "#;
         let collection: OrderedCollection<Object<Null>> =
-            Document::from_json(listing).unwrap().object;
-        assert_eq!(collection.object_type, Some("OrderedCollection"));
-        assert_eq!(collection.summary, Some("Sally's notes"));
+            Document::from_json(String::from(listing)).unwrap().object;
+        assert_eq!(
+            collection.object_type,
+            Some(String::from("OrderedCollection"))
+        );
+        assert_eq!(collection.summary, Some(String::from("Sally's notes")));
         assert_eq!(collection.total_items, Some(2));
 
         let items = &collection.ordered_items;
         assert_eq!(items.len(), collection.total_items.unwrap());
-        assert_eq!(items[0].object_type, Some("Note"));
-        assert_eq!(items[0].name, Some("A Simple Note"));
-        assert_eq!(items[1].object_type, Some("Note"));
-        assert_eq!(items[1].name, Some("Another Simple Note"));
+        assert_eq!(items[0].object_type, Some(String::from("Note")));
+        assert_eq!(items[0].name, Some(String::from("A Simple Note")));
+        assert_eq!(items[1].object_type, Some(String::from("Note")));
+        assert_eq!(items[1].name, Some(String::from("Another Simple Note")));
     }
 
     #[test]
@@ -228,13 +239,19 @@ mod tests {
       }
       "#;
         let collection_page: CollectionPage<Object<Null>> =
-            Document::from_json(listing).unwrap().object;
-        assert_eq!(collection_page.object_type, Some("CollectionPage"));
+            Document::from_json(String::from(listing)).unwrap().object;
+        assert_eq!(
+            collection_page.object_type,
+            Some(String::from("CollectionPage"))
+        );
         assert_eq!(
             collection_page.id,
             Some("http://example.org/foo?page=1".to_string())
         );
-        assert_eq!(collection_page.summary, Some("Page 1 of Sally's notes"));
+        assert_eq!(
+            collection_page.summary,
+            Some(String::from("Page 1 of Sally's notes"))
+        );
         assert_eq!(
             collection_page.part_of,
             "http://example.org/foo".to_string()
@@ -242,10 +259,10 @@ mod tests {
         assert_eq!(collection_page.total_items, None);
 
         let items = &collection_page.items;
-        assert_eq!(items[0].object_type, Some("Note"));
-        assert_eq!(items[0].name, Some("A Simple Note"));
-        assert_eq!(items[1].object_type, Some("Note"));
-        assert_eq!(items[1].name, Some("Another Simple Note"));
+        assert_eq!(items[0].object_type, Some(String::from("Note")));
+        assert_eq!(items[0].name, Some(String::from("A Simple Note")));
+        assert_eq!(items[1].object_type, Some(String::from("Note")));
+        assert_eq!(items[1].name, Some(String::from("Another Simple Note")));
     }
 
     #[test]
@@ -270,13 +287,19 @@ mod tests {
 }
 "#;
         let collection_page: OrderedCollectionPage<Object<Null>> =
-            Document::from_json(listing).unwrap().object;
-        assert_eq!(collection_page.object_type, Some("OrderedCollectionPage"));
+            Document::from_json(String::from(listing)).unwrap().object;
+        assert_eq!(
+            collection_page.object_type,
+            Some(String::from("OrderedCollectionPage"))
+        );
         assert_eq!(
             collection_page.id,
             Some("http://example.org/foo?page=1".to_string())
         );
-        assert_eq!(collection_page.summary, Some("Page 1 of Sally's notes"));
+        assert_eq!(
+            collection_page.summary,
+            Some(String::from("Page 1 of Sally's notes"))
+        );
         assert_eq!(
             collection_page.part_of,
             "http://example.org/foo".to_string()
@@ -284,10 +307,10 @@ mod tests {
         assert_eq!(collection_page.total_items, None);
 
         let items = &collection_page.ordered_items;
-        assert_eq!(items[0].object_type, Some("Note"));
-        assert_eq!(items[0].name, Some("A Simple Note"));
-        assert_eq!(items[1].object_type, Some("Note"));
-        assert_eq!(items[1].name, Some("Another Simple Note"));
+        assert_eq!(items[0].object_type, Some(String::from("Note")));
+        assert_eq!(items[0].name, Some(String::from("A Simple Note")));
+        assert_eq!(items[1].object_type, Some(String::from("Note")));
+        assert_eq!(items[1].name, Some(String::from("Another Simple Note")));
     }
 
     #[test]
@@ -298,13 +321,15 @@ mod tests {
           "name": "A Word of Warning",
           "content": "Looks like it is going to rain today. Bring an umbrella!"
         }"#;
-        let document: Document<Note> = Document::from_json(listing).unwrap();
+        let document: Document<Note> = Document::from_json(String::from(listing)).unwrap();
         let note = document.object;
-        assert_eq!(note.object_type, Some("Note"));
-        assert_eq!(note.name, Some("A Word of Warning"));
+        assert_eq!(note.object_type, Some(String::from("Note")));
+        assert_eq!(note.name, Some(String::from("A Word of Warning")));
         assert_eq!(
             note.content,
-            Some("Looks like it is going to rain today. Bring an umbrella!")
+            Some(String::from(
+                "Looks like it is going to rain today. Bring an umbrella!"
+            ))
         );
     }
 
@@ -322,21 +347,23 @@ mod tests {
     "name": "ExampleCo LLC"
   }
 }"#;
-        let document: Document<Object<Null>> = Document::from_json(listing).unwrap();
+        let document: Document<Object<Null>> = Document::from_json(String::from(listing)).unwrap();
         let object = document.object;
-        assert_eq!(object.name, Some("Holiday announcement"));
-        assert_eq!(object.object_type, Some("Note"));
+        assert_eq!(object.name, Some(String::from("Holiday announcement")));
+        assert_eq!(object.object_type, Some(String::from("Note")));
         assert_eq!(
             object.content,
-            Some("Thursday will be a company-wide holiday. Enjoy your day off!")
+            Some(String::from(
+                "Thursday will be a company-wide holiday. Enjoy your day off!"
+            ))
         );
         assert!(object.audience.is_some());
         let audience = object.audience.unwrap();
         assert_eq!(
             audience.object_type,
-            Some("http://example.org/Organization")
+            Some(String::from("http://example.org/Organization"))
         );
-        assert_eq!(audience.name, Some("ExampleCo LLC"));
+        assert_eq!(audience.name, Some(String::from("ExampleCo LLC")));
     }
 
     #[test]
@@ -349,11 +376,11 @@ mod tests {
   "type": "Note",
   "content": "A <em>simple</em> note"
 }"#;
-        let document: Document<Object<Null>> = Document::from_json(listing).unwrap();
+        let document: Document<Object<Null>> = Document::from_json(String::from(listing)).unwrap();
         let object = document.object;
-        assert_eq!(object.summary, Some("A simple note"));
-        assert_eq!(object.object_type, Some("Note"));
-        assert_eq!(object.content, Some("A <em>simple</em> note"));
+        assert_eq!(object.summary, Some(String::from("A simple note")));
+        assert_eq!(object.object_type, Some(String::from("Note")));
+        assert_eq!(object.content, Some(String::from("A <em>simple</em> note")));
     }
 
     #[test]
@@ -366,11 +393,11 @@ mod tests {
         "type": "Note",
         "summary": "A simple <em>note</em>"
       }"#;
-        let document: Document<Object<Null>> = Document::from_json(listing).unwrap();
+        let document: Document<Object<Null>> = Document::from_json(String::from(listing)).unwrap();
         let object = document.object;
-        assert_eq!(object.summary, Some("A simple <em>note</em>"));
-        assert_eq!(object.object_type, Some("Note"));
-        assert_eq!(object.name, Some("Cane Sugar Processing"));
+        assert_eq!(object.summary, Some(String::from("A simple <em>note</em>")));
+        assert_eq!(object.object_type, Some(String::from("Note")));
+        assert_eq!(object.name, Some(String::from("Cane Sugar Processing")));
     }
 
     // A set of tests from https://www.w3.org/TR/activitystreams-core/ examples
@@ -378,17 +405,19 @@ mod tests {
     fn minimal_activity_3_1() {
         let actual = Document::new(
             ContextBuilder::new().build(),
-            ActivityBuilder::new("Create", "Martin created an image")
-                .actor(
-                    ActorBuilder::new("Person").id("http://www.test.example/martin"
-                        .parse::<http::Uri>()
-                        .unwrap()),
-                )
-                .object(
-                    ObjectBuilder::new()
-                        .id("http://example.org/foo.jpg".parse::<http::Uri>().unwrap()),
-                )
-                .build(),
+            ActivityBuilder::new(
+                String::from("Create"),
+                String::from("Martin created an image"),
+            )
+            .actor(
+                ActorBuilder::new(String::from("Person")).id("http://www.test.example/martin"
+                    .parse::<http::Uri>()
+                    .unwrap()),
+            )
+            .object(
+                ObjectBuilder::new().id("http://example.org/foo.jpg".parse::<http::Uri>().unwrap()),
+            )
+            .build(),
         );
         let expected = r#"{
   "@context": {
@@ -412,48 +441,51 @@ mod tests {
     fn basic_activity_with_additional_detail_3_2() {
         let actual = Document::new(
             ContextBuilder::new().build(),
-            ActivityBuilder::new("Add", "Martin added an article to his blog")
-                // TODO: figure out how to get a 'Z' on this. probably requires a time-zone (so not naive)
-                .published(DateTime::<Utc>::from_utc(
-                    NaiveDate::from_ymd(2015, 2, 10).and_hms(15, 4, 55),
-                    Utc,
-                ))
-                .actor(
-                    ActorBuilder::new("Person")
-                        .id("http://www.test.example/martin"
-                            .parse::<http::Uri>()
-                            .unwrap())
-                        .name("Martin Smith")
-                        .url("http://example.org/martin".parse::<http::Uri>().unwrap())
-                        .image(LinkBuilder::new(
-                            UriBuilder::new(
-                                "http://example.org/martin/image.jpg"
-                                    .parse::<http::Uri>()
-                                    .unwrap(),
-                            )
-                            .media_type("image/jpeg"),
-                        )),
-                )
-                .object(
-                    ObjectBuilder::new()
-                        .object_type("Article")
-                        .id("http://www.test.example/blog/abc123/xyz"
-                            .parse::<http::Uri>()
-                            .unwrap())
-                        .name("Why I love Activity Streams")
-                        .url(
-                            "http://example.org/blog/2011/02/entry"
+            ActivityBuilder::new(
+                String::from("Add"),
+                String::from("Martin added an article to his blog"),
+            )
+            // TODO: figure out how to get a 'Z' on this. probably requires a time-zone (so not naive)
+            .published(DateTime::<Utc>::from_utc(
+                NaiveDate::from_ymd(2015, 2, 10).and_hms(15, 4, 55),
+                Utc,
+            ))
+            .actor(
+                ActorBuilder::new(String::from("Person"))
+                    .id("http://www.test.example/martin"
+                        .parse::<http::Uri>()
+                        .unwrap())
+                    .name(String::from("Martin Smith"))
+                    .url("http://example.org/martin".parse::<http::Uri>().unwrap())
+                    .image(LinkBuilder::new(
+                        UriBuilder::new(
+                            "http://example.org/martin/image.jpg"
                                 .parse::<http::Uri>()
                                 .unwrap(),
-                        ),
-                )
-                .target(
-                    ObjectBuilder::new()
-                        .object_type("OrderedCollection")
-                        .id("http://example.org/blog/".parse::<http::Uri>().unwrap())
-                        .name("Martin's Blog"),
-                )
-                .build(),
+                        )
+                        .media_type(String::from("image/jpeg")),
+                    )),
+            )
+            .object(
+                ObjectBuilder::new()
+                    .object_type(String::from("Article"))
+                    .id("http://www.test.example/blog/abc123/xyz"
+                        .parse::<http::Uri>()
+                        .unwrap())
+                    .name(String::from("Why I love Activity Streams"))
+                    .url(
+                        "http://example.org/blog/2011/02/entry"
+                            .parse::<http::Uri>()
+                            .unwrap(),
+                    ),
+            )
+            .target(
+                ObjectBuilder::new()
+                    .object_type(String::from("OrderedCollection"))
+                    .id("http://example.org/blog/".parse::<http::Uri>().unwrap())
+                    .name(String::from("Martin's Blog")),
+            )
+            .build(),
         );
         let expected = r#"{
   "@context": {
@@ -495,16 +527,16 @@ mod tests {
             ContextBuilder::new().build(),
             ObjectBuilder::new()
                 .id("http://example.org/foo".parse::<http::Uri>().unwrap())
-                .object_type("Note")
-                .name("My favourite stew recipe")
+                .object_type(String::from("Note"))
+                .name(String::from("My favourite stew recipe"))
                 .published(DateTime::<Utc>::from_utc(
                     NaiveDate::from_ymd(2014, 8, 21).and_hms(12, 34, 56),
                     Utc,
                 ))
                 .add_attributed_to(
-                    ActorBuilder::new("Person")
+                    ActorBuilder::new(String::from("Person"))
                         .id("http://joe.website.example/".parse::<http::Uri>().unwrap())
-                        .name("Joe Smith")
+                        .name(String::from("Joe Smith"))
                         .build(),
                 )
                 .build(),
