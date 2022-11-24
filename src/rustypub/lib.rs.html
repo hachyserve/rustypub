@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../rustypub/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../rustypub/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../rustypub/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../rustypub/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../rustypub/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../rustypub/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -530,62 +530,97 @@
 <span id="530">530</span>
 <span id="531">531</span>
 <span id="532">532</span>
-</pre><pre class="rust"><code><span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">core</span>;
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">extended</span>;
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+</pre><pre class="rust"><code><span class="kw">pub mod </span>core;
+<span class="kw">pub mod </span>extended;
 
-<span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
-<span class="kw">use</span> <span class="ident">serde_json::Result</span>;
+<span class="kw">use </span>serde::{de::DeserializeOwned, Serialize};
+<span class="kw">use </span>serde_json::Result;
 
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Serde</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="self">Self</span>: <span class="ident">Serialize</span> <span class="op">+</span> <span class="ident">Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
+<span class="kw">pub trait </span>Serde
+<span class="kw">where
+    </span><span class="self">Self</span>: Serialize + DeserializeOwned,
 {
-    <span class="kw">fn</span> <span class="ident">to_json</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">serialized</span> <span class="op">=</span> <span class="ident">serde_json::to_string</span>(<span class="kw-2">&amp;</span><span class="self">self</span>);
-        <span class="macro">println!</span>(<span class="string">&quot;serialized = {:?}&quot;</span>, <span class="ident">serialized</span>);
-        <span class="ident">serialized</span>
+    <span class="kw">fn </span>to_json(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;String&gt; {
+        <span class="kw">let </span>serialized = serde_json::to_string(<span class="kw-2">&amp;</span><span class="self">self</span>);
+        <span class="macro">println!</span>(<span class="string">&quot;serialized = {:?}&quot;</span>, serialized);
+        serialized
     }
 
-    <span class="kw">fn</span> <span class="ident">to_json_pretty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">serialized</span> <span class="op">=</span> <span class="ident">serde_json::to_string_pretty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>);
-        <span class="macro">println!</span>(<span class="string">&quot;serialized = {:?}&quot;</span>, <span class="ident">serialized</span>);
-        <span class="ident">serialized</span>
+    <span class="kw">fn </span>to_json_pretty(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;String&gt; {
+        <span class="kw">let </span>serialized = serde_json::to_string_pretty(<span class="kw-2">&amp;</span><span class="self">self</span>);
+        <span class="macro">println!</span>(<span class="string">&quot;serialized = {:?}&quot;</span>, serialized);
+        serialized
     }
 
-    <span class="kw">fn</span> <span class="ident">from_json</span>(<span class="ident">json</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;de</span> <span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="ident">serde_json::from_str</span>(<span class="ident">json</span>)
+    <span class="kw">fn </span>from_json(json: String) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+        serde_json::from_str(json.as_str())
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">mod</span> <span class="ident">tests</span> {
-    <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use</span> <span class="ident">chrono</span>::{<span class="ident">DateTime</span>, <span class="ident">NaiveDate</span>, <span class="ident">Utc</span>};
-    <span class="kw">use</span> <span class="ident">pretty_assertions::assert_eq</span>;
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">mod </span>tests {
+    <span class="kw">use super</span>::<span class="kw-2">*</span>;
+    <span class="kw">use </span>chrono::{DateTime, NaiveDate, Utc};
+    <span class="kw">use </span>pretty_assertions::assert_eq;
 
-    <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">core</span>::<span class="kw-2">*</span>, <span class="ident">extended</span>::<span class="kw-2">*</span>};
+    <span class="kw">use crate</span>::{core::<span class="kw-2">*</span>, extended::<span class="kw-2">*</span>};
 
-    <span class="comment">// A set of tests from https://www.w3.org/TR/activitystreams-vocabulary examples</span>
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">example_1</span>() {
-        <span class="kw">let</span> <span class="ident">listing</span> <span class="op">=</span> <span class="string">r#&quot;{
+    <span class="comment">// A set of tests from https://www.w3.org/TR/activitystreams-vocabulary examples
+    </span><span class="attribute">#[test]
+    </span><span class="kw">fn </span>example_1() {
+        <span class="kw">let </span>listing = <span class="string">r#&quot;{
           &quot;@context&quot;: { &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot; },
           &quot;type&quot;: &quot;Object&quot;,
           &quot;id&quot;: &quot;http://www.test.example/object/1&quot;,
           &quot;name&quot;: &quot;A Simple, non-specific object&quot;
         }&quot;#</span>;
-        <span class="kw">let</span> <span class="ident">object</span>: <span class="ident">Object</span><span class="op">&lt;</span><span class="ident">Null</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Document::from_json</span>(<span class="ident">listing</span>).<span class="ident">unwrap</span>().<span class="ident">object</span>;
-        <span class="macro">assert_eq!</span>(<span class="ident">object</span>.<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Object&quot;</span>));
+        <span class="kw">let </span>object: Object&lt;Null&gt; = Document::from_json(String::from(listing)).unwrap().object;
+        <span class="macro">assert_eq!</span>(object.object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Object&quot;</span>)));
         <span class="macro">assert_eq!</span>(
-            <span class="ident">object</span>.<span class="ident">id</span>,
-            <span class="prelude-val">Some</span>(<span class="ident">String::from</span>(<span class="string">&quot;http://www.test.example/object/1&quot;</span>))
+            object.id,
+            <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;http://www.test.example/object/1&quot;</span>))
         );
-        <span class="macro">assert_eq!</span>(<span class="ident">object</span>.<span class="ident">name</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;A Simple, non-specific object&quot;</span>));
+        <span class="macro">assert_eq!</span>(
+            object.name,
+            <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;A Simple, non-specific object&quot;</span>))
+        );
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">example_2</span>() {
-        <span class="kw">let</span> <span class="ident">listing</span> <span class="op">=</span> <span class="string">r#&quot;
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>example_2() {
+        <span class="kw">let </span>listing = <span class="string">r#&quot;
       {
         &quot;@context&quot;: {&quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;},
         &quot;type&quot;: &quot;Link&quot;,
@@ -596,17 +631,17 @@
       }
       &quot;#</span>;
 
-        <span class="kw">let</span> <span class="ident">link</span>: <span class="ident">Link</span> <span class="op">=</span> <span class="ident">Document::from_json</span>(<span class="ident">listing</span>).<span class="ident">unwrap</span>().<span class="ident">object</span>;
-        <span class="macro">assert_eq!</span>(<span class="ident">link</span>.<span class="ident">link_type</span>, <span class="string">&quot;Link&quot;</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">link</span>.<span class="ident">href</span>.<span class="ident">href</span>, <span class="string">&quot;http://example.org/abc&quot;</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">link</span>.<span class="ident">hreflang</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;en&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">link</span>.<span class="ident">href</span>.<span class="ident">media_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;text/html&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">link</span>.<span class="ident">name</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;An example link&quot;</span>));
+        <span class="kw">let </span>link: Link = Document::from_json(String::from(listing)).unwrap().object;
+        <span class="macro">assert_eq!</span>(link.link_type, <span class="string">&quot;Link&quot;</span>);
+        <span class="macro">assert_eq!</span>(link.href.href, <span class="string">&quot;http://example.org/abc&quot;</span>);
+        <span class="macro">assert_eq!</span>(link.hreflang, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;en&quot;</span>)));
+        <span class="macro">assert_eq!</span>(link.href.media_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;text/html&quot;</span>)));
+        <span class="macro">assert_eq!</span>(link.name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;An example link&quot;</span>)));
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">example_3</span>() {
-        <span class="kw">let</span> <span class="ident">listing</span> <span class="op">=</span> <span class="string">r#&quot;
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>example_3() {
+        <span class="kw">let </span>listing = <span class="string">r#&quot;
       {
         &quot;@context&quot;: { &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot; },
         &quot;type&quot;: &quot;Activity&quot;,
@@ -622,24 +657,27 @@
       } 
       &quot;#</span>;
 
-        <span class="kw">let</span> <span class="ident">activity</span>: <span class="ident">Activity</span> <span class="op">=</span> <span class="ident">Document::from_json</span>(<span class="ident">listing</span>).<span class="ident">unwrap</span>().<span class="ident">object</span>;
-        <span class="macro">assert_eq!</span>(<span class="ident">activity</span>.<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Activity&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">activity</span>.<span class="ident">summary</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Sally did something to a note&quot;</span>));
+        <span class="kw">let </span>activity: Activity = Document::from_json(String::from(listing)).unwrap().object;
+        <span class="macro">assert_eq!</span>(activity.object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Activity&quot;</span>)));
+        <span class="macro">assert_eq!</span>(
+            activity.summary,
+            <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Sally did something to a note&quot;</span>))
+        );
 
-        <span class="macro">assert!</span>(<span class="ident">activity</span>.<span class="ident">actor</span>.<span class="ident">is_some</span>());
-        <span class="kw">let</span> <span class="ident">actor</span> <span class="op">=</span> <span class="ident">activity</span>.<span class="ident">actor</span>.<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">actor</span>.<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Person&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">actor</span>.<span class="ident">name</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Sally&quot;</span>));
+        <span class="macro">assert!</span>(activity.actor.is_some());
+        <span class="kw">let </span>actor = activity.actor.unwrap();
+        <span class="macro">assert_eq!</span>(actor.object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Person&quot;</span>)));
+        <span class="macro">assert_eq!</span>(actor.name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Sally&quot;</span>)));
 
-        <span class="macro">assert!</span>(<span class="ident">activity</span>.<span class="ident">object</span>.<span class="ident">is_some</span>());
-        <span class="kw">let</span> <span class="ident">object</span> <span class="op">=</span> <span class="ident">activity</span>.<span class="ident">object</span>.<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">object</span>.<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">object</span>.<span class="ident">name</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;A Note&quot;</span>));
+        <span class="macro">assert!</span>(activity.object.is_some());
+        <span class="kw">let </span>object = activity.object.unwrap();
+        <span class="macro">assert_eq!</span>(object.object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Note&quot;</span>)));
+        <span class="macro">assert_eq!</span>(object.name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;A Note&quot;</span>)));
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">example_4</span>() {
-        <span class="kw">let</span> <span class="ident">listing</span> <span class="op">=</span> <span class="string">r#&quot;
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>example_4() {
+        <span class="kw">let </span>listing = <span class="string">r#&quot;
       {
         &quot;@context&quot;: { &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot; },
         &quot;type&quot;: &quot;Travel&quot;,
@@ -655,24 +693,25 @@
       }
       &quot;#</span>;
 
-        <span class="kw">let</span> <span class="ident">activity</span>: <span class="ident">IntransitiveActivity</span> <span class="op">=</span> <span class="ident">Document::from_json</span>(<span class="ident">listing</span>).<span class="ident">unwrap</span>().<span class="ident">object</span>;
-        <span class="macro">assert_eq!</span>(<span class="ident">activity</span>.<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Travel&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">activity</span>.<span class="ident">summary</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Sally went to work&quot;</span>));
+        <span class="kw">let </span>activity: IntransitiveActivity =
+            Document::from_json(String::from(listing)).unwrap().object;
+        <span class="macro">assert_eq!</span>(activity.object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Travel&quot;</span>)));
+        <span class="macro">assert_eq!</span>(activity.summary, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Sally went to work&quot;</span>)));
 
-        <span class="macro">assert!</span>(<span class="ident">activity</span>.<span class="ident">actor</span>.<span class="ident">is_some</span>());
-        <span class="kw">let</span> <span class="ident">actor</span> <span class="op">=</span> <span class="ident">activity</span>.<span class="ident">actor</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">actor</span>.<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Person&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">actor</span>.<span class="ident">name</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Sally&quot;</span>));
+        <span class="macro">assert!</span>(activity.actor.is_some());
+        <span class="kw">let </span>actor = activity.actor.as_ref().unwrap();
+        <span class="macro">assert_eq!</span>(actor.object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Person&quot;</span>)));
+        <span class="macro">assert_eq!</span>(actor.name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Sally&quot;</span>)));
 
-        <span class="macro">assert!</span>(<span class="ident">activity</span>.<span class="ident">target</span>.<span class="ident">is_some</span>());
-        <span class="kw">let</span> <span class="ident">target</span> <span class="op">=</span> <span class="ident">activity</span>.<span class="ident">target</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">target</span>.<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Place&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">target</span>.<span class="ident">name</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Work&quot;</span>));
+        <span class="macro">assert!</span>(activity.target.is_some());
+        <span class="kw">let </span>target = activity.target.as_ref().unwrap();
+        <span class="macro">assert_eq!</span>(target.object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Place&quot;</span>)));
+        <span class="macro">assert_eq!</span>(target.name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Work&quot;</span>)));
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">example_5</span>() {
-        <span class="kw">let</span> <span class="ident">listing</span> <span class="op">=</span> <span class="string">r#&quot;
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>example_5() {
+        <span class="kw">let </span>listing = <span class="string">r#&quot;
         {
           &quot;@context&quot;: { &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot; },
           &quot;summary&quot;: &quot;Sally&#39;s notes&quot;,
@@ -691,22 +730,23 @@
         }
       &quot;#</span>;
 
-        <span class="kw">let</span> <span class="ident">collection</span>: <span class="ident">Collection</span><span class="op">&lt;</span><span class="ident">Object</span><span class="op">&lt;</span><span class="ident">Null</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Document::from_json</span>(<span class="ident">listing</span>).<span class="ident">unwrap</span>().<span class="ident">object</span>;
-        <span class="macro">assert_eq!</span>(<span class="ident">collection</span>.<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Collection&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">collection</span>.<span class="ident">summary</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Sally&#39;s notes&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">collection</span>.<span class="ident">total_items</span>, <span class="prelude-val">Some</span>(<span class="number">2</span>));
+        <span class="kw">let </span>collection: Collection&lt;Object&lt;Null&gt;&gt; =
+            Document::from_json(String::from(listing)).unwrap().object;
+        <span class="macro">assert_eq!</span>(collection.object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Collection&quot;</span>)));
+        <span class="macro">assert_eq!</span>(collection.summary, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Sally&#39;s notes&quot;</span>)));
+        <span class="macro">assert_eq!</span>(collection.total_items, <span class="prelude-val">Some</span>(<span class="number">2</span>));
 
-        <span class="kw">let</span> <span class="ident">items</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">collection</span>.<span class="ident">items</span>;
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>.<span class="ident">len</span>(), <span class="ident">collection</span>.<span class="ident">total_items</span>.<span class="ident">unwrap</span>());
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>[<span class="number">0</span>].<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>[<span class="number">0</span>].<span class="ident">name</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;A Simple Note&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>[<span class="number">1</span>].<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>[<span class="number">1</span>].<span class="ident">name</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Another Simple Note&quot;</span>));
+        <span class="kw">let </span>items = <span class="kw-2">&amp;</span>collection.items;
+        <span class="macro">assert_eq!</span>(items.len(), collection.total_items.unwrap());
+        <span class="macro">assert_eq!</span>(items[<span class="number">0</span>].object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Note&quot;</span>)));
+        <span class="macro">assert_eq!</span>(items[<span class="number">0</span>].name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;A Simple Note&quot;</span>)));
+        <span class="macro">assert_eq!</span>(items[<span class="number">1</span>].object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Note&quot;</span>)));
+        <span class="macro">assert_eq!</span>(items[<span class="number">1</span>].name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Another Simple Note&quot;</span>)));
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">example_6</span>() {
-        <span class="kw">let</span> <span class="ident">listing</span> <span class="op">=</span> <span class="string">r#&quot;
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>example_6() {
+        <span class="kw">let </span>listing = <span class="string">r#&quot;
       {
         &quot;@context&quot;: { &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot; },
         &quot;summary&quot;: &quot;Sally&#39;s notes&quot;,
@@ -724,23 +764,26 @@
         ]
       }
       &quot;#</span>;
-        <span class="kw">let</span> <span class="ident">collection</span>: <span class="ident">OrderedCollection</span><span class="op">&lt;</span><span class="ident">Object</span><span class="op">&lt;</span><span class="ident">Null</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span>
-            <span class="ident">Document::from_json</span>(<span class="ident">listing</span>).<span class="ident">unwrap</span>().<span class="ident">object</span>;
-        <span class="macro">assert_eq!</span>(<span class="ident">collection</span>.<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;OrderedCollection&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">collection</span>.<span class="ident">summary</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Sally&#39;s notes&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">collection</span>.<span class="ident">total_items</span>, <span class="prelude-val">Some</span>(<span class="number">2</span>));
+        <span class="kw">let </span>collection: OrderedCollection&lt;Object&lt;Null&gt;&gt; =
+            Document::from_json(String::from(listing)).unwrap().object;
+        <span class="macro">assert_eq!</span>(
+            collection.object_type,
+            <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;OrderedCollection&quot;</span>))
+        );
+        <span class="macro">assert_eq!</span>(collection.summary, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Sally&#39;s notes&quot;</span>)));
+        <span class="macro">assert_eq!</span>(collection.total_items, <span class="prelude-val">Some</span>(<span class="number">2</span>));
 
-        <span class="kw">let</span> <span class="ident">items</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">collection</span>.<span class="ident">ordered_items</span>;
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>.<span class="ident">len</span>(), <span class="ident">collection</span>.<span class="ident">total_items</span>.<span class="ident">unwrap</span>());
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>[<span class="number">0</span>].<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>[<span class="number">0</span>].<span class="ident">name</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;A Simple Note&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>[<span class="number">1</span>].<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>[<span class="number">1</span>].<span class="ident">name</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Another Simple Note&quot;</span>));
+        <span class="kw">let </span>items = <span class="kw-2">&amp;</span>collection.ordered_items;
+        <span class="macro">assert_eq!</span>(items.len(), collection.total_items.unwrap());
+        <span class="macro">assert_eq!</span>(items[<span class="number">0</span>].object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Note&quot;</span>)));
+        <span class="macro">assert_eq!</span>(items[<span class="number">0</span>].name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;A Simple Note&quot;</span>)));
+        <span class="macro">assert_eq!</span>(items[<span class="number">1</span>].object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Note&quot;</span>)));
+        <span class="macro">assert_eq!</span>(items[<span class="number">1</span>].name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Another Simple Note&quot;</span>)));
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">example_7</span>() {
-        <span class="kw">let</span> <span class="ident">listing</span> <span class="op">=</span> <span class="string">r#&quot;
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>example_7() {
+        <span class="kw">let </span>listing = <span class="string">r#&quot;
       {
         &quot;@context&quot;: { &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot; },
         &quot;summary&quot;: &quot;Page 1 of Sally&#39;s notes&quot;,
@@ -759,30 +802,36 @@
         ]
       }
       &quot;#</span>;
-        <span class="kw">let</span> <span class="ident">collection_page</span>: <span class="ident">CollectionPage</span><span class="op">&lt;</span><span class="ident">Object</span><span class="op">&lt;</span><span class="ident">Null</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span>
-            <span class="ident">Document::from_json</span>(<span class="ident">listing</span>).<span class="ident">unwrap</span>().<span class="ident">object</span>;
-        <span class="macro">assert_eq!</span>(<span class="ident">collection_page</span>.<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;CollectionPage&quot;</span>));
+        <span class="kw">let </span>collection_page: CollectionPage&lt;Object&lt;Null&gt;&gt; =
+            Document::from_json(String::from(listing)).unwrap().object;
         <span class="macro">assert_eq!</span>(
-            <span class="ident">collection_page</span>.<span class="ident">id</span>,
-            <span class="prelude-val">Some</span>(<span class="string">&quot;http://example.org/foo?page=1&quot;</span>.<span class="ident">to_string</span>())
+            collection_page.object_type,
+            <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;CollectionPage&quot;</span>))
         );
-        <span class="macro">assert_eq!</span>(<span class="ident">collection_page</span>.<span class="ident">summary</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Page 1 of Sally&#39;s notes&quot;</span>));
         <span class="macro">assert_eq!</span>(
-            <span class="ident">collection_page</span>.<span class="ident">part_of</span>,
-            <span class="string">&quot;http://example.org/foo&quot;</span>.<span class="ident">to_string</span>()
+            collection_page.id,
+            <span class="prelude-val">Some</span>(<span class="string">&quot;http://example.org/foo?page=1&quot;</span>.to_string())
         );
-        <span class="macro">assert_eq!</span>(<span class="ident">collection_page</span>.<span class="ident">total_items</span>, <span class="prelude-val">None</span>);
+        <span class="macro">assert_eq!</span>(
+            collection_page.summary,
+            <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Page 1 of Sally&#39;s notes&quot;</span>))
+        );
+        <span class="macro">assert_eq!</span>(
+            collection_page.part_of,
+            <span class="string">&quot;http://example.org/foo&quot;</span>.to_string()
+        );
+        <span class="macro">assert_eq!</span>(collection_page.total_items, <span class="prelude-val">None</span>);
 
-        <span class="kw">let</span> <span class="ident">items</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">collection_page</span>.<span class="ident">items</span>;
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>[<span class="number">0</span>].<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>[<span class="number">0</span>].<span class="ident">name</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;A Simple Note&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>[<span class="number">1</span>].<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>[<span class="number">1</span>].<span class="ident">name</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Another Simple Note&quot;</span>));
+        <span class="kw">let </span>items = <span class="kw-2">&amp;</span>collection_page.items;
+        <span class="macro">assert_eq!</span>(items[<span class="number">0</span>].object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Note&quot;</span>)));
+        <span class="macro">assert_eq!</span>(items[<span class="number">0</span>].name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;A Simple Note&quot;</span>)));
+        <span class="macro">assert_eq!</span>(items[<span class="number">1</span>].object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Note&quot;</span>)));
+        <span class="macro">assert_eq!</span>(items[<span class="number">1</span>].name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Another Simple Note&quot;</span>)));
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">example_8</span>() {
-        <span class="kw">let</span> <span class="ident">listing</span> <span class="op">=</span> <span class="string">r#&quot;
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>example_8() {
+        <span class="kw">let </span>listing = <span class="string">r#&quot;
 {
   &quot;@context&quot;: {&quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;},
   &quot;summary&quot;: &quot;Page 1 of Sally&#39;s notes&quot;,
@@ -801,48 +850,56 @@
   ]
 }
 &quot;#</span>;
-        <span class="kw">let</span> <span class="ident">collection_page</span>: <span class="ident">OrderedCollectionPage</span><span class="op">&lt;</span><span class="ident">Object</span><span class="op">&lt;</span><span class="ident">Null</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span>
-            <span class="ident">Document::from_json</span>(<span class="ident">listing</span>).<span class="ident">unwrap</span>().<span class="ident">object</span>;
-        <span class="macro">assert_eq!</span>(<span class="ident">collection_page</span>.<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;OrderedCollectionPage&quot;</span>));
+        <span class="kw">let </span>collection_page: OrderedCollectionPage&lt;Object&lt;Null&gt;&gt; =
+            Document::from_json(String::from(listing)).unwrap().object;
         <span class="macro">assert_eq!</span>(
-            <span class="ident">collection_page</span>.<span class="ident">id</span>,
-            <span class="prelude-val">Some</span>(<span class="string">&quot;http://example.org/foo?page=1&quot;</span>.<span class="ident">to_string</span>())
+            collection_page.object_type,
+            <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;OrderedCollectionPage&quot;</span>))
         );
-        <span class="macro">assert_eq!</span>(<span class="ident">collection_page</span>.<span class="ident">summary</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Page 1 of Sally&#39;s notes&quot;</span>));
         <span class="macro">assert_eq!</span>(
-            <span class="ident">collection_page</span>.<span class="ident">part_of</span>,
-            <span class="string">&quot;http://example.org/foo&quot;</span>.<span class="ident">to_string</span>()
+            collection_page.id,
+            <span class="prelude-val">Some</span>(<span class="string">&quot;http://example.org/foo?page=1&quot;</span>.to_string())
         );
-        <span class="macro">assert_eq!</span>(<span class="ident">collection_page</span>.<span class="ident">total_items</span>, <span class="prelude-val">None</span>);
+        <span class="macro">assert_eq!</span>(
+            collection_page.summary,
+            <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Page 1 of Sally&#39;s notes&quot;</span>))
+        );
+        <span class="macro">assert_eq!</span>(
+            collection_page.part_of,
+            <span class="string">&quot;http://example.org/foo&quot;</span>.to_string()
+        );
+        <span class="macro">assert_eq!</span>(collection_page.total_items, <span class="prelude-val">None</span>);
 
-        <span class="kw">let</span> <span class="ident">items</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">collection_page</span>.<span class="ident">ordered_items</span>;
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>[<span class="number">0</span>].<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>[<span class="number">0</span>].<span class="ident">name</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;A Simple Note&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>[<span class="number">1</span>].<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">items</span>[<span class="number">1</span>].<span class="ident">name</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Another Simple Note&quot;</span>));
+        <span class="kw">let </span>items = <span class="kw-2">&amp;</span>collection_page.ordered_items;
+        <span class="macro">assert_eq!</span>(items[<span class="number">0</span>].object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Note&quot;</span>)));
+        <span class="macro">assert_eq!</span>(items[<span class="number">0</span>].name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;A Simple Note&quot;</span>)));
+        <span class="macro">assert_eq!</span>(items[<span class="number">1</span>].object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Note&quot;</span>)));
+        <span class="macro">assert_eq!</span>(items[<span class="number">1</span>].name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Another Simple Note&quot;</span>)));
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">example_53</span>() {
-        <span class="kw">let</span> <span class="ident">listing</span> <span class="op">=</span> <span class="string">r#&quot;{
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>example_53() {
+        <span class="kw">let </span>listing = <span class="string">r#&quot;{
           &quot;@context&quot;: { &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot; },
           &quot;type&quot;: &quot;Note&quot;,
           &quot;name&quot;: &quot;A Word of Warning&quot;,
           &quot;content&quot;: &quot;Looks like it is going to rain today. Bring an umbrella!&quot;
         }&quot;#</span>;
-        <span class="kw">let</span> <span class="ident">document</span>: <span class="ident">Document</span><span class="op">&lt;</span><span class="ident">Note</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Document::from_json</span>(<span class="ident">listing</span>).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">note</span> <span class="op">=</span> <span class="ident">document</span>.<span class="ident">object</span>;
-        <span class="macro">assert_eq!</span>(<span class="ident">note</span>.<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">note</span>.<span class="ident">name</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;A Word of Warning&quot;</span>));
+        <span class="kw">let </span>document: Document&lt;Note&gt; = Document::from_json(String::from(listing)).unwrap();
+        <span class="kw">let </span>note = document.object;
+        <span class="macro">assert_eq!</span>(note.object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Note&quot;</span>)));
+        <span class="macro">assert_eq!</span>(note.name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;A Word of Warning&quot;</span>)));
         <span class="macro">assert_eq!</span>(
-            <span class="ident">note</span>.<span class="ident">content</span>,
-            <span class="prelude-val">Some</span>(<span class="string">&quot;Looks like it is going to rain today. Bring an umbrella!&quot;</span>)
+            note.content,
+            <span class="prelude-val">Some</span>(String::from(
+                <span class="string">&quot;Looks like it is going to rain today. Bring an umbrella!&quot;
+            </span>))
         );
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">example_69</span>() {
-        <span class="kw">let</span> <span class="ident">listing</span> <span class="op">=</span> <span class="string">r#&quot;{
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>example_69() {
+        <span class="kw">let </span>listing = <span class="string">r#&quot;{
   &quot;@context&quot;: {
     &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;
   },
@@ -854,26 +911,28 @@
     &quot;name&quot;: &quot;ExampleCo LLC&quot;
   }
 }&quot;#</span>;
-        <span class="kw">let</span> <span class="ident">document</span>: <span class="ident">Document</span><span class="op">&lt;</span><span class="ident">Object</span><span class="op">&lt;</span><span class="ident">Null</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Document::from_json</span>(<span class="ident">listing</span>).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">object</span> <span class="op">=</span> <span class="ident">document</span>.<span class="ident">object</span>;
-        <span class="macro">assert_eq!</span>(<span class="ident">object</span>.<span class="ident">name</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Holiday announcement&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">object</span>.<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>));
+        <span class="kw">let </span>document: Document&lt;Object&lt;Null&gt;&gt; = Document::from_json(String::from(listing)).unwrap();
+        <span class="kw">let </span>object = document.object;
+        <span class="macro">assert_eq!</span>(object.name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Holiday announcement&quot;</span>)));
+        <span class="macro">assert_eq!</span>(object.object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Note&quot;</span>)));
         <span class="macro">assert_eq!</span>(
-            <span class="ident">object</span>.<span class="ident">content</span>,
-            <span class="prelude-val">Some</span>(<span class="string">&quot;Thursday will be a company-wide holiday. Enjoy your day off!&quot;</span>)
+            object.content,
+            <span class="prelude-val">Some</span>(String::from(
+                <span class="string">&quot;Thursday will be a company-wide holiday. Enjoy your day off!&quot;
+            </span>))
         );
-        <span class="macro">assert!</span>(<span class="ident">object</span>.<span class="ident">audience</span>.<span class="ident">is_some</span>());
-        <span class="kw">let</span> <span class="ident">audience</span> <span class="op">=</span> <span class="ident">object</span>.<span class="ident">audience</span>.<span class="ident">unwrap</span>();
+        <span class="macro">assert!</span>(object.audience.is_some());
+        <span class="kw">let </span>audience = object.audience.unwrap();
         <span class="macro">assert_eq!</span>(
-            <span class="ident">audience</span>.<span class="ident">object_type</span>,
-            <span class="prelude-val">Some</span>(<span class="string">&quot;http://example.org/Organization&quot;</span>)
+            audience.object_type,
+            <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;http://example.org/Organization&quot;</span>))
         );
-        <span class="macro">assert_eq!</span>(<span class="ident">audience</span>.<span class="ident">name</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;ExampleCo LLC&quot;</span>));
+        <span class="macro">assert_eq!</span>(audience.name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;ExampleCo LLC&quot;</span>)));
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">example_114</span>() {
-        <span class="kw">let</span> <span class="ident">listing</span> <span class="op">=</span> <span class="string">r#&quot;{
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>example_114() {
+        <span class="kw">let </span>listing = <span class="string">r#&quot;{
   &quot;@context&quot;: {
     &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;
   },
@@ -881,16 +940,16 @@
   &quot;type&quot;: &quot;Note&quot;,
   &quot;content&quot;: &quot;A &lt;em&gt;simple&lt;/em&gt; note&quot;
 }&quot;#</span>;
-        <span class="kw">let</span> <span class="ident">document</span>: <span class="ident">Document</span><span class="op">&lt;</span><span class="ident">Object</span><span class="op">&lt;</span><span class="ident">Null</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Document::from_json</span>(<span class="ident">listing</span>).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">object</span> <span class="op">=</span> <span class="ident">document</span>.<span class="ident">object</span>;
-        <span class="macro">assert_eq!</span>(<span class="ident">object</span>.<span class="ident">summary</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;A simple note&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">object</span>.<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">object</span>.<span class="ident">content</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;A &lt;em&gt;simple&lt;/em&gt; note&quot;</span>));
+        <span class="kw">let </span>document: Document&lt;Object&lt;Null&gt;&gt; = Document::from_json(String::from(listing)).unwrap();
+        <span class="kw">let </span>object = document.object;
+        <span class="macro">assert_eq!</span>(object.summary, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;A simple note&quot;</span>)));
+        <span class="macro">assert_eq!</span>(object.object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Note&quot;</span>)));
+        <span class="macro">assert_eq!</span>(object.content, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;A &lt;em&gt;simple&lt;/em&gt; note&quot;</span>)));
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">example_133</span>() {
-        <span class="kw">let</span> <span class="ident">listing</span> <span class="op">=</span> <span class="string">r#&quot;{
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>example_133() {
+        <span class="kw">let </span>listing = <span class="string">r#&quot;{
         &quot;@context&quot;: {
           &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;
         },
@@ -898,31 +957,33 @@
         &quot;type&quot;: &quot;Note&quot;,
         &quot;summary&quot;: &quot;A simple &lt;em&gt;note&lt;/em&gt;&quot;
       }&quot;#</span>;
-        <span class="kw">let</span> <span class="ident">document</span>: <span class="ident">Document</span><span class="op">&lt;</span><span class="ident">Object</span><span class="op">&lt;</span><span class="ident">Null</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Document::from_json</span>(<span class="ident">listing</span>).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">object</span> <span class="op">=</span> <span class="ident">document</span>.<span class="ident">object</span>;
-        <span class="macro">assert_eq!</span>(<span class="ident">object</span>.<span class="ident">summary</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;A simple &lt;em&gt;note&lt;/em&gt;&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">object</span>.<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">object</span>.<span class="ident">name</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Cane Sugar Processing&quot;</span>));
+        <span class="kw">let </span>document: Document&lt;Object&lt;Null&gt;&gt; = Document::from_json(String::from(listing)).unwrap();
+        <span class="kw">let </span>object = document.object;
+        <span class="macro">assert_eq!</span>(object.summary, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;A simple &lt;em&gt;note&lt;/em&gt;&quot;</span>)));
+        <span class="macro">assert_eq!</span>(object.object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Note&quot;</span>)));
+        <span class="macro">assert_eq!</span>(object.name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Cane Sugar Processing&quot;</span>)));
     }
 
-    <span class="comment">// A set of tests from https://www.w3.org/TR/activitystreams-core/ examples</span>
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">minimal_activity_3_1</span>() {
-        <span class="kw">let</span> <span class="ident">actual</span> <span class="op">=</span> <span class="ident">Document::new</span>(
-            <span class="ident">ContextBuilder::new</span>().<span class="ident">build</span>(),
-            <span class="ident">ActivityBuilder::new</span>(<span class="string">&quot;Create&quot;</span>, <span class="string">&quot;Martin created an image&quot;</span>)
-                .<span class="ident">actor</span>(
-                    <span class="ident">ActorBuilder::new</span>(<span class="string">&quot;Person&quot;</span>).<span class="ident">id</span>(<span class="string">&quot;http://www.test.example/martin&quot;</span>
-                        .<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">http::Uri</span><span class="op">&gt;</span>()
-                        .<span class="ident">unwrap</span>()),
-                )
-                .<span class="ident">object</span>(
-                    <span class="ident">ObjectBuilder::new</span>()
-                        .<span class="ident">id</span>(<span class="string">&quot;http://example.org/foo.jpg&quot;</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">http::Uri</span><span class="op">&gt;</span>().<span class="ident">unwrap</span>()),
-                )
-                .<span class="ident">build</span>(),
+    <span class="comment">// A set of tests from https://www.w3.org/TR/activitystreams-core/ examples
+    </span><span class="attribute">#[test]
+    </span><span class="kw">fn </span>minimal_activity_3_1() {
+        <span class="kw">let </span>actual = Document::new(
+            ContextBuilder::new().build(),
+            ActivityBuilder::new(
+                String::from(<span class="string">&quot;Create&quot;</span>),
+                String::from(<span class="string">&quot;Martin created an image&quot;</span>),
+            )
+            .actor(
+                ActorBuilder::new(String::from(<span class="string">&quot;Person&quot;</span>)).id(<span class="string">&quot;http://www.test.example/martin&quot;
+                    </span>.parse::&lt;http::Uri&gt;()
+                    .unwrap()),
+            )
+            .object(
+                ObjectBuilder::new().id(<span class="string">&quot;http://example.org/foo.jpg&quot;</span>.parse::&lt;http::Uri&gt;().unwrap()),
+            )
+            .build(),
         );
-        <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="string">r#&quot;{
+        <span class="kw">let </span>expected = <span class="string">r#&quot;{
   &quot;@context&quot;: {
     &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;
   },
@@ -936,58 +997,61 @@
     &quot;id&quot;: &quot;http://example.org/foo.jpg&quot;
   }
 }&quot;#</span>;
-        <span class="macro">assert!</span>(<span class="ident">actual</span>.<span class="ident">to_json_pretty</span>().<span class="ident">is_ok</span>());
-        <span class="macro">assert_eq!</span>(<span class="ident">actual</span>.<span class="ident">to_json_pretty</span>().<span class="ident">unwrap</span>(), <span class="ident">expected</span>);
+        <span class="macro">assert!</span>(actual.to_json_pretty().is_ok());
+        <span class="macro">assert_eq!</span>(actual.to_json_pretty().unwrap(), expected);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">basic_activity_with_additional_detail_3_2</span>() {
-        <span class="kw">let</span> <span class="ident">actual</span> <span class="op">=</span> <span class="ident">Document::new</span>(
-            <span class="ident">ContextBuilder::new</span>().<span class="ident">build</span>(),
-            <span class="ident">ActivityBuilder::new</span>(<span class="string">&quot;Add&quot;</span>, <span class="string">&quot;Martin added an article to his blog&quot;</span>)
-                <span class="comment">// TODO: figure out how to get a &#39;Z&#39; on this. probably requires a time-zone (so not naive)</span>
-                .<span class="ident">published</span>(<span class="ident">DateTime</span>::<span class="op">&lt;</span><span class="ident">Utc</span><span class="op">&gt;</span><span class="ident">::from_utc</span>(
-                    <span class="ident">NaiveDate::from_ymd</span>(<span class="number">2015</span>, <span class="number">2</span>, <span class="number">10</span>).<span class="ident">and_hms</span>(<span class="number">15</span>, <span class="number">4</span>, <span class="number">55</span>),
-                    <span class="ident">Utc</span>,
-                ))
-                .<span class="ident">actor</span>(
-                    <span class="ident">ActorBuilder::new</span>(<span class="string">&quot;Person&quot;</span>)
-                        .<span class="ident">id</span>(<span class="string">&quot;http://www.test.example/martin&quot;</span>
-                            .<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">http::Uri</span><span class="op">&gt;</span>()
-                            .<span class="ident">unwrap</span>())
-                        .<span class="ident">name</span>(<span class="string">&quot;Martin Smith&quot;</span>)
-                        .<span class="ident">url</span>(<span class="string">&quot;http://example.org/martin&quot;</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">http::Uri</span><span class="op">&gt;</span>().<span class="ident">unwrap</span>())
-                        .<span class="ident">image</span>(<span class="ident">LinkBuilder::new</span>(
-                            <span class="ident">UriBuilder::new</span>(
-                                <span class="string">&quot;http://example.org/martin/image.jpg&quot;</span>
-                                    .<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">http::Uri</span><span class="op">&gt;</span>()
-                                    .<span class="ident">unwrap</span>(),
-                            )
-                            .<span class="ident">media_type</span>(<span class="string">&quot;image/jpeg&quot;</span>),
-                        )),
-                )
-                .<span class="ident">object</span>(
-                    <span class="ident">ObjectBuilder::new</span>()
-                        .<span class="ident">object_type</span>(<span class="string">&quot;Article&quot;</span>)
-                        .<span class="ident">id</span>(<span class="string">&quot;http://www.test.example/blog/abc123/xyz&quot;</span>
-                            .<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">http::Uri</span><span class="op">&gt;</span>()
-                            .<span class="ident">unwrap</span>())
-                        .<span class="ident">name</span>(<span class="string">&quot;Why I love Activity Streams&quot;</span>)
-                        .<span class="ident">url</span>(
-                            <span class="string">&quot;http://example.org/blog/2011/02/entry&quot;</span>
-                                .<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">http::Uri</span><span class="op">&gt;</span>()
-                                .<span class="ident">unwrap</span>(),
-                        ),
-                )
-                .<span class="ident">target</span>(
-                    <span class="ident">ObjectBuilder::new</span>()
-                        .<span class="ident">object_type</span>(<span class="string">&quot;OrderedCollection&quot;</span>)
-                        .<span class="ident">id</span>(<span class="string">&quot;http://example.org/blog/&quot;</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">http::Uri</span><span class="op">&gt;</span>().<span class="ident">unwrap</span>())
-                        .<span class="ident">name</span>(<span class="string">&quot;Martin&#39;s Blog&quot;</span>),
-                )
-                .<span class="ident">build</span>(),
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>basic_activity_with_additional_detail_3_2() {
+        <span class="kw">let </span>actual = Document::new(
+            ContextBuilder::new().build(),
+            ActivityBuilder::new(
+                String::from(<span class="string">&quot;Add&quot;</span>),
+                String::from(<span class="string">&quot;Martin added an article to his blog&quot;</span>),
+            )
+            <span class="comment">// TODO: figure out how to get a &#39;Z&#39; on this. probably requires a time-zone (so not naive)
+            </span>.published(DateTime::&lt;Utc&gt;::from_utc(
+                NaiveDate::from_ymd(<span class="number">2015</span>, <span class="number">2</span>, <span class="number">10</span>).and_hms(<span class="number">15</span>, <span class="number">4</span>, <span class="number">55</span>),
+                Utc,
+            ))
+            .actor(
+                ActorBuilder::new(String::from(<span class="string">&quot;Person&quot;</span>))
+                    .id(<span class="string">&quot;http://www.test.example/martin&quot;
+                        </span>.parse::&lt;http::Uri&gt;()
+                        .unwrap())
+                    .name(String::from(<span class="string">&quot;Martin Smith&quot;</span>))
+                    .url(<span class="string">&quot;http://example.org/martin&quot;</span>.parse::&lt;http::Uri&gt;().unwrap())
+                    .image(LinkBuilder::new(
+                        UriBuilder::new(
+                            <span class="string">&quot;http://example.org/martin/image.jpg&quot;
+                                </span>.parse::&lt;http::Uri&gt;()
+                                .unwrap(),
+                        )
+                        .media_type(String::from(<span class="string">&quot;image/jpeg&quot;</span>)),
+                    )),
+            )
+            .object(
+                ObjectBuilder::new()
+                    .object_type(String::from(<span class="string">&quot;Article&quot;</span>))
+                    .id(<span class="string">&quot;http://www.test.example/blog/abc123/xyz&quot;
+                        </span>.parse::&lt;http::Uri&gt;()
+                        .unwrap())
+                    .name(String::from(<span class="string">&quot;Why I love Activity Streams&quot;</span>))
+                    .url(
+                        <span class="string">&quot;http://example.org/blog/2011/02/entry&quot;
+                            </span>.parse::&lt;http::Uri&gt;()
+                            .unwrap(),
+                    ),
+            )
+            .target(
+                ObjectBuilder::new()
+                    .object_type(String::from(<span class="string">&quot;OrderedCollection&quot;</span>))
+                    .id(<span class="string">&quot;http://example.org/blog/&quot;</span>.parse::&lt;http::Uri&gt;().unwrap())
+                    .name(String::from(<span class="string">&quot;Martin&#39;s Blog&quot;</span>)),
+            )
+            .build(),
         );
-        <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="string">r#&quot;{
+        <span class="kw">let </span>expected = <span class="string">r#&quot;{
   &quot;@context&quot;: {
     &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;
   },
@@ -1017,32 +1081,32 @@
     &quot;name&quot;: &quot;Martin&#39;s Blog&quot;
   }
 }&quot;#</span>;
-        <span class="macro">assert!</span>(<span class="ident">actual</span>.<span class="ident">to_json_pretty</span>().<span class="ident">is_ok</span>());
-        <span class="macro">assert_eq!</span>(<span class="ident">actual</span>.<span class="ident">to_json_pretty</span>().<span class="ident">unwrap</span>(), <span class="ident">expected</span>);
+        <span class="macro">assert!</span>(actual.to_json_pretty().is_ok());
+        <span class="macro">assert_eq!</span>(actual.to_json_pretty().unwrap(), expected);
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">object_4_1_7</span>() {
-        <span class="kw">let</span> <span class="ident">actual</span> <span class="op">=</span> <span class="ident">Document::new</span>(
-            <span class="ident">ContextBuilder::new</span>().<span class="ident">build</span>(),
-            <span class="ident">ObjectBuilder::new</span>()
-                .<span class="ident">id</span>(<span class="string">&quot;http://example.org/foo&quot;</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">http::Uri</span><span class="op">&gt;</span>().<span class="ident">unwrap</span>())
-                .<span class="ident">object_type</span>(<span class="string">&quot;Note&quot;</span>)
-                .<span class="ident">name</span>(<span class="string">&quot;My favourite stew recipe&quot;</span>)
-                .<span class="ident">published</span>(<span class="ident">DateTime</span>::<span class="op">&lt;</span><span class="ident">Utc</span><span class="op">&gt;</span><span class="ident">::from_utc</span>(
-                    <span class="ident">NaiveDate::from_ymd</span>(<span class="number">2014</span>, <span class="number">8</span>, <span class="number">21</span>).<span class="ident">and_hms</span>(<span class="number">12</span>, <span class="number">34</span>, <span class="number">56</span>),
-                    <span class="ident">Utc</span>,
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>object_4_1_7() {
+        <span class="kw">let </span>actual = Document::new(
+            ContextBuilder::new().build(),
+            ObjectBuilder::new()
+                .id(<span class="string">&quot;http://example.org/foo&quot;</span>.parse::&lt;http::Uri&gt;().unwrap())
+                .object_type(String::from(<span class="string">&quot;Note&quot;</span>))
+                .name(String::from(<span class="string">&quot;My favourite stew recipe&quot;</span>))
+                .published(DateTime::&lt;Utc&gt;::from_utc(
+                    NaiveDate::from_ymd(<span class="number">2014</span>, <span class="number">8</span>, <span class="number">21</span>).and_hms(<span class="number">12</span>, <span class="number">34</span>, <span class="number">56</span>),
+                    Utc,
                 ))
-                .<span class="ident">add_attributed_to</span>(
-                    <span class="ident">ActorBuilder::new</span>(<span class="string">&quot;Person&quot;</span>)
-                        .<span class="ident">id</span>(<span class="string">&quot;http://joe.website.example/&quot;</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">http::Uri</span><span class="op">&gt;</span>().<span class="ident">unwrap</span>())
-                        .<span class="ident">name</span>(<span class="string">&quot;Joe Smith&quot;</span>)
-                        .<span class="ident">build</span>(),
+                .add_attributed_to(
+                    ActorBuilder::new(String::from(<span class="string">&quot;Person&quot;</span>))
+                        .id(<span class="string">&quot;http://joe.website.example/&quot;</span>.parse::&lt;http::Uri&gt;().unwrap())
+                        .name(String::from(<span class="string">&quot;Joe Smith&quot;</span>))
+                        .build(),
                 )
-                .<span class="ident">build</span>(),
+                .build(),
         );
 
-        <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="string">r#&quot;{
+        <span class="kw">let </span>expected = <span class="string">r#&quot;{
   &quot;@context&quot;: {
     &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;
   },
@@ -1058,9 +1122,9 @@
     }
   ]
 }&quot;#</span>;
-        <span class="macro">assert!</span>(<span class="ident">actual</span>.<span class="ident">to_json_pretty</span>().<span class="ident">is_ok</span>());
-        <span class="macro">assert_eq!</span>(<span class="ident">actual</span>.<span class="ident">to_json_pretty</span>().<span class="ident">unwrap</span>(), <span class="ident">expected</span>);
+        <span class="macro">assert!</span>(actual.to_json_pretty().is_ok());
+        <span class="macro">assert_eq!</span>(actual.to_json_pretty().unwrap(), expected);
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="rustypub" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="rustypub" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

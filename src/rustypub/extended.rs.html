@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/extended.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>extended.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../rustypub/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../rustypub/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../rustypub/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/extended.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>extended.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../rustypub/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../rustypub/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../rustypub/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -248,190 +248,193 @@
 <span id="248">248</span>
 <span id="249">249</span>
 <span id="250">250</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::core</span>::{<span class="ident">LinkBuilder</span>, <span class="ident">Null</span>, <span class="ident">Object</span>, <span class="ident">ObjectBuilder</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::Serde</span>;
-<span class="kw">use</span> <span class="ident">chrono</span>::{<span class="ident">DateTime</span>, <span class="ident">Utc</span>};
-<span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::core::{LinkBuilder, Null, Object, ObjectBuilder};
+<span class="kw">use </span><span class="kw">crate</span>::Serde;
+<span class="kw">use </span>chrono::{DateTime, Utc};
+<span class="kw">use </span>serde::{Deserialize, Serialize};
 
-<span class="doccomment">/// https://www.w3.org/TR/activitystreams-vocabulary/#dfn-note</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>, <span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Note</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">flatten</span>, <span class="ident">borrow</span>)]</span>
-    <span class="ident">base</span>: <span class="ident">Object</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Null</span><span class="op">&gt;</span>,
+<span class="doccomment">/// https://www.w3.org/TR/activitystreams-vocabulary/#dfn-note
+</span><span class="attribute">#[derive(Serialize, Deserialize, Debug)]
+</span><span class="kw">pub struct </span>Note {
+    <span class="attribute">#[serde(flatten)]
+    </span>base: Object&lt;Null&gt;,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Note</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>, <span class="ident">content</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">Note</span> {
-            <span class="ident">base</span>: <span class="ident">ObjectBuilder::new</span>()
-                .<span class="ident">object_type</span>(<span class="string">&quot;Note&quot;</span>)
-                .<span class="ident">name</span>(<span class="ident">name</span>)
-                .<span class="ident">content</span>(<span class="ident">content</span>)
-                .<span class="ident">build</span>(),
+<span class="kw">impl </span>Note {
+    <span class="kw">pub fn </span>new(name: String, content: String) -&gt; <span class="self">Self </span>{
+        Note {
+            base: ObjectBuilder::new()
+                .object_type(<span class="string">&quot;Note&quot;</span>.to_string())
+                .name(name)
+                .content(content)
+                .build(),
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span>: <span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Serde</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Note</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {}
+<span class="kw">impl </span>Serde <span class="kw">for </span>Note {}
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">std::ops::Deref</span> <span class="kw">for</span> <span class="ident">Note</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="ident">Object</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Null</span><span class="op">&gt;</span>;
+<span class="kw">impl </span>std::ops::Deref <span class="kw">for </span>Note {
+    <span class="kw">type </span>Target = Object&lt;Null&gt;;
 
-    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Target</span> {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">base</span>
+    <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Target {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.base
     }
 }
 
-<span class="comment">// TODO: expand to actor types: https://www.w3.org/TR/activitystreams-vocabulary/#actor-types</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>, <span class="ident">Debug</span>, <span class="ident">Clone</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Actor</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">flatten</span>, <span class="ident">borrow</span>)]</span>
-    <span class="ident">base</span>: <span class="ident">Object</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Null</span><span class="op">&gt;</span>,
+<span class="comment">// TODO: expand to actor types: https://www.w3.org/TR/activitystreams-vocabulary/#actor-types
+</span><span class="attribute">#[derive(Serialize, Deserialize, Debug, Clone)]
+</span><span class="kw">pub struct </span>Actor {
+    <span class="attribute">#[serde(flatten)]
+    </span>base: Object&lt;Null&gt;,
 
-    <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">rename</span> <span class="op">=</span> <span class="string">&quot;preferredUsername&quot;</span>)]</span>
-    <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">skip_serializing_if</span> <span class="op">=</span> <span class="string">&quot;Option::is_none&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="ident">preferred_username</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span>,
-    <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">skip_serializing_if</span> <span class="op">=</span> <span class="string">&quot;Option::is_none&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="ident">inbox</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span>,
-    <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">skip_serializing_if</span> <span class="op">=</span> <span class="string">&quot;Option::is_none&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="ident">outbox</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span>,
-    <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">skip_serializing_if</span> <span class="op">=</span> <span class="string">&quot;Option::is_none&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="ident">followers</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span>,
-    <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">skip_serializing_if</span> <span class="op">=</span> <span class="string">&quot;Option::is_none&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="ident">following</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span>,
-    <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">skip_serializing_if</span> <span class="op">=</span> <span class="string">&quot;Option::is_none&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="ident">liked</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span>,
+    <span class="attribute">#[serde(rename = <span class="string">&quot;preferredUsername&quot;</span>)]
+    #[serde(skip_serializing_if = <span class="string">&quot;Option::is_none&quot;</span>)]
+    </span><span class="kw">pub </span>preferred_username: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="attribute">#[serde(skip_serializing_if = <span class="string">&quot;Option::is_none&quot;</span>)]
+    </span><span class="kw">pub </span>inbox: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="attribute">#[serde(skip_serializing_if = <span class="string">&quot;Option::is_none&quot;</span>)]
+    </span><span class="kw">pub </span>outbox: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="attribute">#[serde(skip_serializing_if = <span class="string">&quot;Option::is_none&quot;</span>)]
+    </span><span class="kw">pub </span>followers: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="attribute">#[serde(skip_serializing_if = <span class="string">&quot;Option::is_none&quot;</span>)]
+    </span><span class="kw">pub </span>following: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="attribute">#[serde(skip_serializing_if = <span class="string">&quot;Option::is_none&quot;</span>)]
+    </span><span class="kw">pub </span>liked: <span class="prelude-ty">Option</span>&lt;String&gt;,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span>: <span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Serde</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Actor</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {}
+<span class="kw">impl </span>Serde <span class="kw">for </span>Actor {}
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">std::ops::Deref</span> <span class="kw">for</span> <span class="ident">Actor</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="ident">Object</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Null</span><span class="op">&gt;</span>;
+<span class="kw">impl </span>std::ops::Deref <span class="kw">for </span>Actor {
+    <span class="kw">type </span>Target = Object&lt;Null&gt;;
 
-    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Target</span> {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">base</span>
+    <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Target {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.base
     }
 }
 
-<span class="doccomment">/// Builder for an [Actor].</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ActorBuilder</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="ident">base</span>: <span class="ident">ObjectBuilder</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Null</span><span class="op">&gt;</span>,
+<span class="doccomment">/// Builder for an [Actor].
+</span><span class="attribute">#[derive(Clone)]
+</span><span class="kw">pub struct </span>ActorBuilder {
+    base: ObjectBuilder&lt;Null&gt;,
 
-    <span class="ident">preferred_username</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span>,
-    <span class="ident">inbox</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span>,
-    <span class="ident">outbox</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span>,
-    <span class="ident">followers</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span>,
-    <span class="ident">following</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span>,
-    <span class="ident">liked</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span>,
+    preferred_username: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    inbox: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    outbox: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    followers: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    following: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    liked: <span class="prelude-ty">Option</span>&lt;String&gt;,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">ActorBuilder</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">actor_type</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">ActorBuilder</span> {
-            <span class="ident">base</span>: <span class="ident">ObjectBuilder::new</span>().<span class="ident">object_type</span>(<span class="ident">actor_type</span>),
-            <span class="ident">preferred_username</span>: <span class="prelude-val">None</span>,
-            <span class="ident">inbox</span>: <span class="prelude-val">None</span>,
-            <span class="ident">outbox</span>: <span class="prelude-val">None</span>,
-            <span class="ident">followers</span>: <span class="prelude-val">None</span>,
-            <span class="ident">following</span>: <span class="prelude-val">None</span>,
-            <span class="ident">liked</span>: <span class="prelude-val">None</span>,
+<span class="kw">impl </span>ActorBuilder {
+    <span class="kw">pub fn </span>new(actor_type: String) -&gt; <span class="self">Self </span>{
+        ActorBuilder {
+            base: ObjectBuilder::new().object_type(actor_type),
+            preferred_username: <span class="prelude-val">None</span>,
+            inbox: <span class="prelude-val">None</span>,
+            outbox: <span class="prelude-val">None</span>,
+            followers: <span class="prelude-val">None</span>,
+            following: <span class="prelude-val">None</span>,
+            liked: <span class="prelude-val">None</span>,
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">id</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">id</span>: <span class="ident">http::Uri</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">base</span>.<span class="ident">id</span>(<span class="ident">id</span>);
-        <span class="self">self</span>
-    }
+    <span class="kw">pub fn </span>id(<span class="kw-2">mut </span><span class="self">self</span>, id: http::Uri) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.base.id(id);
+        <span class="self">self
+    </span>}
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">name</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">base</span>.<span class="ident">name</span>(<span class="ident">name</span>);
-        <span class="self">self</span>
-    }
+    <span class="kw">pub fn </span>name(<span class="kw-2">mut </span><span class="self">self</span>, name: String) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.base.name(name);
+        <span class="self">self
+    </span>}
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">url</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">url</span>: <span class="ident">http::Uri</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">base</span>.<span class="ident">url</span>(<span class="ident">url</span>);
-        <span class="self">self</span>
-    }
+    <span class="kw">pub fn </span>url(<span class="kw-2">mut </span><span class="self">self</span>, url: http::Uri) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.base.url(url);
+        <span class="self">self
+    </span>}
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">published</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">datetime</span>: <span class="ident">DateTime</span><span class="op">&lt;</span><span class="ident">Utc</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">base</span>.<span class="ident">published</span>(<span class="ident">datetime</span>);
-        <span class="self">self</span>
-    }
+    <span class="kw">pub fn </span>published(<span class="kw-2">mut </span><span class="self">self</span>, datetime: DateTime&lt;Utc&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.base.published(datetime);
+        <span class="self">self
+    </span>}
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">image</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">image</span>: <span class="ident">LinkBuilder</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">base</span>.<span class="ident">image</span>(<span class="ident">image</span>);
-        <span class="self">self</span>
-    }
+    <span class="kw">pub fn </span>image(<span class="kw-2">mut </span><span class="self">self</span>, image: LinkBuilder) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.base.image(image);
+        <span class="self">self
+    </span>}
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">summary</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">summary</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">base</span>.<span class="ident">summary</span>(<span class="ident">summary</span>);
-        <span class="self">self</span>
-    }
+    <span class="kw">pub fn </span>summary(<span class="kw-2">mut </span><span class="self">self</span>, summary: String) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.base.summary(summary);
+        <span class="self">self
+    </span>}
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">preferred_username</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">username</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">preferred_username</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">username</span>);
-        <span class="self">self</span>
-    }
+    <span class="kw">pub fn </span>preferred_username(<span class="kw-2">mut </span><span class="self">self</span>, username: String) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.preferred_username = <span class="prelude-val">Some</span>(username);
+        <span class="self">self
+    </span>}
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">inbox</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">inbox</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">inbox</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">inbox</span>);
-        <span class="self">self</span>
-    }
+    <span class="kw">pub fn </span>inbox(<span class="kw-2">mut </span><span class="self">self</span>, inbox: String) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.inbox = <span class="prelude-val">Some</span>(inbox);
+        <span class="self">self
+    </span>}
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">outbox</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">outbox</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">outbox</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">outbox</span>);
-        <span class="self">self</span>
-    }
+    <span class="kw">pub fn </span>outbox(<span class="kw-2">mut </span><span class="self">self</span>, outbox: String) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.outbox = <span class="prelude-val">Some</span>(outbox);
+        <span class="self">self
+    </span>}
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">followers</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">followers</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">followers</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">followers</span>);
-        <span class="self">self</span>
-    }
+    <span class="kw">pub fn </span>followers(<span class="kw-2">mut </span><span class="self">self</span>, followers: String) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.followers = <span class="prelude-val">Some</span>(followers);
+        <span class="self">self
+    </span>}
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">following</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">following</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">following</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">following</span>);
-        <span class="self">self</span>
-    }
+    <span class="kw">pub fn </span>following(<span class="kw-2">mut </span><span class="self">self</span>, following: String) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.following = <span class="prelude-val">Some</span>(following);
+        <span class="self">self
+    </span>}
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">liked</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">liked</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">liked</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">liked</span>);
-        <span class="self">self</span>
-    }
+    <span class="kw">pub fn </span>liked(<span class="kw-2">mut </span><span class="self">self</span>, liked: String) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.liked = <span class="prelude-val">Some</span>(liked);
+        <span class="self">self
+    </span>}
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">build</span>(<span class="self">self</span>) -&gt; <span class="ident">Actor</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-        <span class="ident">Actor</span> {
-            <span class="ident">base</span>: <span class="self">self</span>.<span class="ident">base</span>.<span class="ident">build</span>(),
+    <span class="kw">pub fn </span>build(<span class="self">self</span>) -&gt; Actor {
+        Actor {
+            base: <span class="self">self</span>.base.build(),
 
-            <span class="ident">preferred_username</span>: <span class="self">self</span>.<span class="ident">preferred_username</span>,
-            <span class="ident">inbox</span>: <span class="self">self</span>.<span class="ident">inbox</span>,
-            <span class="ident">outbox</span>: <span class="self">self</span>.<span class="ident">outbox</span>,
-            <span class="ident">followers</span>: <span class="self">self</span>.<span class="ident">followers</span>,
-            <span class="ident">following</span>: <span class="self">self</span>.<span class="ident">following</span>,
-            <span class="ident">liked</span>: <span class="self">self</span>.<span class="ident">liked</span>,
+            preferred_username: <span class="self">self</span>.preferred_username,
+            inbox: <span class="self">self</span>.inbox,
+            outbox: <span class="self">self</span>.outbox,
+            followers: <span class="self">self</span>.followers,
+            following: <span class="self">self</span>.following,
+            liked: <span class="self">self</span>.liked,
         }
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">mod</span> <span class="ident">tests</span> {
-    <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::core</span>::{<span class="ident">ContextBuilder</span>, <span class="ident">Document</span>};
-    <span class="kw">use</span> <span class="ident">pretty_assertions::assert_eq</span>;
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">mod </span>tests {
+    <span class="kw">use super</span>::<span class="kw-2">*</span>;
+    <span class="kw">use </span><span class="kw">crate</span>::core::{ContextBuilder, Document};
+    <span class="kw">use </span>pretty_assertions::assert_eq;
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_actor</span>() {
-        <span class="kw">let</span> <span class="ident">actual</span> <span class="op">=</span> <span class="ident">Document::new</span>(
-            <span class="ident">ContextBuilder::new</span>().<span class="ident">build</span>(),
-            <span class="ident">ActorBuilder::new</span>(<span class="string">&quot;Person&quot;</span>)
-                .<span class="ident">id</span>(<span class="string">&quot;https://example.com/person/1234&quot;</span>
-                    .<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">http::Uri</span><span class="op">&gt;</span>()
-                    .<span class="ident">unwrap</span>())
-                .<span class="ident">name</span>(<span class="string">&quot;name&quot;</span>)
-                .<span class="ident">preferred_username</span>(<span class="string">&quot;dma&quot;</span>)
-                .<span class="ident">build</span>(),
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>serialize_actor() {
+        <span class="kw">let </span>actual = Document::new(
+            ContextBuilder::new().build(),
+            ActorBuilder::new(String::from(<span class="string">&quot;Person&quot;</span>))
+                .id(<span class="string">&quot;https://example.com/person/1234&quot;
+                    </span>.parse::&lt;http::Uri&gt;()
+                    .unwrap())
+                .name(String::from(<span class="string">&quot;name&quot;</span>))
+                .preferred_username(String::from(<span class="string">&quot;dma&quot;</span>))
+                .build(),
         );
-        <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="string">r#&quot;{
+        <span class="kw">let </span>expected = <span class="string">r#&quot;{
   &quot;@context&quot;: {
     &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;
   },
@@ -440,13 +443,13 @@
   &quot;name&quot;: &quot;name&quot;,
   &quot;preferredUsername&quot;: &quot;dma&quot;
 }&quot;#</span>;
-        <span class="macro">assert!</span>(<span class="ident">actual</span>.<span class="ident">to_json_pretty</span>().<span class="ident">is_ok</span>());
-        <span class="macro">assert_eq!</span>(<span class="ident">actual</span>.<span class="ident">to_json_pretty</span>().<span class="ident">unwrap</span>(), <span class="ident">expected</span>)
+        <span class="macro">assert!</span>(actual.to_json_pretty().is_ok());
+        <span class="macro">assert_eq!</span>(actual.to_json_pretty().unwrap(), expected)
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">deserialize_actor</span>() {
-        <span class="kw">let</span> <span class="ident">actual</span> <span class="op">=</span> <span class="string">r#&quot;{
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>deserialize_actor() {
+        <span class="kw">let </span>actual = <span class="string">r#&quot;{
   &quot;@context&quot;: {
     &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;
   },
@@ -455,21 +458,24 @@
   &quot;name&quot;: &quot;name&quot;,
   &quot;preferredUsername&quot;: &quot;dma&quot;
 }&quot;#</span>;
-        <span class="kw">let</span> <span class="ident">document</span>: <span class="ident">Document</span><span class="op">&lt;</span><span class="ident">Actor</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Document::from_json</span>(<span class="ident">actual</span>).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">actor</span> <span class="op">=</span> <span class="ident">document</span>.<span class="ident">object</span> <span class="kw">as</span> <span class="ident">Actor</span>;
-        <span class="macro">assert_eq!</span>(<span class="ident">actor</span>.<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Person&quot;</span>));
+        <span class="kw">let </span>document: Document&lt;Actor&gt; = Document::from_json(String::from(actual)).unwrap();
+        <span class="kw">let </span>actor = document.object <span class="kw">as </span>Actor;
+        <span class="macro">assert_eq!</span>(actor.object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Person&quot;</span>)));
         <span class="macro">assert_eq!</span>(
-            <span class="ident">actor</span>.<span class="ident">id</span>,
-            <span class="prelude-val">Some</span>(<span class="ident">String::from</span>(<span class="string">&quot;https://example.com/person/1234&quot;</span>))
+            actor.id,
+            <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;https://example.com/person/1234&quot;</span>))
         );
-        <span class="macro">assert_eq!</span>(<span class="ident">actor</span>.<span class="ident">name</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;name&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">actor</span>.<span class="ident">preferred_username</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;dma&quot;</span>));
+        <span class="macro">assert_eq!</span>(actor.name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;name&quot;</span>)));
+        <span class="macro">assert_eq!</span>(actor.preferred_username, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;dma&quot;</span>)));
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">serialize_note</span>() {
-        <span class="kw">let</span> <span class="ident">actual</span> <span class="op">=</span> <span class="ident">Document::new</span>(<span class="ident">ContextBuilder::new</span>().<span class="ident">build</span>(), <span class="ident">Note::new</span>(<span class="string">&quot;Name&quot;</span>, <span class="string">&quot;Content&quot;</span>));
-        <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="string">r#&quot;{
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>serialize_note() {
+        <span class="kw">let </span>actual = Document::new(
+            ContextBuilder::new().build(),
+            Note::new(String::from(<span class="string">&quot;Name&quot;</span>), String::from(<span class="string">&quot;Content&quot;</span>)),
+        );
+        <span class="kw">let </span>expected = <span class="string">r#&quot;{
   &quot;@context&quot;: {
     &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;
   },
@@ -477,13 +483,13 @@
   &quot;name&quot;: &quot;Name&quot;,
   &quot;content&quot;: &quot;Content&quot;
 }&quot;#</span>;
-        <span class="macro">assert!</span>(<span class="ident">actual</span>.<span class="ident">to_json_pretty</span>().<span class="ident">is_ok</span>());
-        <span class="macro">assert_eq!</span>(<span class="ident">actual</span>.<span class="ident">to_json_pretty</span>().<span class="ident">unwrap</span>(), <span class="ident">expected</span>)
+        <span class="macro">assert!</span>(actual.to_json_pretty().is_ok());
+        <span class="macro">assert_eq!</span>(actual.to_json_pretty().unwrap(), expected)
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">deserialize_note</span>() {
-        <span class="kw">let</span> <span class="ident">actual</span> <span class="op">=</span> <span class="string">r#&quot;{
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>deserialize_note() {
+        <span class="kw">let </span>actual = <span class="string">r#&quot;{
   &quot;@context&quot;: {
     &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;
   },
@@ -491,12 +497,12 @@
   &quot;name&quot;: &quot;Name&quot;,
   &quot;content&quot;: &quot;Content&quot;
 }&quot;#</span>;
-        <span class="kw">let</span> <span class="ident">document</span>: <span class="ident">Document</span><span class="op">&lt;</span><span class="ident">Note</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Document::from_json</span>(<span class="ident">actual</span>).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">actor</span> <span class="op">=</span> <span class="ident">document</span>.<span class="ident">object</span> <span class="kw">as</span> <span class="ident">Note</span>;
-        <span class="macro">assert_eq!</span>(<span class="ident">actor</span>.<span class="ident">object_type</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">actor</span>.<span class="ident">name</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Name&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">actor</span>.<span class="ident">content</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;Content&quot;</span>));
+        <span class="kw">let </span>document: Document&lt;Note&gt; = Document::from_json(String::from(actual)).unwrap();
+        <span class="kw">let </span>actor = document.object <span class="kw">as </span>Note;
+        <span class="macro">assert_eq!</span>(actor.object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Note&quot;</span>)));
+        <span class="macro">assert_eq!</span>(actor.name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Name&quot;</span>)));
+        <span class="macro">assert_eq!</span>(actor.content, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Content&quot;</span>)));
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="rustypub" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="rustypub" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>
