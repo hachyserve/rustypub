@@ -172,7 +172,7 @@ mod tests {
     #[test]
     fn serialize_actor() {
         let actual = Document::new(
-            ContextBuilder::new().build(),
+            ContextBuilder::new().build().unwrap(),
             ActorBuilder::new(String::from("Person"))
                 .id("https://example.com/person/1234"
                     .parse::<http::Uri>()
@@ -219,7 +219,7 @@ mod tests {
     #[test]
     fn serialize_note() {
         let actual = Document::new(
-            ContextBuilder::new().build(),
+            ContextBuilder::new().build().unwrap(),
             Note::new(String::from("Name"), String::from("Content")),
         );
         let expected = r#"{

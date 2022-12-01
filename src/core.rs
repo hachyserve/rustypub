@@ -1,7 +1,8 @@
 use crate::extended::{Actor, ActorBuilder};
 use crate::Serde;
 use chrono::{DateTime, Utc};
-use serde::{Deserialize, Serialize};
+use serde::{Deserializer, Deserialize, Serialize};
+use derive_builder::Builder;
 
 /// [Null]-type object that implements [Serde] for convenience
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -16,7 +17,7 @@ impl Serde for Null {}
 /// 2.0 object.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Document<T> {
-    #[serde(rename = "@context")]
+    #[serde(rename = "@context", deserialize_with = "context_deserializer")]
     pub context: Context,
 
     #[serde(flatten)]
@@ -40,7 +41,8 @@ impl<T: Serde> Document<T> {
 /// alternative URL "http://www.w3.org/ns/activitystreams" instead. This can be
 /// done using a string, object, or array.
 /// <https://www.w3.org/TR/activitystreams-core/#jsonld>
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Builder)]
+#[builder(default)]
 pub struct Context {
     #[serde(rename = "@vocab")]
     namespace: String,
@@ -49,40 +51,46 @@ pub struct Context {
     language: Option<String>,
 }
 
-/// Builder struct for [Context].
-pub struct ContextBuilder {
-    namespace: String,
-    language: Option<String>,
-}
+const NAMESPACE: &'static str = "https://www.w3.org/ns/activitystreams";
 
-impl ContextBuilder {
-    const NAMESPACE: &'static str = "https://www.w3.org/ns/activitystreams";
-
+impl Context {
     pub fn new() -> Self {
-        ContextBuilder {
-            namespace: ContextBuilder::NAMESPACE.to_string(),
+        Context {
+            namespace: NAMESPACE.to_string(),
             language: None,
         }
     }
-
-    // TODO: extend this to other options per the docs
-    pub fn language(mut self, language: String) -> Self {
-        self.language = Some(language);
-        self
-    }
-
-    pub fn build(self) -> Context {
+}
+impl Default for Context {
+    fn default() -> Self {
         Context {
-            namespace: self.namespace,
-            language: self.language,
+            namespace: NAMESPACE.to_string(),
+            language: None,
         }
     }
 }
 
-impl Default for ContextBuilder {
-    fn default() -> Self {
-        Self::new()
+impl ContextBuilder {
+    pub fn new() -> Self {
+        ContextBuilder::default()
     }
+}
+
+fn context_deserializer<'de, D>(deserializer: D) -> Result<Context, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    #[derive(Deserialize, Debug)]
+    #[serde(untagged)]
+    enum ContextType<'a> {
+        Context(Context),
+        Str(&'a str),
+    }
+
+    Ok(match ContextType::deserialize(deserializer)? {
+        ContextType::Str(_x) => Context::new(),
+        ContextType::Context(x) => x,
+    })
 }
 
 /// The [Object] is the primary base type for the Activity Streams vocabulary.
@@ -894,7 +902,7 @@ mod tests {
     fn serialize_object() {
         let object: Object<Null> = ObjectBuilder::new().name(String::from("name")).build();
         let actual = Document::new(
-            ContextBuilder::new().language(String::from("en")).build(),
+            ContextBuilder::new().language(Some(String::from("en"))).build().unwrap(),
             object,
         );
         let expected = r#"{
@@ -942,7 +950,7 @@ mod tests {
     #[test]
     fn serialize_link() {
         let actual = Document::new(
-            ContextBuilder::new().build(),
+            ContextBuilder::new().build().unwrap(),
             LinkBuilder::new(UriBuilder::new(
                 "http://example.org/abc".parse::<http::Uri>().unwrap(),
             ))
@@ -989,7 +997,7 @@ mod tests {
     #[test]
     fn serialize_preview() {
         let actual = Document::new(
-            ContextBuilder::new().build(),
+            ContextBuilder::new().build().unwrap(),
             PreviewBuilder::new(String::from("Video"), String::from("Trailer"))
                 .duration(String::from("PT1M"))
                 .url(
@@ -1056,7 +1064,7 @@ mod tests {
     #[test]
     fn serialize_activity() {
         let actual = Document::new(
-            ContextBuilder::new().build(),
+            ContextBuilder::new().build().unwrap(),
             ActivityBuilder::new(
                 String::from("Activity"),
                 String::from("Sally did something to a note"),

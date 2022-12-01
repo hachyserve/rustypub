@@ -4,6 +4,8 @@ pub mod extended;
 use serde::{de::DeserializeOwned, Serialize};
 use serde_json::Result;
 
+extern crate derive_builder;
+
 pub trait Serde
 where
     Self: Serialize + DeserializeOwned,
@@ -404,7 +406,7 @@ mod tests {
     #[test]
     fn minimal_activity_3_1() {
         let actual = Document::new(
-            ContextBuilder::new().build(),
+            ContextBuilder::new().build().unwrap(),
             ActivityBuilder::new(
                 String::from("Create"),
                 String::from("Martin created an image"),
@@ -440,7 +442,7 @@ mod tests {
     #[test]
     fn basic_activity_with_additional_detail_3_2() {
         let actual = Document::new(
-            ContextBuilder::new().build(),
+            ContextBuilder::new().build().unwrap(),
             ActivityBuilder::new(
                 String::from("Add"),
                 String::from("Martin added an article to his blog"),
@@ -524,7 +526,7 @@ mod tests {
     #[test]
     fn object_4_1_7() {
         let actual = Document::new(
-            ContextBuilder::new().build(),
+            ContextBuilder::new().build().unwrap(),
             ObjectBuilder::new()
                 .id("http://example.org/foo".parse::<http::Uri>().unwrap())
                 .object_type(String::from("Note"))
