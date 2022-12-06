@@ -1,6 +1,10 @@
 use crate::core::{LinkBuilder, Null, Object, ObjectBuilder};
 use crate::Serde;
 use chrono::{DateTime, Utc};
+use rsa::{
+    pkcs1::{DecodeRsaPublicKey, Error},
+    RsaPublicKey,
+};
 use serde::{Deserialize, Serialize};
 
 /// https://www.w3.org/TR/activitystreams-vocabulary/#dfn-note
@@ -51,6 +55,8 @@ pub struct Actor {
     pub following: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub liked: Option<String>,
+    #[serde(rename = "publicKey", skip_serializing_if = "Option::is_none")]
+    pub public_key_info: Option<PublicKeyInfo>,
 }
 
 impl Serde for Actor {}
@@ -60,6 +66,17 @@ impl std::ops::Deref for Actor {
 
     fn deref(&self) -> &Self::Target {
         &self.base
+    }
+}
+
+impl Actor {
+    pub fn key(&self) -> Result<RsaPublicKey, Error> {
+        RsaPublicKey::from_pkcs1_pem(
+            &self
+                .public_key_info.as_ref()
+                .expect("public_key_info not set")
+                .public_key_pem,
+        )
     }
 }
 
@@ -74,6 +91,7 @@ pub struct ActorBuilder {
     followers: Option<String>,
     following: Option<String>,
     liked: Option<String>,
+    public_key_info: Option<PublicKeyInfo>,
 }
 
 impl ActorBuilder {
@@ -86,6 +104,7 @@ impl ActorBuilder {
             followers: None,
             following: None,
             liked: None,
+            public_key_info: None,
         }
     }
 
@@ -149,6 +168,11 @@ impl ActorBuilder {
         self
     }
 
+    pub fn public_key_info(mut self, public_key_info: PublicKeyInfo) -> Self {
+        self.public_key_info = Some(public_key_info.clone());
+        self
+    }
+
     pub fn build(self) -> Actor {
         Actor {
             base: self.base.build(),
@@ -159,8 +183,17 @@ impl ActorBuilder {
             followers: self.followers,
             following: self.following,
             liked: self.liked,
+            public_key_info: self.public_key_info,
         }
     }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PublicKeyInfo {
+    id: String,
+    owner: String,
+    public_key_pem: String,
 }
 
 #[cfg(test)]
