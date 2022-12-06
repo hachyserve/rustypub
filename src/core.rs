@@ -458,6 +458,10 @@ pub struct Activity {
     pub target: Option<Object<Null>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub result: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub to: Option<Vec<String>>,
+
     #[serde(skip_serializing_if = "Option::is_none")]
     pub origin: Option<String>, // TODO: Origin
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -482,6 +486,7 @@ pub struct ActivityBuilder {
     object: Option<ObjectBuilder<Null>>,
     target: Option<ObjectBuilder<Null>>,
     result: Option<String>,
+    to: Option<Vec<String>>,
     origin: Option<String>,
     instrument: Option<String>,
 }
@@ -496,9 +501,15 @@ impl ActivityBuilder {
             object: None,
             target: None,
             result: None,
+            to: None,
             origin: None,
             instrument: None,
         }
+    }
+
+    pub fn id(mut self, id: http::Uri) -> Self {
+        self.base.id(id);
+        self
     }
 
     pub fn published(&mut self, datetime: DateTime<Utc>) -> Self {
@@ -526,6 +537,11 @@ impl ActivityBuilder {
         self.clone()
     }
 
+    pub fn to(&mut self, to: Vec<String>) -> Self {
+        self.to = Some(to.clone());
+        self.clone()
+    }
+
     pub fn origin(&mut self, origin: String) -> Self {
         self.origin = Some(origin);
         self.clone()
@@ -543,6 +559,7 @@ impl ActivityBuilder {
             object: self.object.map(|o| o.build()),
             target: self.target.map(|t| t.build()),
             result: self.result,
+            to: self.to,
             origin: self.origin,
             instrument: self.instrument,
         }
