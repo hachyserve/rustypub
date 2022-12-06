@@ -1129,6 +1129,23 @@
 <span id="1129">1129</span>
 <span id="1130">1130</span>
 <span id="1131">1131</span>
+<span id="1132">1132</span>
+<span id="1133">1133</span>
+<span id="1134">1134</span>
+<span id="1135">1135</span>
+<span id="1136">1136</span>
+<span id="1137">1137</span>
+<span id="1138">1138</span>
+<span id="1139">1139</span>
+<span id="1140">1140</span>
+<span id="1141">1141</span>
+<span id="1142">1142</span>
+<span id="1143">1143</span>
+<span id="1144">1144</span>
+<span id="1145">1145</span>
+<span id="1146">1146</span>
+<span id="1147">1147</span>
+<span id="1148">1148</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::extended::{Actor, ActorBuilder};
 <span class="kw">use </span><span class="kw">crate</span>::Serde;
 <span class="kw">use </span>chrono::{DateTime, Utc};
@@ -1589,6 +1606,10 @@
     </span><span class="kw">pub </span>target: <span class="prelude-ty">Option</span>&lt;Object&lt;Null&gt;&gt;,
     <span class="attribute">#[serde(skip_serializing_if = <span class="string">&quot;Option::is_none&quot;</span>)]
     </span><span class="kw">pub </span>result: <span class="prelude-ty">Option</span>&lt;String&gt;,
+
+    <span class="attribute">#[serde(skip_serializing_if = <span class="string">&quot;Option::is_none&quot;</span>)]
+    </span><span class="kw">pub </span>to: <span class="prelude-ty">Option</span>&lt;Vec&lt;String&gt;&gt;,
+
     <span class="attribute">#[serde(skip_serializing_if = <span class="string">&quot;Option::is_none&quot;</span>)]
     </span><span class="kw">pub </span>origin: <span class="prelude-ty">Option</span>&lt;String&gt;, <span class="comment">// TODO: Origin
     </span><span class="attribute">#[serde(skip_serializing_if = <span class="string">&quot;Option::is_none&quot;</span>)]
@@ -1613,6 +1634,7 @@
     object: <span class="prelude-ty">Option</span>&lt;ObjectBuilder&lt;Null&gt;&gt;,
     target: <span class="prelude-ty">Option</span>&lt;ObjectBuilder&lt;Null&gt;&gt;,
     result: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    to: <span class="prelude-ty">Option</span>&lt;Vec&lt;String&gt;&gt;,
     origin: <span class="prelude-ty">Option</span>&lt;String&gt;,
     instrument: <span class="prelude-ty">Option</span>&lt;String&gt;,
 }
@@ -1627,10 +1649,16 @@
             object: <span class="prelude-val">None</span>,
             target: <span class="prelude-val">None</span>,
             result: <span class="prelude-val">None</span>,
+            to: <span class="prelude-val">None</span>,
             origin: <span class="prelude-val">None</span>,
             instrument: <span class="prelude-val">None</span>,
         }
     }
+
+    <span class="kw">pub fn </span>id(<span class="kw-2">mut </span><span class="self">self</span>, id: http::Uri) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.base.id(id);
+        <span class="self">self
+    </span>}
 
     <span class="kw">pub fn </span>published(<span class="kw-2">&amp;mut </span><span class="self">self</span>, datetime: DateTime&lt;Utc&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.base.published(datetime);
@@ -1657,6 +1685,11 @@
         <span class="self">self</span>.clone()
     }
 
+    <span class="kw">pub fn </span>to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, to: Vec&lt;String&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.to = <span class="prelude-val">Some</span>(to.clone());
+        <span class="self">self</span>.clone()
+    }
+
     <span class="kw">pub fn </span>origin(<span class="kw-2">&amp;mut </span><span class="self">self</span>, origin: String) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.origin = <span class="prelude-val">Some</span>(origin);
         <span class="self">self</span>.clone()
@@ -1674,6 +1707,7 @@
             object: <span class="self">self</span>.object.map(|o| o.build()),
             target: <span class="self">self</span>.target.map(|t| t.build()),
             result: <span class="self">self</span>.result,
+            to: <span class="self">self</span>.to,
             origin: <span class="self">self</span>.origin,
             instrument: <span class="self">self</span>.instrument,
         }
