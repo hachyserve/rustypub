@@ -73,7 +73,8 @@ impl Actor {
     pub fn key(&self) -> Result<RsaPublicKey, Error> {
         RsaPublicKey::from_pkcs1_pem(
             &self
-                .public_key_info.as_ref()
+                .public_key_info
+                .as_ref()
                 .expect("public_key_info not set")
                 .public_key_pem,
         )
@@ -191,9 +192,9 @@ impl ActorBuilder {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PublicKeyInfo {
-    id: String,
-    owner: String,
-    public_key_pem: String,
+    pub id: String,
+    pub owner: String,
+    pub public_key_pem: String,
 }
 
 #[cfg(test)]

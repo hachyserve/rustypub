@@ -445,7 +445,7 @@ impl LinkBuilder {
 /// [Activity] type itself serves as an abstract base type for all types of
 /// activities. It is important to note that the [Activity] type itself does
 /// not carry any specific semantics about the kind of action being taken.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Activity {
     #[serde(flatten)]
     base: Object<Null>,
