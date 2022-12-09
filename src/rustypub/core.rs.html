@@ -1593,7 +1593,7 @@
 /// [Activity] type itself serves as an abstract base type for all types of
 /// activities. It is important to note that the [Activity] type itself does
 /// not carry any specific semantics about the kind of action being taken.
-</span><span class="attribute">#[derive(Serialize, Deserialize, Debug)]
+</span><span class="attribute">#[derive(Serialize, Deserialize, Debug, Clone)]
 </span><span class="kw">pub struct </span>Activity {
     <span class="attribute">#[serde(flatten)]
     </span>base: Object&lt;Null&gt;,

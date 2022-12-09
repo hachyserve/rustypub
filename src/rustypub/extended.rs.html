@@ -284,6 +284,7 @@
 <span id="284">284</span>
 <span id="285">285</span>
 <span id="286">286</span>
+<span id="287">287</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::core::{LinkBuilder, Null, Object, ObjectBuilder};
 <span class="kw">use </span><span class="kw">crate</span>::Serde;
 <span class="kw">use </span>chrono::{DateTime, Utc};
@@ -359,7 +360,8 @@
     <span class="kw">pub fn </span>key(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;RsaPublicKey, Error&gt; {
         RsaPublicKey::from_pkcs1_pem(
             <span class="kw-2">&amp;</span><span class="self">self
-                </span>.public_key_info.as_ref()
+                </span>.public_key_info
+                .as_ref()
                 .expect(<span class="string">&quot;public_key_info not set&quot;</span>)
                 .public_key_pem,
         )
@@ -477,9 +479,9 @@
 <span class="attribute">#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = <span class="string">&quot;camelCase&quot;</span>)]
 </span><span class="kw">pub struct </span>PublicKeyInfo {
-    id: String,
-    owner: String,
-    public_key_pem: String,
+    <span class="kw">pub </span>id: String,
+    <span class="kw">pub </span>owner: String,
+    <span class="kw">pub </span>public_key_pem: String,
 }
 
 <span class="attribute">#[cfg(test)]
