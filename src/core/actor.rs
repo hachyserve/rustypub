@@ -35,6 +35,14 @@ pub struct Actor {
 }
 
 impl ActorBuilder {
+
+    pub fn with_base<F>(&mut self, build_fn: F) -> &mut Self
+        where F: FnOnce(&mut ObjectBuilder) -> &mut ObjectBuilder
+    {
+        let mut base_builder = ObjectBuilder::default();
+        self.base(build_fn(&mut base_builder).build().unwrap())
+    }
+
     pub fn from_base(object: Object) -> ActorBuilder {
         ActorBuilder::default()
             .base(object).to_owned()

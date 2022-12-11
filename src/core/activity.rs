@@ -39,6 +39,14 @@ pub struct Activity {
 }
 
 impl ActivityBuilder {
+
+    pub fn with_base<F>(&mut self, build_fn: F) -> &mut Self
+        where F: FnOnce(&mut ObjectBuilder) -> &mut ObjectBuilder
+    {
+        let mut base_builder = ObjectBuilder::default();
+        self.base(build_fn(&mut base_builder).build().unwrap())
+    }
+
     /// Instances of [IntransitiveActivity] are a subtype of [Activity] representing
     /// intransitive actions. The object property is therefore inappropriate for
     /// these activities.
@@ -60,22 +68,20 @@ mod tests {
 
     #[test]
     fn serialize_activity() {
-        let base_object = ObjectBuilder::default()
-            .object_type(Some("Activity".into()))
-            .summary(Some("Sally did something to a note".into())).build().unwrap();
         let target_object = ObjectBuilder::new()
                 .object_type(Some("Note".into()))
                 .name(Some("A Note".into()))
                 .build().unwrap();
         let subject_actor = ActorBuilder::default()
-            .base(
-                ObjectBuilder::default()
-                .object_type(Some("Person".into()))
+            .with_base(|base_builder|
+                base_builder.object_type(Some("Person".into()))
                 .name(Some("Sally".into()))
-                .build().unwrap()
             ).build().unwrap();
         let activity = ActivityBuilder::default()
-            .base(base_object)
+            .with_base(|base_builder|
+                base_builder.object_type(Some("Activity".into()))
+                .summary(Some("Sally did something to a note".into()))
+            )
             .object(Some(target_object))
             .actor(Some(subject_actor))
             .build().unwrap();
