@@ -1,6 +1,10 @@
 use serde::{ Deserialize, Serialize };
 use crate::core::object::{ Object, ObjectBuilder };
 use derive_builder::Builder;
+use rsa::{
+    pkcs1::{DecodeRsaPublicKey, Error},
+    RsaPublicKey,
+};
 
 // TODO: does this have additional fields? Who says?
 // TODO: expand to actor types: https://www.w3.org/TR/activitystreams-vocabulary/#actor-types
@@ -25,6 +29,9 @@ pub struct Actor {
     pub following: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub liked: Option<String>,
+
+    #[serde(rename = "publicKey", skip_serializing_if = "Option::is_none")]
+    pub public_key_info: Option<PublicKeyInfo>,
 }
 
 impl ActorBuilder {
@@ -32,6 +39,14 @@ impl ActorBuilder {
         ActorBuilder::default()
             .base(object).to_owned()
     }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PublicKeyInfo {
+    pub id: String,
+    pub owner: String,
+    pub public_key_pem: String,
 }
 
 #[cfg(test)]

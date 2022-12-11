@@ -28,6 +28,10 @@ pub struct Activity {
     pub target: Option<Object>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub result: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub to: Option<Vec<String>>,
+
     #[serde(skip_serializing_if = "Option::is_none")]
     pub origin: Option<String>, // TODO: Origin
     #[serde(skip_serializing_if = "Option::is_none")]
