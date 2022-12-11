@@ -398,11 +398,10 @@ mod tests {
         let target_object = ObjectBuilder::new()
             .id(Some("http://example.org/foo.jpg".into()))
             .build().unwrap();
-        let source_actor = ActorBuilder::from_base(
-            ObjectBuilder::default()
-                .object_type(Some("Person".into()))
+        let source_actor = ActorBuilder::default()
+            .with_base(|base_builder|
+                base_builder.object_type(Some("Person".into()))
                 .id(Some("http://www.test.example/martin".into()))
-                .build().unwrap()
             ).build().unwrap();
         let activity = ActivityBuilder::default()
             .base(object)
@@ -433,17 +432,16 @@ mod tests {
 
     #[test]
     fn basic_activity_with_additional_detail_3_2() {
-        let source_actor = ActorBuilder::from_base(
-            ObjectBuilder::default()
-            .object_type(Some("Person".into()))
-            .id(Some("http://www.test.example/martin".into()))
-            .name(Some("Martin Smith".into()))
-            .image(Some(Link::new(
-                "http://example.org/martin/image.jpg".into(),
-                "image/jpeg".into(),
-            )))
-            .url(Some("http://example.org/martin".into()))
-            .build().unwrap()
+        let source_actor = ActorBuilder::default()
+            .with_base(|base_builder|
+                base_builder.object_type(Some("Person".into()))
+                .id(Some("http://www.test.example/martin".into()))
+                .name(Some("Martin Smith".into()))
+                .image(Some(Link::new(
+                    "http://example.org/martin/image.jpg".into(),
+                    "image/jpeg".into(),
+                )))
+                .url(Some("http://example.org/martin".into()))
         ).build().unwrap();
         let base = ObjectBuilder::default()
             .object_type(Some("Add".into()))
