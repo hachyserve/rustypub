@@ -131,17 +131,17 @@ mod tests {
         assert_eq!(activity.base.object_type, Some("Activity".into()));
         assert_eq!(
             activity.base.summary,
-            Some(String::from("Sally did something to a note"))
+            Some("Sally did something to a note".into())
         );
 
         assert!(activity.actor.is_some());
         let actor = activity.actor.unwrap();
-        assert_eq!(actor.base.object_type, Some(String::from("Person")));
-        assert_eq!(actor.base.name, Some(String::from("Sally")));
+        assert_eq!(actor.base.object_type, Some("Person".into()));
+        assert_eq!(actor.base.name, Some("Sally".into()));
 
         assert!(activity.object.is_some());
         let object = activity.object.as_ref().unwrap();
-        assert_eq!(object.object_type, Some(String::from("Note")));
-        assert_eq!(object.name, Some(String::from("A Note")));
+        assert_eq!(object.object_type, Some("Note".into()));
+        assert_eq!(object.name, Some("A Note".into()));
     }
 }

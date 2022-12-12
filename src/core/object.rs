@@ -211,7 +211,7 @@ mod tests {
             .name(Some("name".into()))
             .build().unwrap();
         let context: Context = ContextBuilder::new()
-            .language(Some(String::from("en")))
+            .language(Some("en".into()))
             .build().unwrap();
         let actual = DocumentBuilder::default()
             .object(Some(object))
@@ -242,9 +242,9 @@ mod tests {
 }"#,
         );
         let document: Document<Object> = Document::deserialize_string(actual).unwrap();
-        assert_eq!(document.context.language, Some(String::from("en")));
+        assert_eq!(document.context.language, Some("en".into()));
         let object = document.object as Object;
-        assert_eq!(object.name, Some(String::from("name")));
+        assert_eq!(object.name, Some("name".into()));
     }
 
     #[test]
@@ -270,8 +270,8 @@ mod tests {
             ContextBuilder::new().build().unwrap(),
             LinkBuilder::new()
             .href(href)
-            .name(Some(String::from("An example link")))
-            .hreflang(Some(String::from("en")))
+            .name(Some("An example link".into()))
+            .hreflang(Some("en".into()))
             .link_type(Some("Link".into()))
             .media_type(Some("text/html".into()))
             .build().unwrap(),
@@ -309,8 +309,8 @@ mod tests {
         let link = document.object as Link;
         assert_eq!(link.link_type, Some("Link".into()));
         assert_eq!(link.href, "http://example.org/abc");
-        assert_eq!(link.name, Some(String::from("An example link")));
-        assert_eq!(link.hreflang, Some(String::from("en")));
+        assert_eq!(link.name, Some("An example link".into()));
+        assert_eq!(link.hreflang, Some("en".into()));
     }
 
     #[test]
@@ -320,7 +320,7 @@ mod tests {
             "video/mkv".into()
         );
         let preview = PreviewBuilder::default()
-            .duration(Some(String::from("PT1M")))
+            .duration(Some("PT1M".into()))
             .object_type(Some("Video".into()))
             .url(Some(Box::new(trailer_preview)))
             .name(Some("Trailer".into()))
@@ -382,17 +382,17 @@ mod tests {
         );
         let document: Document<Object> = Document::deserialize_string(actual).unwrap();
         let object = document.object;
-        assert_eq!(object.object_type, Some(String::from("Video")));
-        assert_eq!(object.name, Some(String::from("Cool New Movie")));
-        assert_eq!(object.duration, Some(String::from("PT2H30M")));
+        assert_eq!(object.object_type, Some("Video".into()));
+        assert_eq!(object.name, Some("Cool New Movie".into()));
+        assert_eq!(object.duration, Some("PT2H30M".into()));
 
         let preview = object.preview.unwrap();
-        assert_eq!(preview.object_type, Some(String::from("Video")));
-        assert_eq!(preview.name, Some(String::from("Trailer")));
-        assert_eq!(preview.duration, Some(String::from("PT1M")));
+        assert_eq!(preview.object_type, Some("Video".into()));
+        assert_eq!(preview.name, Some("Trailer".into()));
+        assert_eq!(preview.duration, Some("PT1M".into()));
 
         let url = preview.url.as_ref().unwrap();
-        assert_eq!(url.media_type, Some(String::from("video/mkv")));
+        assert_eq!(url.media_type, Some("video/mkv".into()));
         assert_eq!(url.href, "http://example.org/trailer.mkv".parse::<http::Uri>().unwrap());
     }
 
