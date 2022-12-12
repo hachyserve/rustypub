@@ -1,7 +1,7 @@
-use serde::{ Deserialize, Serialize };
+use crate::core::actor::{Actor, ActorBuilder};
+use crate::core::object::{Object, ObjectBuilder};
 use derive_builder::Builder;
-use crate::core::object::{ Object, ObjectBuilder };
-use crate::core::actor::{ Actor, ActorBuilder };
+use serde::{Deserialize, Serialize};
 
 ///////////////////////////////
 // Activity
@@ -39,31 +39,34 @@ pub struct Activity {
 }
 
 impl ActivityBuilder {
-
     // TODO: macro
     pub fn with_base<F>(&mut self, build_fn: F) -> &mut Self
-        where F: FnOnce(&mut ObjectBuilder) -> &mut ObjectBuilder
+    where
+        F: FnOnce(&mut ObjectBuilder) -> &mut ObjectBuilder,
     {
         let mut base_builder = ObjectBuilder::default();
         self.base(build_fn(&mut base_builder).build().unwrap())
     }
 
     pub fn with_object<F>(&mut self, build_fn: F) -> &mut Self
-        where F: FnOnce(&mut ObjectBuilder) -> &mut ObjectBuilder
+    where
+        F: FnOnce(&mut ObjectBuilder) -> &mut ObjectBuilder,
     {
         let mut base_builder = ObjectBuilder::default();
         self.object(Some(build_fn(&mut base_builder).build().unwrap()))
     }
 
     pub fn with_actor<F>(&mut self, build_fn: F) -> &mut Self
-        where F: FnOnce(&mut ActorBuilder) -> &mut ActorBuilder
+    where
+        F: FnOnce(&mut ActorBuilder) -> &mut ActorBuilder,
     {
         let mut base_builder = ActorBuilder::default();
         self.actor(Some(build_fn(&mut base_builder).build().unwrap()))
     }
 
     pub fn with_target<F>(&mut self, build_fn: F) -> &mut Self
-        where F: FnOnce(&mut ObjectBuilder) -> &mut ObjectBuilder
+    where
+        F: FnOnce(&mut ObjectBuilder) -> &mut ObjectBuilder,
     {
         let mut base_builder = ObjectBuilder::default();
         self.target(Some(build_fn(&mut base_builder).build().unwrap()))
@@ -74,37 +77,40 @@ impl ActivityBuilder {
     pub fn intransitive_activity(object_type: String) -> Self {
         let obj = ObjectBuilder::default()
             .object_type(Some(object_type))
-            .build().unwrap();
-        ActivityBuilder::default()
-            .base(obj)
-            .object(None).to_owned()
+            .build()
+            .unwrap();
+        ActivityBuilder::default().base(obj).object(None).to_owned()
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::core::{ContextBuilder, Document};
     use pretty_assertions::assert_eq;
-    use crate::core::{ Document, ContextBuilder };
 
     #[test]
     fn serialize_activity() {
         let activity = ActivityBuilder::default()
-            .with_base(|builder|
-                builder.object_type(Some("Activity".into()))
-                .summary(Some("Sally did something to a note".into()))
-            )
-            .with_object(|builder|
-                builder.object_type(Some("Note".into()))
-                .name(Some("A Note".into()))
-            )
-            .with_actor(|actor|
-                actor.with_base(|builder|
-                    builder.object_type(Some("Person".into()))
-                    .name(Some("Sally".into()))
-                )
-            )
-            .build().unwrap();
+            .with_base(|builder| {
+                builder
+                    .object_type(Some("Activity".into()))
+                    .summary(Some("Sally did something to a note".into()))
+            })
+            .with_object(|builder| {
+                builder
+                    .object_type(Some("Note".into()))
+                    .name(Some("A Note".into()))
+            })
+            .with_actor(|actor| {
+                actor.with_base(|builder| {
+                    builder
+                        .object_type(Some("Person".into()))
+                        .name(Some("Sally".into()))
+                })
+            })
+            .build()
+            .unwrap();
         let actual = Document::new(ContextBuilder::default().build().unwrap(), activity);
         let expected = String::from(
             r#"{

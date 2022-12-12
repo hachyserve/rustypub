@@ -1,22 +1,19 @@
 pub mod core;
 
-extern crate serde;
 extern crate derive_builder;
-
+extern crate serde;
 
 #[cfg(test)]
 mod tests {
     use chrono::{DateTime, NaiveDate, Utc};
-    use pretty_assertions::assert_eq;
     use http::Uri;
+    use pretty_assertions::assert_eq;
 
     use crate::core::{
-        Document,
-        ContextBuilder,
-        collection::{ Collection, OrderedCollection, CollectionPage, OrderedCollectionPage },
-        activity::{ Activity, ActivityBuilder },
-        object::{ Object, ObjectBuilder, AttributedTo },
-        Link,
+        activity::{Activity, ActivityBuilder},
+        collection::{Collection, CollectionPage, OrderedCollection, OrderedCollectionPage},
+        object::{AttributedTo, Object, ObjectBuilder},
+        ContextBuilder, Document, Link,
     };
 
     // A set of tests from https://www.w3.org/TR/activitystreams-vocabulary examples
@@ -34,10 +31,7 @@ mod tests {
             object.id,
             Some("http://www.test.example/object/1".parse::<Uri>().unwrap())
         );
-        assert_eq!(
-            object.name,
-            Some("A Simple, non-specific object".into())
-        );
+        assert_eq!(object.name, Some("A Simple, non-specific object".into()));
     }
 
     #[test]
@@ -55,7 +49,10 @@ mod tests {
 
         let link: Link = Document::deserialize_string(listing.into()).unwrap().object;
         assert_eq!(link.link_type, Some("Link".into()));
-        assert_eq!(link.href, "http://example.org/abc".parse::<http::Uri>().unwrap());
+        assert_eq!(
+            link.href,
+            "http://example.org/abc".parse::<http::Uri>().unwrap()
+        );
         assert_eq!(link.hreflang, Some("en".into()));
         assert_eq!(link.media_type, Some("text/html".into()));
         assert_eq!(link.name, Some("An example link".into()));
@@ -76,12 +73,15 @@ mod tests {
           "type": "Note",
           "name": "A Note"
         }
-      } 
+      }
       "#;
 
         let activity: Activity = Document::deserialize_string(listing.into()).unwrap().object;
         assert_eq!(activity.base.object_type, Some("Activity".into()));
-        assert_eq!( activity.base.summary, Some("Sally did something to a note".into()));
+        assert_eq!(
+            activity.base.summary,
+            Some("Sally did something to a note".into())
+        );
 
         assert!(activity.actor.is_some());
         let actor = activity.actor.unwrap();
@@ -149,7 +149,8 @@ mod tests {
         }
       "#;
 
-        let collection: Collection<Object> = Document::deserialize_string(listing.into()).unwrap().object;
+        let collection: Collection<Object> =
+            Document::deserialize_string(listing.into()).unwrap().object;
         assert_eq!(collection.base.object_type, Some("Collection".into()));
         assert_eq!(collection.base.summary, Some("Sally's notes".into()));
         assert_eq!(collection.total_items, Some(2));
@@ -182,7 +183,8 @@ mod tests {
         ]
       }
       "#;
-        let collection: OrderedCollection<Object> = Document::deserialize_string(listing.into()).unwrap().object;
+        let collection: OrderedCollection<Object> =
+            Document::deserialize_string(listing.into()).unwrap().object;
         assert_eq!(
             collection.base.object_type,
             Some("OrderedCollection".into())
@@ -385,22 +387,24 @@ mod tests {
     #[test]
     fn minimal_activity_3_1() {
         let activity = ActivityBuilder::default()
-            .with_base(|builder|
-                  builder.object_type(Some("Create".into()))
-                  .summary(Some("Martin created an image".into()))
-            )
-            .with_actor(|actor|
-                actor.with_base(|base_builder|
-                    base_builder.object_type(Some("Person".into()))
-                    .id(Some("http://www.test.example/martin".parse::<Uri>().unwrap()))
-                )
-            )
-            .with_object(|builder| builder.id(Some("http://example.org/foo.jpg".parse::<Uri>().unwrap())))
-            .build().unwrap();
-        let actual = Document::new(
-            ContextBuilder::new().build().unwrap(),
-            activity
-        );
+            .with_base(|builder| {
+                builder
+                    .object_type(Some("Create".into()))
+                    .summary(Some("Martin created an image".into()))
+            })
+            .with_actor(|actor| {
+                actor.with_base(|base_builder| {
+                    base_builder.object_type(Some("Person".into())).id(Some(
+                        "http://www.test.example/martin".parse::<Uri>().unwrap(),
+                    ))
+                })
+            })
+            .with_object(|builder| {
+                builder.id(Some("http://example.org/foo.jpg".parse::<Uri>().unwrap()))
+            })
+            .build()
+            .unwrap();
+        let actual = Document::new(ContextBuilder::new().build().unwrap(), activity);
         let expected = r#"{
   "@context": {
     "@vocab": "https://www.w3.org/ns/activitystreams"
@@ -422,44 +426,51 @@ mod tests {
     #[test]
     fn basic_activity_with_additional_detail_3_2() {
         let activity = ActivityBuilder::default()
-            .with_base(|b|
+            .with_base(|b| {
                 b.object_type(Some("Add".into()))
-                .summary(Some("Martin added an article to his blog".into()))
-                .published(Some(DateTime::<Utc>::from_utc(
-                    NaiveDate::from_ymd(2015, 2, 10).and_hms(15, 4, 55),
-                    Utc,
-                )))
-            )
-            .with_actor(|actor|
-                actor.with_base(|base_builder|
-                    base_builder.object_type(Some("Person".into()))
-                    .id(Some("http://www.test.example/martin".parse::<Uri>().unwrap()))
-                    .name(Some("Martin Smith".into()))
-                    .image(Some(Link::new(
-                        "http://example.org/martin/image.jpg".into(),
-                        "image/jpeg".into(),
+                    .summary(Some("Martin added an article to his blog".into()))
+                    .published(Some(DateTime::<Utc>::from_utc(
+                        NaiveDate::from_ymd(2015, 2, 10).and_hms(15, 4, 55),
+                        Utc,
                     )))
-                    .url(Some("http://example.org/martin".into()))
-                )
-            )
+            })
+            .with_actor(|actor| {
+                actor.with_base(|base_builder| {
+                    base_builder
+                        .object_type(Some("Person".into()))
+                        .id(Some(
+                            "http://www.test.example/martin".parse::<Uri>().unwrap(),
+                        ))
+                        .name(Some("Martin Smith".into()))
+                        .image(Some(Link::new(
+                            "http://example.org/martin/image.jpg".into(),
+                            "image/jpeg".into(),
+                        )))
+                        .url(Some("http://example.org/martin".into()))
+                })
+            })
             // TODO: figure out how to get a 'Z' on this. probably requires a time-zone (so not naive)
-            .with_object(|builder|
-                 builder.object_type(Some("Article".into()))
-                 .id(Some("http://www.test.example/blog/abc123/xyz".parse::<Uri>().unwrap()))
-                 .name(Some("Why I love Activity Streams".into()))
-                 .url(Some("http://example.org/blog/2011/02/entry".into()))
-            )
-            .with_target(|target|
-                target.object_type(Some("OrderedCollection".into()))
-                .id(Some("http://example.org/blog/".parse::<Uri>().unwrap()))
-                .name(Some("Martin's Blog".into()))
-            )
-            .build().unwrap();
+            .with_object(|builder| {
+                builder
+                    .object_type(Some("Article".into()))
+                    .id(Some(
+                        "http://www.test.example/blog/abc123/xyz"
+                            .parse::<Uri>()
+                            .unwrap(),
+                    ))
+                    .name(Some("Why I love Activity Streams".into()))
+                    .url(Some("http://example.org/blog/2011/02/entry".into()))
+            })
+            .with_target(|target| {
+                target
+                    .object_type(Some("OrderedCollection".into()))
+                    .id(Some("http://example.org/blog/".parse::<Uri>().unwrap()))
+                    .name(Some("Martin's Blog".into()))
+            })
+            .build()
+            .unwrap();
 
-        let actual = Document::new(
-            ContextBuilder::new().build().unwrap(),
-            activity
-        );
+        let actual = Document::new(ContextBuilder::new().build().unwrap(), activity);
         let expected = r#"{
   "@context": {
     "@vocab": "https://www.w3.org/ns/activitystreams"
@@ -500,7 +511,8 @@ mod tests {
             .object_type(Some("Person".into()))
             .id(Some("http://joe.website.example/".parse::<Uri>().unwrap()))
             .name(Some("Joe Smith".into()))
-            .build().unwrap();
+            .build()
+            .unwrap();
         let actual = Document::new(
             ContextBuilder::new().build().unwrap(),
             ObjectBuilder::new()
@@ -512,7 +524,8 @@ mod tests {
                     Utc,
                 )))
                 .attributed_to(vec![AttributedTo::Object(subject)])
-                .build().unwrap()
+                .build()
+                .unwrap(),
         );
 
         let expected = r#"{

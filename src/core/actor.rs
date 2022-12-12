@@ -1,6 +1,6 @@
-use serde::{ Deserialize, Serialize };
-use crate::core::object::{ Object, ObjectBuilder };
+use crate::core::object::{Object, ObjectBuilder};
 use derive_builder::Builder;
+use serde::{Deserialize, Serialize};
 
 // TODO: expand to actor types: https://www.w3.org/TR/activitystreams-vocabulary/#actor-types
 #[derive(Serialize, Deserialize, Default, Debug, Clone, Builder)]
@@ -30,9 +30,9 @@ pub struct Actor {
 }
 
 impl ActorBuilder {
-
     pub fn with_base<F>(&mut self, build_fn: F) -> &mut Self
-        where F: FnOnce(&mut ObjectBuilder) -> &mut ObjectBuilder
+    where
+        F: FnOnce(&mut ObjectBuilder) -> &mut ObjectBuilder,
     {
         let mut base_builder = ObjectBuilder::default();
         self.base(build_fn(&mut base_builder).build().unwrap())
@@ -51,19 +51,22 @@ pub struct PublicKeyInfo {
 mod tests {
     use super::*;
     use crate::core::{ContextBuilder, Document};
-    use pretty_assertions::assert_eq;
     use http::Uri;
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn serialize_actor() {
         let person = ActorBuilder::default()
-            .with_base(|base|
+            .with_base(|base| {
                 base.object_type(Some("Person".into()))
-                .id(Some("https://example.com/person/1234".parse::<Uri>().unwrap()))
-                .name(Some("name".into()))
-            )
+                    .id(Some(
+                        "https://example.com/person/1234".parse::<Uri>().unwrap(),
+                    ))
+                    .name(Some("name".into()))
+            })
             .preferred_username(Some("dma".into()))
-            .build().unwrap();
+            .build()
+            .unwrap();
         let context = ContextBuilder::new().build().unwrap();
         let actual = Document::new(context, person);
         let expected = r#"{
@@ -94,7 +97,10 @@ mod tests {
         let document: Document<Actor> = Document::deserialize_string(actual.into()).unwrap();
         let actor = document.object;
         assert_eq!(actor.base.object_type, Some("Person".into()));
-        assert_eq!(actor.base.id, Some("https://example.com/person/1234".parse::<Uri>().unwrap()));
+        assert_eq!(
+            actor.base.id,
+            Some("https://example.com/person/1234".parse::<Uri>().unwrap())
+        );
         assert_eq!(actor.base.name, Some("name".into()));
         assert_eq!(actor.preferred_username, Some("dma".into()));
     }

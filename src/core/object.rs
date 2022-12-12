@@ -1,7 +1,7 @@
-use serde::{ Deserialize, Serialize };
-use chrono::{ DateTime, Utc };
+use chrono::{DateTime, Utc};
 use derive_builder::Builder;
 use http::Uri;
+use serde::{Deserialize, Serialize};
 
 ///////////////////////////
 // Object
@@ -42,7 +42,7 @@ pub struct Object {
     #[serde(
         rename = "attributedTo",
         skip_serializing_if = "Vec::is_empty",
-        default = "Vec::new",
+        default = "Vec::new"
     )]
     pub attributed_to: Vec<AttributedTo>,
 
@@ -78,10 +78,10 @@ pub struct Person(Object);
 pub struct Service(Object);
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(untagged)] 
+#[serde(untagged)]
 pub enum AttributedTo {
     Object(Object),
-    Link(Link)
+    Link(Link),
 }
 
 impl ObjectBuilder {
@@ -90,14 +90,14 @@ impl ObjectBuilder {
     }
 
     pub fn of_object_type(t: String) -> Self {
-        ObjectBuilder::default()
-            .object_type(Some(t)).to_owned()
+        ObjectBuilder::default().object_type(Some(t)).to_owned()
     }
 
     pub fn note(name: String, content: String) -> Self {
         ObjectBuilder::of_object_type("Note".into())
-             .name(Some(name))
-             .content(Some(content)).to_owned()
+            .name(Some(name))
+            .content(Some(content))
+            .to_owned()
     }
 }
 
@@ -108,7 +108,7 @@ impl ObjectBuilder {
 // https://github.com/serde-rs/serde/issues/723#issuecomment-423299411
 mod opt_uri {
     use http::uri::Uri;
-    use serde::{Serialize, Serializer, Deserialize, Deserializer};
+    use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
     pub fn serialize<S>(value: &Option<Uri>, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -186,7 +186,7 @@ impl Link {
             hreflang: None,
             height: None,
             width: None,
-            preview: None
+            preview: None,
         }
     }
 }
@@ -228,26 +228,28 @@ impl Default for Preview {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::core::{Context, ContextBuilder, Document, DocumentBuilder};
     use pretty_assertions::assert_eq;
     use serde_json::Result;
-    use crate::core::{ Context, ContextBuilder, Document, DocumentBuilder };
 
     #[test]
     fn serialize_object() {
         let object: Object = ObjectBuilder::default()
             .name(Some("name".into()))
-            .build().unwrap();
+            .build()
+            .unwrap();
         let context: Context = ContextBuilder::new()
             .language(Some("en".into()))
-            .build().unwrap();
+            .build()
+            .unwrap();
         let actual = DocumentBuilder::default()
             .object(Some(object))
             .context(context)
-            .build().unwrap();
+            .build()
+            .unwrap();
 
         let expected = r#"{
   "@context": {
@@ -294,18 +296,17 @@ mod tests {
 
     #[test]
     fn serialize_link() {
-        let href = Uri::from(
-            "http://example.org/abc".parse::<http::Uri>().unwrap(),
-        );
+        let href = Uri::from("http://example.org/abc".parse::<http::Uri>().unwrap());
         let actual = Document::new(
             ContextBuilder::new().build().unwrap(),
             LinkBuilder::new()
-            .href(href)
-            .name(Some("An example link".into()))
-            .hreflang(Some("en".into()))
-            .link_type(Some("Link".into()))
-            .media_type(Some("text/html".into()))
-            .build().unwrap(),
+                .href(href)
+                .name(Some("An example link".into()))
+                .hreflang(Some("en".into()))
+                .link_type(Some("Link".into()))
+                .media_type(Some("text/html".into()))
+                .build()
+                .unwrap(),
         );
         let expected = String::from(
             r#"{
@@ -317,7 +318,7 @@ mod tests {
   "mediaType": "text/html",
   "name": "An example link",
   "hreflang": "en"
-}"#
+}"#,
         );
         assert!(actual.serialize_pretty().is_ok());
         assert_eq!(actual.serialize_pretty().unwrap(), expected);
@@ -346,25 +347,24 @@ mod tests {
 
     #[test]
     fn serialize_preview() {
-         let trailer_preview = Link::new(
-            "http://example.org/trailer.mkv".into(),
-            "video/mkv".into()
-        );
+        let trailer_preview =
+            Link::new("http://example.org/trailer.mkv".into(), "video/mkv".into());
         let preview = PreviewBuilder::default()
             .duration(Some("PT1M".into()))
             .object_type(Some("Video".into()))
             .url(Some(Box::new(trailer_preview)))
             .name(Some("Trailer".into()))
-            .build().unwrap();
+            .build()
+            .unwrap();
 
         let object = ObjectBuilder::default()
             .duration(Some("PT2H30M".into()))
             .name(Some("Cool New Movie".into()))
             .preview(Some(Box::new(preview)))
             .object_type(Some("Video".into()))
-            .build().unwrap();
-        let context = ContextBuilder::new()
-            .build().unwrap();
+            .build()
+            .unwrap();
+        let context = ContextBuilder::new().build().unwrap();
         let actual = Document::new(context, object);
         let expected = String::from(
             r#"{
@@ -424,13 +424,20 @@ mod tests {
 
         let url = preview.url.as_ref().unwrap();
         assert_eq!(url.media_type, Some("video/mkv".into()));
-        assert_eq!(url.href, "http://example.org/trailer.mkv".parse::<http::Uri>().unwrap());
+        assert_eq!(
+            url.href,
+            "http://example.org/trailer.mkv"
+                .parse::<http::Uri>()
+                .unwrap()
+        );
     }
 
     #[test]
     fn serialize_note() {
         let context = ContextBuilder::new().build().unwrap();
-        let note = ObjectBuilder::note("Name".into(), "Content".into()).build().unwrap();
+        let note = ObjectBuilder::note("Name".into(), "Content".into())
+            .build()
+            .unwrap();
         let document: Document<Object> = Document::new(context, note);
         let expected = r#"{
   "@context": {
@@ -453,7 +460,8 @@ mod tests {
   "type": "Note",
   "name": "Name",
   "content": "Content"
-}"#.into();
+}"#
+        .into();
         let document: Document<Object> = Document::deserialize_string(actual).unwrap();
         let note: Object = document.object;
         assert_eq!(note.object_type, Some("Note".into()));
