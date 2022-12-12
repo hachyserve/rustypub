@@ -88,6 +88,7 @@ mod tests {
     use super::*;
     use crate::core::{ContextBuilder, Document};
     use pretty_assertions::assert_eq;
+    use serde_json::json;
 
     #[test]
     fn serialize_activity() {
@@ -112,46 +113,42 @@ mod tests {
             .build()
             .unwrap();
         let actual = Document::new(ContextBuilder::default().build().unwrap(), activity);
-        let expected = String::from(
-            r#"{
-  "@context": {
-    "@vocab": "https://www.w3.org/ns/activitystreams"
-  },
-  "type": "Activity",
-  "summary": "Sally did something to a note",
-  "actor": {
-    "type": "Person",
-    "name": "Sally"
-  },
-  "object": {
-    "type": "Note",
-    "name": "A Note"
-  }
-}"#,
-        );
-        assert!(actual.serialize_pretty().is_ok());
-        assert_eq!(actual.serialize_pretty().unwrap(), expected);
+        let expected = json!({
+          "@context": {
+            "@vocab": "https://www.w3.org/ns/activitystreams"
+          },
+          "type": "Activity",
+          "summary": "Sally did something to a note",
+          "actor": {
+            "type": "Person",
+            "name": "Sally"
+          },
+          "object": {
+            "type": "Note",
+            "name": "A Note"
+          }
+        });
+        assert_eq!(serde_json::to_value(actual).unwrap(), expected);
     }
 
     #[test]
     fn deserialize_activity() {
-        let actual = String::from(
-            r#"{
-  "@context": {
-    "@vocab": "https://www.w3.org/ns/activitystreams"
-  },
-  "type": "Activity",
-  "summary": "Sally did something to a note",
-  "actor": {
-    "type": "Person",
-    "name": "Sally"
-  },
-  "object": {
-    "type": "Note",
-    "name": "A Note"
-  }
-}"#,
-        );
+        let actual = json!({
+          "@context": {
+            "@vocab": "https://www.w3.org/ns/activitystreams"
+          },
+          "type": "Activity",
+          "summary": "Sally did something to a note",
+          "actor": {
+            "type": "Person",
+            "name": "Sally"
+          },
+          "object": {
+            "type": "Note",
+            "name": "A Note"
+          }
+        })
+        .to_string();
         let document: Document<Activity> = Document::deserialize_string(actual).unwrap();
         let activity = document.object as Activity;
         assert_eq!(activity.base.object_type, Some("Activity".into()));

@@ -53,6 +53,7 @@ mod tests {
     use crate::core::{ContextBuilder, Document};
     use http::Uri;
     use pretty_assertions::assert_eq;
+    use serde_json::json;
 
     #[test]
     fn serialize_actor() {
@@ -69,32 +70,33 @@ mod tests {
             .unwrap();
         let context = ContextBuilder::new().build().unwrap();
         let actual = Document::new(context, person);
-        let expected = r#"{
-  "@context": {
-    "@vocab": "https://www.w3.org/ns/activitystreams"
-  },
-  "type": "Person",
-  "id": "https://example.com/person/1234",
-  "name": "name",
-  "preferredUsername": "dma"
-}"#;
-        let s = serde_json::to_string_pretty(&actual);
-        assert!(s.is_ok());
-        assert_eq!(s.unwrap(), expected)
+        let expected = json!({
+          "@context": {
+            "@vocab": "https://www.w3.org/ns/activitystreams"
+          },
+          "type": "Person",
+          "id": "https://example.com/person/1234",
+          "name": "name",
+          "preferredUsername": "dma"
+        });
+
+        let v = serde_json::to_value(&actual);
+        assert_eq!(v.unwrap(), expected)
     }
 
     #[test]
     fn deserialize_actor() {
-        let actual = r#"{
-  "@context": {
-    "@vocab": "https://www.w3.org/ns/activitystreams"
-  },
-  "type": "Person",
-  "id": "https://example.com/person/1234",
-  "name": "name",
-  "preferredUsername": "dma"
-}"#;
-        let document: Document<Actor> = Document::deserialize_string(actual.into()).unwrap();
+        let actual = json!({
+          "@context": {
+            "@vocab": "https://www.w3.org/ns/activitystreams"
+          },
+          "type": "Person",
+          "id": "https://example.com/person/1234",
+          "name": "name",
+          "preferredUsername": "dma"
+        })
+        .to_string();
+        let document: Document<Actor> = Document::deserialize_string(actual).unwrap();
         let actor = document.object;
         assert_eq!(actor.base.object_type, Some("Person".into()));
         assert_eq!(

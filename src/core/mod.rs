@@ -106,6 +106,8 @@ impl ContextBuilder {
 
 #[cfg(test)]
 mod tests {
+    use serde_json::json;
+
     use super::*;
 
     #[test]
@@ -115,23 +117,22 @@ mod tests {
             .build()
             .unwrap();
 
-        let expected = r#"{
-  "@vocab": "https://www.w3.org/ns/activitystreams",
-  "@language": "en"
-}"#;
-        let serialize_pretty = serde_json::to_string_pretty(&ctx);
-        assert!(serialize_pretty.is_ok());
-        assert_eq!(serialize_pretty.ok().unwrap(), expected)
+        let expected = json!({
+          "@vocab": "https://www.w3.org/ns/activitystreams",
+          "@language": "en"
+        });
+        let value = serde_json::to_value(&ctx);
+        assert_eq!(value.unwrap(), expected)
     }
 
     #[test]
     fn deserialize_context() {
-        let actual = String::from(
-            r#"{
-    "@vocab": "https://www.w3.org/ns/activitystreams",
-    "@language": "en"
-}"#,
-        );
+        let actual = json!(
+                    {
+            "@vocab": "https://www.w3.org/ns/activitystreams",
+            "@language": "en"
+        })
+        .to_string();
         let ctx: Context = serde_json::from_str(&actual).unwrap();
         assert_eq!(ctx.language, Some("en".into()));
         assert_eq!(

@@ -8,6 +8,7 @@ mod tests {
     use chrono::{DateTime, NaiveDate, Utc};
     use http::Uri;
     use pretty_assertions::assert_eq;
+    use serde_json::json;
 
     use crate::core::{
         activity::{Activity, ActivityBuilder},
@@ -19,13 +20,14 @@ mod tests {
     // A set of tests from https://www.w3.org/TR/activitystreams-vocabulary examples
     #[test]
     fn example_1() {
-        let listing = r#"{
+        let listing = json!({
           "@context": { "@vocab": "https://www.w3.org/ns/activitystreams" },
           "type": "Object",
           "id": "http://www.test.example/object/1",
           "name": "A Simple, non-specific object"
-        }"#;
-        let object: Object = Document::deserialize_string(listing.into()).unwrap().object;
+        })
+        .to_string();
+        let object: Object = Document::deserialize_string(listing).unwrap().object;
         assert_eq!(object.object_type, Some("Object".into()));
         assert_eq!(
             object.id,
@@ -36,18 +38,17 @@ mod tests {
 
     #[test]
     fn example_2() {
-        let listing = r#"
-      {
-        "@context": {"@vocab": "https://www.w3.org/ns/activitystreams"},
-        "type": "Link",
-        "href": "http://example.org/abc",
-        "hreflang": "en",
-        "mediaType": "text/html",
-        "name": "An example link"
-      }
-      "#;
+        let listing = json!({
+          "@context": {"@vocab": "https://www.w3.org/ns/activitystreams"},
+          "type": "Link",
+          "href": "http://example.org/abc",
+          "hreflang": "en",
+          "mediaType": "text/html",
+          "name": "An example link"
+        })
+        .to_string();
 
-        let link: Link = Document::deserialize_string(listing.into()).unwrap().object;
+        let link: Link = Document::deserialize_string(listing).unwrap().object;
         assert_eq!(link.link_type, Some("Link".into()));
         assert_eq!(
             link.href,
@@ -60,23 +61,22 @@ mod tests {
 
     #[test]
     fn example_3() {
-        let listing = r#"
-      {
-        "@context": { "@vocab": "https://www.w3.org/ns/activitystreams" },
-        "type": "Activity",
-        "summary": "Sally did something to a note",
-        "actor": {
-          "type": "Person",
-          "name": "Sally"
-        },
-        "object": {
-          "type": "Note",
-          "name": "A Note"
-        }
-      }
-      "#;
+        let listing = json!({
+          "@context": { "@vocab": "https://www.w3.org/ns/activitystreams" },
+          "type": "Activity",
+          "summary": "Sally did something to a note",
+          "actor": {
+            "type": "Person",
+            "name": "Sally"
+          },
+          "object": {
+            "type": "Note",
+            "name": "A Note"
+          }
+        })
+        .to_string();
 
-        let activity: Activity = Document::deserialize_string(listing.into()).unwrap().object;
+        let activity: Activity = Document::deserialize_string(listing).unwrap().object;
         assert_eq!(activity.base.object_type, Some("Activity".into()));
         assert_eq!(
             activity.base.summary,
@@ -96,23 +96,22 @@ mod tests {
 
     #[test]
     fn example_4() {
-        let listing = r#"
-      {
-        "@context": { "@vocab": "https://www.w3.org/ns/activitystreams" },
-        "type": "Travel",
-        "summary": "Sally went to work",
-        "actor": {
-          "type": "Person",
-          "name": "Sally"
-        },
-        "target": {
-          "type": "Place",
-          "name": "Work"
-        }
-      }
-      "#;
+        let listing = json!({
+          "@context": { "@vocab": "https://www.w3.org/ns/activitystreams" },
+          "type": "Travel",
+          "summary": "Sally went to work",
+          "actor": {
+            "type": "Person",
+            "name": "Sally"
+          },
+          "target": {
+            "type": "Place",
+            "name": "Work"
+          }
+        })
+        .to_string();
 
-        let activity: Activity = Document::deserialize_string(listing.into()).unwrap().object;
+        let activity: Activity = Document::deserialize_string(listing).unwrap().object;
         assert_eq!(activity.base.object_type, Some("Travel".into()));
         assert_eq!(activity.base.summary, Some("Sally went to work".into()));
         assert!(activity.object.is_none());
@@ -130,8 +129,7 @@ mod tests {
 
     #[test]
     fn example_5() {
-        let listing = r#"
-        {
+        let listing = json!({
           "@context": { "@vocab": "https://www.w3.org/ns/activitystreams" },
           "summary": "Sally's notes",
           "type": "Collection",
@@ -146,11 +144,10 @@ mod tests {
               "name": "Another Simple Note"
             }
           ]
-        }
-      "#;
+        })
+        .to_string();
 
-        let collection: Collection<Object> =
-            Document::deserialize_string(listing.into()).unwrap().object;
+        let collection: Collection<Object> = Document::deserialize_string(listing).unwrap().object;
         assert_eq!(collection.base.object_type, Some("Collection".into()));
         assert_eq!(collection.base.summary, Some("Sally's notes".into()));
         assert_eq!(collection.total_items, Some(2));
@@ -165,26 +162,26 @@ mod tests {
 
     #[test]
     fn example_6() {
-        let listing = r#"
-      {
-        "@context": { "@vocab": "https://www.w3.org/ns/activitystreams" },
-        "summary": "Sally's notes",
-        "type": "OrderedCollection",
-        "totalItems": 2,
-        "orderedItems": [
-          {
-            "type": "Note",
-            "name": "A Simple Note"
-          },
-          {
-            "type": "Note",
-            "name": "Another Simple Note"
-          }
-        ]
-      }
-      "#;
+        let listing = json!({
+          "@context": { "@vocab": "https://www.w3.org/ns/activitystreams" },
+          "summary": "Sally's notes",
+          "type": "OrderedCollection",
+          "totalItems": 2,
+          "orderedItems": [
+            {
+              "type": "Note",
+              "name": "A Simple Note"
+            },
+            {
+              "type": "Note",
+              "name": "Another Simple Note"
+            }
+          ]
+        })
+        .to_string();
+
         let collection: OrderedCollection<Object> =
-            Document::deserialize_string(listing.into()).unwrap().object;
+            Document::deserialize_string(listing).unwrap().object;
         assert_eq!(
             collection.base.object_type,
             Some("OrderedCollection".into())
@@ -202,27 +199,27 @@ mod tests {
 
     #[test]
     fn example_7() {
-        let listing = r#"
-      {
-        "@context": { "@vocab": "https://www.w3.org/ns/activitystreams" },
-        "summary": "Page 1 of Sally's notes",
-        "type": "CollectionPage",
-        "id": "http://example.org/foo?page=1",
-        "partOf": "http://example.org/foo",
-        "items": [
-          {
-            "type": "Note",
-            "name": "A Simple Note"
-          },
-          {
-            "type": "Note",
-            "name": "Another Simple Note"
-          }
-        ]
-      }
-      "#;
+        let listing = json!({
+          "@context": { "@vocab": "https://www.w3.org/ns/activitystreams" },
+          "summary": "Page 1 of Sally's notes",
+          "type": "CollectionPage",
+          "id": "http://example.org/foo?page=1",
+          "partOf": "http://example.org/foo",
+          "items": [
+            {
+              "type": "Note",
+              "name": "A Simple Note"
+            },
+            {
+              "type": "Note",
+              "name": "Another Simple Note"
+            }
+          ]
+        })
+        .to_string();
+
         let collection_page: CollectionPage<Object> =
-            Document::deserialize_string(listing.into()).unwrap().object;
+            Document::deserialize_string(listing).unwrap().object;
         assert_eq!(
             collection_page.base.base.object_type,
             Some("CollectionPage".into())
@@ -250,27 +247,27 @@ mod tests {
 
     #[test]
     fn example_8() {
-        let listing = r#"
-{
-  "@context": {"@vocab": "https://www.w3.org/ns/activitystreams"},
-  "summary": "Page 1 of Sally's notes",
-  "type": "OrderedCollectionPage",
-  "id": "http://example.org/foo?page=1",
-  "partOf": "http://example.org/foo",
-  "orderedItems": [
-    {
-      "type": "Note",
-      "name": "A Simple Note"
-    },
-    {
-      "type": "Note",
-      "name": "Another Simple Note"
-    }
-  ]
-}
-"#;
+        let listing = json!({
+          "@context": {"@vocab": "https://www.w3.org/ns/activitystreams"},
+          "summary": "Page 1 of Sally's notes",
+          "type": "OrderedCollectionPage",
+          "id": "http://example.org/foo?page=1",
+          "partOf": "http://example.org/foo",
+          "orderedItems": [
+            {
+              "type": "Note",
+              "name": "A Simple Note"
+            },
+            {
+              "type": "Note",
+              "name": "Another Simple Note"
+            }
+          ]
+        })
+        .to_string();
+
         let collection_page: OrderedCollectionPage<Object> =
-            Document::deserialize_string(listing.into()).unwrap().object;
+            Document::deserialize_string(listing).unwrap().object;
         assert_eq!(
             collection_page.base.base.object_type,
             Some("OrderedCollectionPage".into())
@@ -298,13 +295,15 @@ mod tests {
 
     #[test]
     fn example_53() {
-        let listing = r#"{
+        let listing = json!({
           "@context": { "@vocab": "https://www.w3.org/ns/activitystreams" },
           "type": "Note",
           "name": "A Word of Warning",
           "content": "Looks like it is going to rain today. Bring an umbrella!"
-        }"#;
-        let document: Document<Object> = Document::deserialize_string(listing.into()).unwrap();
+        })
+        .to_string();
+
+        let document: Document<Object> = Document::deserialize_string(listing).unwrap();
         let note = document.object;
         assert_eq!(note.object_type, Some("Note".into()));
         assert_eq!(note.name, Some("A Word of Warning".into()));
@@ -318,19 +317,21 @@ mod tests {
 
     #[test]
     fn example_69() {
-        let listing = r#"{
-  "@context": {
-    "@vocab": "https://www.w3.org/ns/activitystreams"
-  },
-  "name": "Holiday announcement",
-  "type": "Note",
-  "content": "Thursday will be a company-wide holiday. Enjoy your day off!",
-  "audience": {
-    "type": "http://example.org/Organization",
-    "name": "ExampleCo LLC"
-  }
-}"#;
-        let document: Document<Object> = Document::deserialize_string(listing.into()).unwrap();
+        let listing = json!({
+          "@context": {
+            "@vocab": "https://www.w3.org/ns/activitystreams"
+          },
+          "name": "Holiday announcement",
+          "type": "Note",
+          "content": "Thursday will be a company-wide holiday. Enjoy your day off!",
+          "audience": {
+            "type": "http://example.org/Organization",
+            "name": "ExampleCo LLC"
+          }
+        })
+        .to_string();
+
+        let document: Document<Object> = Document::deserialize_string(listing).unwrap();
         let object = document.object;
         assert_eq!(object.name, Some("Holiday announcement".into()));
         assert_eq!(object.object_type, Some("Note".into()));
@@ -351,15 +352,17 @@ mod tests {
 
     #[test]
     fn example_114() {
-        let listing = r#"{
-  "@context": {
-    "@vocab": "https://www.w3.org/ns/activitystreams"
-  },
-  "summary": "A simple note",
-  "type": "Note",
-  "content": "A <em>simple</em> note"
-}"#;
-        let document: Document<Object> = Document::deserialize_string(listing.into()).unwrap();
+        let listing = json!({
+          "@context": {
+            "@vocab": "https://www.w3.org/ns/activitystreams"
+          },
+          "summary": "A simple note",
+          "type": "Note",
+          "content": "A <em>simple</em> note"
+        })
+        .to_string();
+
+        let document: Document<Object> = Document::deserialize_string(listing).unwrap();
         let object = document.object;
         assert_eq!(object.summary, Some("A simple note".into()));
         assert_eq!(object.object_type, Some("Note".into()));
@@ -368,15 +371,17 @@ mod tests {
 
     #[test]
     fn example_133() {
-        let listing = r#"{
-        "@context": {
-          "@vocab": "https://www.w3.org/ns/activitystreams"
-        },
-        "name": "Cane Sugar Processing",
-        "type": "Note",
-        "summary": "A simple <em>note</em>"
-      }"#;
-        let document: Document<Object> = Document::deserialize_string(listing.into()).unwrap();
+        let listing = json!({
+          "@context": {
+            "@vocab": "https://www.w3.org/ns/activitystreams"
+          },
+          "name": "Cane Sugar Processing",
+          "type": "Note",
+          "summary": "A simple <em>note</em>"
+        })
+        .to_string();
+
+        let document: Document<Object> = Document::deserialize_string(listing).unwrap();
         let object = document.object;
         assert_eq!(object.summary, Some("A simple <em>note</em>".into()));
         assert_eq!(object.object_type, Some("Note".into()));
@@ -405,22 +410,21 @@ mod tests {
             .build()
             .unwrap();
         let actual = Document::new(ContextBuilder::new().build().unwrap(), activity);
-        let expected = r#"{
-  "@context": {
-    "@vocab": "https://www.w3.org/ns/activitystreams"
-  },
-  "type": "Create",
-  "summary": "Martin created an image",
-  "actor": {
-    "type": "Person",
-    "id": "http://www.test.example/martin"
-  },
-  "object": {
-    "id": "http://example.org/foo.jpg"
-  }
-}"#;
-        assert!(actual.serialize_pretty().is_ok());
-        assert_eq!(actual.serialize_pretty().unwrap(), expected);
+        let expected = json!({
+          "@context": {
+            "@vocab": "https://www.w3.org/ns/activitystreams"
+          },
+          "type": "Create",
+          "summary": "Martin created an image",
+          "actor": {
+            "type": "Person",
+            "id": "http://www.test.example/martin"
+          },
+          "object": {
+            "id": "http://example.org/foo.jpg"
+          }
+        });
+        assert_eq!(serde_json::to_value(actual).unwrap(), expected);
     }
 
     #[test]
@@ -471,38 +475,37 @@ mod tests {
             .unwrap();
 
         let actual = Document::new(ContextBuilder::new().build().unwrap(), activity);
-        let expected = r#"{
-  "@context": {
-    "@vocab": "https://www.w3.org/ns/activitystreams"
-  },
-  "type": "Add",
-  "published": "2015-02-10T15:04:55Z",
-  "summary": "Martin added an article to his blog",
-  "actor": {
-    "type": "Person",
-    "id": "http://www.test.example/martin",
-    "name": "Martin Smith",
-    "url": "http://example.org/martin",
-    "image": {
-      "type": "Link",
-      "href": "http://example.org/martin/image.jpg",
-      "mediaType": "image/jpeg"
-    }
-  },
-  "object": {
-    "type": "Article",
-    "id": "http://www.test.example/blog/abc123/xyz",
-    "name": "Why I love Activity Streams",
-    "url": "http://example.org/blog/2011/02/entry"
-  },
-  "target": {
-    "type": "OrderedCollection",
-    "id": "http://example.org/blog/",
-    "name": "Martin's Blog"
-  }
-}"#;
-        assert!(actual.serialize_pretty().is_ok());
-        assert_eq!(actual.serialize_pretty().unwrap(), expected);
+        let expected = json!({
+          "@context": {
+            "@vocab": "https://www.w3.org/ns/activitystreams"
+          },
+          "type": "Add",
+          "published": "2015-02-10T15:04:55Z",
+          "summary": "Martin added an article to his blog",
+          "actor": {
+            "type": "Person",
+            "id": "http://www.test.example/martin",
+            "name": "Martin Smith",
+            "url": "http://example.org/martin",
+            "image": {
+              "type": "Link",
+              "href": "http://example.org/martin/image.jpg",
+              "mediaType": "image/jpeg"
+            }
+          },
+          "object": {
+            "type": "Article",
+            "id": "http://www.test.example/blog/abc123/xyz",
+            "name": "Why I love Activity Streams",
+            "url": "http://example.org/blog/2011/02/entry"
+          },
+          "target": {
+            "type": "OrderedCollection",
+            "id": "http://example.org/blog/",
+            "name": "Martin's Blog"
+          }
+        });
+        assert_eq!(serde_json::to_value(actual).unwrap(), expected);
     }
 
     #[test]
@@ -528,23 +531,22 @@ mod tests {
                 .unwrap(),
         );
 
-        let expected = r#"{
-  "@context": {
-    "@vocab": "https://www.w3.org/ns/activitystreams"
-  },
-  "type": "Note",
-  "id": "http://example.org/foo",
-  "name": "My favourite stew recipe",
-  "published": "2014-08-21T12:34:56Z",
-  "attributedTo": [
-    {
-      "type": "Person",
-      "id": "http://joe.website.example/",
-      "name": "Joe Smith"
-    }
-  ]
-}"#;
-        assert!(actual.serialize_pretty().is_ok());
-        assert_eq!(actual.serialize_pretty().unwrap(), expected);
+        let expected = json!({
+          "@context": {
+            "@vocab": "https://www.w3.org/ns/activitystreams"
+          },
+          "type": "Note",
+          "id": "http://example.org/foo",
+          "name": "My favourite stew recipe",
+          "published": "2014-08-21T12:34:56Z",
+          "attributedTo": [
+            {
+              "type": "Person",
+              "id": "http://joe.website.example/",
+              "name": "Joe Smith"
+            }
+          ]
+        });
+        assert_eq!(serde_json::to_value(actual).unwrap(), expected);
     }
 }
