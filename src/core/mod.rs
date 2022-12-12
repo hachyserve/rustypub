@@ -26,7 +26,7 @@ impl<T : DeserializeOwned + Serialize > Document<T> {
         Document { context, object }
     }
 
-    pub fn pretty_print(&self) -> serde_json::Result<String>  {
+    pub fn serialize_pretty(&self) -> serde_json::Result<String>  {
         let serialized = serde_json::to_string_pretty(&self);
         println!("serialized = {:?}", serialized);
         serialized
@@ -120,17 +120,14 @@ pub struct Collection<Item: Clone> { // TODO: can we avoid need for Clone?
 }
 
 impl<Item: Clone> CollectionBuilder<Item> {
-    pub fn ordered_collection(items: Vec<Item>) -> Self
-        where Item : DeserializeOwned + Serialize {
-        let obj = ObjectBuilder::default()
-            .object_type(Some("OrderedCollection".into()))
-            .build()
-            .unwrap();
-        CollectionBuilder::default()
-            .base(obj)
-            .items(items)
-            .to_owned()
+
+    pub fn with_base<F>(&mut self, build_fn: F) -> &mut Self
+        where F: FnOnce(&mut ObjectBuilder) -> &mut ObjectBuilder
+    {
+        let mut base_builder = ObjectBuilder::default();
+        self.base(build_fn(&mut base_builder).build().unwrap())
     }
+
 }
 
 /// A subtype of [Collection] in which members of the logical collection are
@@ -194,9 +191,9 @@ mod tests {
   "@vocab": "https://www.w3.org/ns/activitystreams",
   "@language": "en"
 }"#;
-        let pretty_print = serde_json::to_string_pretty(&ctx);
-        assert!(pretty_print.is_ok());
-        assert_eq!(pretty_print.ok().unwrap(), expected)
+        let serialize_pretty = serde_json::to_string_pretty(&ctx);
+        assert!(serialize_pretty.is_ok());
+        assert_eq!(serialize_pretty.ok().unwrap(), expected)
     }
 
     #[test]

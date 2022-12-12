@@ -1,4 +1,4 @@
-use serde::{ Deserialize, Serialize, de::DeserializeOwned };
+use serde::{ Deserialize, Serialize };
 use chrono::{ DateTime, Utc };
 use derive_builder::Builder;
 use http::Uri;
@@ -225,9 +225,9 @@ mod tests {
   },
   "name": "name"
 }"#;
-        let pretty_print = serde_json::to_string_pretty(&actual);
-        assert!(pretty_print.is_ok());
-        assert_eq!(pretty_print.ok().unwrap(), expected)
+        let serialize_pretty = serde_json::to_string_pretty(&actual);
+        assert!(serialize_pretty.is_ok());
+        assert_eq!(serialize_pretty.ok().unwrap(), expected)
     }
 
     #[test]
@@ -288,8 +288,8 @@ mod tests {
   "hreflang": "en"
 }"#
         );
-        assert!(actual.pretty_print().is_ok());
-        assert_eq!(actual.pretty_print().unwrap(), expected);
+        assert!(actual.serialize_pretty().is_ok());
+        assert_eq!(actual.serialize_pretty().unwrap(), expected);
     }
 
     #[test]
@@ -355,8 +355,8 @@ mod tests {
   }
 }"#,
         );
-        assert!(actual.pretty_print().is_ok());
-        assert_eq!(actual.pretty_print().unwrap(), expected);
+        assert!(actual.serialize_pretty().is_ok());
+        assert_eq!(actual.serialize_pretty().unwrap(), expected);
     }
 
     #[test]
@@ -409,8 +409,8 @@ mod tests {
   "name": "Name",
   "content": "Content"
 }"#;
-        assert!(document.pretty_print().is_ok());
-        assert_eq!(document.pretty_print().unwrap(), expected)
+        assert!(document.serialize_pretty().is_ok());
+        assert_eq!(document.serialize_pretty().unwrap(), expected)
     }
 
     #[test]

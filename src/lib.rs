@@ -1,8 +1,5 @@
 pub mod core;
 
-// use serde::{de::DeserializeOwned, Serialize};
-// use serde_json::Result;
-
 extern crate serde;
 extern crate derive_builder;
 
@@ -426,8 +423,8 @@ mod tests {
     "id": "http://example.org/foo.jpg"
   }
 }"#;
-        assert!(actual.pretty_print().is_ok());
-        assert_eq!(actual.pretty_print().unwrap(), expected);
+        assert!(actual.serialize_pretty().is_ok());
+        assert_eq!(actual.serialize_pretty().unwrap(), expected);
     }
 
     #[test]
@@ -505,8 +502,8 @@ mod tests {
     "name": "Martin's Blog"
   }
 }"#;
-        assert!(actual.pretty_print().is_ok());
-        assert_eq!(actual.pretty_print().unwrap(), expected);
+        assert!(actual.serialize_pretty().is_ok());
+        assert_eq!(actual.serialize_pretty().unwrap(), expected);
     }
 
     #[test]
@@ -546,7 +543,7 @@ mod tests {
     }
   ]
 }"#;
-        assert!(actual.pretty_print().is_ok());
-        assert_eq!(actual.pretty_print().unwrap(), expected);
+        assert!(actual.serialize_pretty().is_ok());
+        assert_eq!(actual.serialize_pretty().unwrap(), expected);
     }
 }

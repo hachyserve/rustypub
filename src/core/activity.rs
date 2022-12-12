@@ -1,7 +1,7 @@
 use serde::{ Deserialize, Serialize };
 use derive_builder::Builder;
 use crate::core::object::{ Object, ObjectBuilder };
-use crate::core::actor::Actor;
+use crate::core::actor::{ Actor, ActorBuilder };
 
 ///////////////////////////////
 // Activity
@@ -47,6 +47,20 @@ impl ActivityBuilder {
         self.base(build_fn(&mut base_builder).build().unwrap())
     }
 
+    pub fn with_object<F>(&mut self, build_fn: F) -> &mut Self
+        where F: FnOnce(&mut ObjectBuilder) -> &mut ObjectBuilder
+    {
+        let mut base_builder = ObjectBuilder::default();
+        self.object(Some(build_fn(&mut base_builder).build().unwrap()))
+    }
+
+    pub fn with_actor<F>(&mut self, build_fn: F) -> &mut Self
+        where F: FnOnce(&mut ActorBuilder) -> &mut ActorBuilder
+    {
+        let mut base_builder = ActorBuilder::default();
+        self.actor(Some(build_fn(&mut base_builder).build().unwrap()))
+    }
+
     /// Instances of [IntransitiveActivity] are a subtype of [Activity] representing
     /// intransitive actions. The object property is therefore inappropriate for
     /// these activities.
@@ -64,26 +78,25 @@ impl ActivityBuilder {
 mod tests {
     use super::*;
     use pretty_assertions::assert_eq;
-    use crate::core::{ Document, ContextBuilder, object::ObjectBuilder, actor::ActorBuilder };
+    use crate::core::{ Document, ContextBuilder };
 
     #[test]
     fn serialize_activity() {
-        let target_object = ObjectBuilder::new()
-                .object_type(Some("Note".into()))
-                .name(Some("A Note".into()))
-                .build().unwrap();
-        let subject_actor = ActorBuilder::default()
-            .with_base(|base_builder|
-                base_builder.object_type(Some("Person".into()))
-                .name(Some("Sally".into()))
-            ).build().unwrap();
         let activity = ActivityBuilder::default()
-            .with_base(|base_builder|
-                base_builder.object_type(Some("Activity".into()))
+            .with_base(|builder|
+                builder.object_type(Some("Activity".into()))
                 .summary(Some("Sally did something to a note".into()))
             )
-            .object(Some(target_object))
-            .actor(Some(subject_actor))
+            .with_object(|builder|
+                builder.object_type(Some("Note".into()))
+                .name(Some("A Note".into()))
+            )
+            .with_actor(|actor|
+                actor.with_base(|builder|
+                    builder.object_type(Some("Person".into()))
+                    .name(Some("Sally".into()))
+                )
+            )
             .build().unwrap();
         let actual = Document::new(ContextBuilder::default().build().unwrap(), activity);
         let expected = String::from(
@@ -103,8 +116,8 @@ mod tests {
   }
 }"#,
         );
-        assert!(actual.pretty_print().is_ok());
-        assert_eq!(actual.pretty_print().unwrap(), expected);
+        assert!(actual.serialize_pretty().is_ok());
+        assert_eq!(actual.serialize_pretty().unwrap(), expected);
     }
 
     #[test]

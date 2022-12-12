@@ -1,12 +1,7 @@
 use serde::{ Deserialize, Serialize };
 use crate::core::object::{ Object, ObjectBuilder };
 use derive_builder::Builder;
-use rsa::{
-    pkcs1::{DecodeRsaPublicKey, Error},
-    RsaPublicKey,
-};
 
-// TODO: does this have additional fields? Who says?
 // TODO: expand to actor types: https://www.w3.org/TR/activitystreams-vocabulary/#actor-types
 #[derive(Serialize, Deserialize, Default, Debug, Clone, Builder)]
 #[builder(default)]
@@ -42,11 +37,6 @@ impl ActorBuilder {
         let mut base_builder = ObjectBuilder::default();
         self.base(build_fn(&mut base_builder).build().unwrap())
     }
-
-    pub fn from_base(object: Object) -> ActorBuilder {
-        ActorBuilder::default()
-            .base(object).to_owned()
-    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -65,12 +55,12 @@ mod tests {
 
     #[test]
     fn serialize_actor() {
-        let person = ActorBuilder::from_base(ObjectBuilder::default()
-            .object_type(Some("Person".into()))
-            .id(Some("https://example.com/person/1234".into()))
-            .name(Some("name".into()))
-            .build().unwrap()
-        )
+        let person = ActorBuilder::default()
+            .with_base(|base|
+                base.object_type(Some("Person".into()))
+                .id(Some("https://example.com/person/1234".into()))
+                .name(Some("name".into()))
+            )
             .preferred_username(Some("dma".into()))
             .build().unwrap();
         let context = ContextBuilder::new().build().unwrap();
