@@ -36,14 +36,14 @@ mod tests {
           "name": "A Simple, non-specific object"
         }"#;
         let object: Object = Document::deserialize_string(listing.into()).unwrap().object;
-        assert_eq!(object.object_type, Some(String::from("Object")));
+        assert_eq!(object.object_type, Some("Object".into()));
         assert_eq!(
             object.id,
-            Some(String::from("http://www.test.example/object/1"))
+            Some("http://www.test.example/object/1".into())
         );
         assert_eq!(
             object.name,
-            Some(String::from("A Simple, non-specific object"))
+            Some("A Simple, non-specific object".into())
         );
     }
 
@@ -63,9 +63,9 @@ mod tests {
         let link: Link = Document::deserialize_string(listing.into()).unwrap().object;
         assert_eq!(link.link_type, Some("Link".into()));
         assert_eq!(link.href, "http://example.org/abc".parse::<http::Uri>().unwrap());
-        assert_eq!(link.hreflang, Some(String::from("en")));
-        assert_eq!(link.media_type, Some(String::from("text/html")));
-        assert_eq!(link.name, Some(String::from("An example link")));
+        assert_eq!(link.hreflang, Some("en".into()));
+        assert_eq!(link.media_type, Some("text/html".into()));
+        assert_eq!(link.name, Some("An example link".into()));
     }
 
     #[test]
@@ -87,18 +87,18 @@ mod tests {
       "#;
 
         let activity: Activity = Document::deserialize_string(listing.into()).unwrap().object;
-        assert_eq!(activity.base.object_type, Some(String::from("Activity")));
+        assert_eq!(activity.base.object_type, Some("Activity".into()));
         assert_eq!( activity.base.summary, Some("Sally did something to a note".into()));
 
         assert!(activity.actor.is_some());
         let actor = activity.actor.unwrap();
-        assert_eq!(actor.base.object_type, Some(String::from("Person")));
-        assert_eq!(actor.base.name, Some(String::from("Sally")));
+        assert_eq!(actor.base.object_type, Some("Person".into()));
+        assert_eq!(actor.base.name, Some("Sally".into()));
 
         assert!(activity.object.is_some());
         let object = activity.object.unwrap();
-        assert_eq!(object.object_type, Some(String::from("Note")));
-        assert_eq!(object.name, Some(String::from("A Note")));
+        assert_eq!(object.object_type, Some("Note".into()));
+        assert_eq!(object.name, Some("A Note".into()));
     }
 
     #[test]
@@ -156,17 +156,17 @@ mod tests {
         }
       "#;
 
-        let collection: Collection<Object> = Document::deserialize_string(String::from(listing)).unwrap().object;
+        let collection: Collection<Object> = Document::deserialize_string(listing.into()).unwrap().object;
         assert_eq!(collection.base.object_type, Some("Collection".into()));
-        assert_eq!(collection.base.summary, Some(String::from("Sally's notes")));
+        assert_eq!(collection.base.summary, Some("Sally's notes".into()));
         assert_eq!(collection.total_items, Some(2));
 
         let items = &collection.items;
         assert_eq!(items.len(), collection.total_items.unwrap());
-        assert_eq!(items[0].object_type, Some(String::from("Note")));
-        assert_eq!(items[0].name, Some(String::from("A Simple Note")));
-        assert_eq!(items[1].object_type, Some(String::from("Note")));
-        assert_eq!(items[1].name, Some(String::from("Another Simple Note")));
+        assert_eq!(items[0].object_type, Some("Note".into()));
+        assert_eq!(items[0].name, Some("A Simple Note".into()));
+        assert_eq!(items[1].object_type, Some("Note".into()));
+        assert_eq!(items[1].name, Some("Another Simple Note".into()));
     }
 
     #[test]
@@ -192,17 +192,17 @@ mod tests {
         let collection: OrderedCollection<Object> = Document::deserialize_string(listing.into()).unwrap().object;
         assert_eq!(
             collection.base.object_type,
-            Some(String::from("OrderedCollection"))
+            Some("OrderedCollection".into())
         );
-        assert_eq!(collection.base.summary, Some(String::from("Sally's notes")));
+        assert_eq!(collection.base.summary, Some("Sally's notes".into()));
         assert_eq!(collection.total_items, Some(2));
 
         let items = &collection.ordered_items;
         assert_eq!(items.len(), collection.total_items.unwrap());
-        assert_eq!(items[0].object_type, Some(String::from("Note")));
-        assert_eq!(items[0].name, Some(String::from("A Simple Note")));
-        assert_eq!(items[1].object_type, Some(String::from("Note")));
-        assert_eq!(items[1].name, Some(String::from("Another Simple Note")));
+        assert_eq!(items[0].object_type, Some("Note".into()));
+        assert_eq!(items[0].name, Some("A Simple Note".into()));
+        assert_eq!(items[1].object_type, Some("Note".into()));
+        assert_eq!(items[1].name, Some("Another Simple Note".into()));
     }
 
     #[test]
@@ -230,7 +230,7 @@ mod tests {
             Document::deserialize_string(listing.into()).unwrap().object;
         assert_eq!(
             collection_page.base.base.object_type,
-            Some(String::from("CollectionPage"))
+            Some("CollectionPage".into())
         );
         assert_eq!(
             collection_page.base.base.id,
@@ -238,7 +238,7 @@ mod tests {
         );
         assert_eq!(
             collection_page.base.base.summary,
-            Some(String::from("Page 1 of Sally's notes"))
+            Some("Page 1 of Sally's notes".into())
         );
         assert_eq!(
             collection_page.part_of,
@@ -247,10 +247,10 @@ mod tests {
         assert_eq!(collection_page.base.total_items, None);
 
         let items = &collection_page.base.items;
-        assert_eq!(items[0].object_type, Some(String::from("Note")));
-        assert_eq!(items[0].name, Some(String::from("A Simple Note")));
-        assert_eq!(items[1].object_type, Some(String::from("Note")));
-        assert_eq!(items[1].name, Some(String::from("Another Simple Note")));
+        assert_eq!(items[0].object_type, Some("Note".into()));
+        assert_eq!(items[0].name, Some("A Simple Note".into()));
+        assert_eq!(items[1].object_type, Some("Note".into()));
+        assert_eq!(items[1].name, Some("Another Simple Note".into()));
     }
 
     #[test]
@@ -278,7 +278,7 @@ mod tests {
             Document::deserialize_string(listing.into()).unwrap().object;
         assert_eq!(
             collection_page.base.base.object_type,
-            Some(String::from("OrderedCollectionPage"))
+            Some("OrderedCollectionPage".into())
         );
         assert_eq!(
             collection_page.base.base.id,
@@ -286,7 +286,7 @@ mod tests {
         );
         assert_eq!(
             collection_page.base.base.summary,
-            Some(String::from("Page 1 of Sally's notes"))
+            Some("Page 1 of Sally's notes".into())
         );
         assert_eq!(
             collection_page.part_of,
@@ -295,10 +295,10 @@ mod tests {
         assert_eq!(collection_page.base.total_items, None);
 
         let items = &collection_page.base.ordered_items;
-        assert_eq!(items[0].object_type, Some(String::from("Note")));
-        assert_eq!(items[0].name, Some(String::from("A Simple Note")));
-        assert_eq!(items[1].object_type, Some(String::from("Note")));
-        assert_eq!(items[1].name, Some(String::from("Another Simple Note")));
+        assert_eq!(items[0].object_type, Some("Note".into()));
+        assert_eq!(items[0].name, Some("A Simple Note".into()));
+        assert_eq!(items[1].object_type, Some("Note".into()));
+        assert_eq!(items[1].name, Some("Another Simple Note".into()));
     }
 
     #[test]
@@ -311,8 +311,8 @@ mod tests {
         }"#;
         let document: Document<Object> = Document::deserialize_string(listing.into()).unwrap();
         let note = document.object;
-        assert_eq!(note.object_type, Some(String::from("Note")));
-        assert_eq!(note.name, Some(String::from("A Word of Warning")));
+        assert_eq!(note.object_type, Some("Note".into()));
+        assert_eq!(note.name, Some("A Word of Warning".into()));
         assert_eq!(
             note.content,
             Some(String::from(
@@ -337,8 +337,8 @@ mod tests {
 }"#;
         let document: Document<Object> = Document::deserialize_string(listing.into()).unwrap();
         let object = document.object;
-        assert_eq!(object.name, Some(String::from("Holiday announcement")));
-        assert_eq!(object.object_type, Some(String::from("Note")));
+        assert_eq!(object.name, Some("Holiday announcement".into()));
+        assert_eq!(object.object_type, Some("Note".into()));
         assert_eq!(
             object.content,
             Some(String::from(
@@ -349,9 +349,9 @@ mod tests {
         let audience = object.audience.unwrap();
         assert_eq!(
             audience.object_type,
-            Some(String::from("http://example.org/Organization"))
+            Some("http://example.org/Organization".into())
         );
-        assert_eq!(audience.name, Some(String::from("ExampleCo LLC")));
+        assert_eq!(audience.name, Some("ExampleCo LLC".into()));
     }
 
     #[test]
@@ -366,9 +366,9 @@ mod tests {
 }"#;
         let document: Document<Object> = Document::deserialize_string(listing.into()).unwrap();
         let object = document.object;
-        assert_eq!(object.summary, Some(String::from("A simple note")));
-        assert_eq!(object.object_type, Some(String::from("Note")));
-        assert_eq!(object.content, Some(String::from("A <em>simple</em> note")));
+        assert_eq!(object.summary, Some("A simple note".into()));
+        assert_eq!(object.object_type, Some("Note".into()));
+        assert_eq!(object.content, Some("A <em>simple</em> note".into()));
     }
 
     #[test]
@@ -383,9 +383,9 @@ mod tests {
       }"#;
         let document: Document<Object> = Document::deserialize_string(listing.into()).unwrap();
         let object = document.object;
-        assert_eq!(object.summary, Some(String::from("A simple <em>note</em>")));
-        assert_eq!(object.object_type, Some(String::from("Note")));
-        assert_eq!(object.name, Some(String::from("Cane Sugar Processing")));
+        assert_eq!(object.summary, Some("A simple <em>note</em>".into()));
+        assert_eq!(object.object_type, Some("Note".into()));
+        assert_eq!(object.name, Some("Cane Sugar Processing".into()));
     }
 
     // A set of tests from https://www.w3.org/TR/activitystreams-core/ examples
