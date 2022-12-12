@@ -52,13 +52,14 @@ mod tests {
     use super::*;
     use crate::core::{ContextBuilder, Document};
     use pretty_assertions::assert_eq;
+    use http::Uri;
 
     #[test]
     fn serialize_actor() {
         let person = ActorBuilder::default()
             .with_base(|base|
                 base.object_type(Some("Person".into()))
-                .id(Some("https://example.com/person/1234".into()))
+                .id(Some("https://example.com/person/1234".parse::<Uri>().unwrap()))
                 .name(Some("name".into()))
             )
             .preferred_username(Some("dma".into()))
@@ -93,7 +94,7 @@ mod tests {
         let document: Document<Actor> = Document::deserialize_string(actual.into()).unwrap();
         let actor = document.object;
         assert_eq!(actor.base.object_type, Some("Person".into()));
-        assert_eq!(actor.base.id, Some("https://example.com/person/1234".into()));
+        assert_eq!(actor.base.id, Some("https://example.com/person/1234".parse::<Uri>().unwrap()));
         assert_eq!(actor.base.name, Some("name".into()));
         assert_eq!(actor.preferred_username, Some("dma".into()));
     }

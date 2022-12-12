@@ -23,8 +23,8 @@ pub struct Object {
     #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
     pub object_type: Option<String>,
 
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none", with = "opt_uri")]
+    pub id: Option<Uri>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
@@ -98,6 +98,37 @@ impl ObjectBuilder {
         ObjectBuilder::of_object_type("Note".into())
              .name(Some(name))
              .content(Some(content)).to_owned()
+    }
+}
+
+// a maintainer of Serde gives a workaround for Option + with:
+// https://github.com/serde-rs/serde/issues/1301#issuecomment-394108486
+// don't forget to default or you will get:
+// panicked at 'called `Result::unwrap()` on an `Err` value: Error("missing field `id`"
+// https://github.com/serde-rs/serde/issues/723#issuecomment-423299411
+mod opt_uri {
+    use http::uri::Uri;
+    use serde::{Serialize, Serializer, Deserialize, Deserializer};
+
+    pub fn serialize<S>(value: &Option<Uri>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        #[derive(Serialize)]
+        struct Helper<'a>(#[serde(with = "http_serde::uri")] &'a Uri);
+
+        value.as_ref().map(Helper).serialize(serializer)
+    }
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<Option<Uri>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        #[derive(Deserialize)]
+        struct Helper(#[serde(with = "http_serde::uri")] Uri);
+
+        let helper = Option::deserialize(deserializer)?;
+        Ok(helper.map(|Helper(external)| external))
     }
 }
 

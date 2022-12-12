@@ -8,12 +8,12 @@ extern crate derive_builder;
 mod tests {
     use chrono::{DateTime, NaiveDate, Utc};
     use pretty_assertions::assert_eq;
+    use http::Uri;
 
     use crate::core::{
         Document,
         ContextBuilder,
         collection::{ Collection, OrderedCollection, CollectionPage, OrderedCollectionPage },
-        actor::ActorBuilder,
         activity::{ Activity, ActivityBuilder },
         object::{ Object, ObjectBuilder, AttributedTo },
         Link,
@@ -32,7 +32,7 @@ mod tests {
         assert_eq!(object.object_type, Some("Object".into()));
         assert_eq!(
             object.id,
-            Some("http://www.test.example/object/1".into())
+            Some("http://www.test.example/object/1".parse::<Uri>().unwrap())
         );
         assert_eq!(
             object.name,
@@ -227,7 +227,7 @@ mod tests {
         );
         assert_eq!(
             collection_page.base.base.id,
-            Some("http://example.org/foo?page=1".to_string())
+            Some("http://example.org/foo?page=1".parse::<Uri>().unwrap())
         );
         assert_eq!(
             collection_page.base.base.summary,
@@ -275,7 +275,7 @@ mod tests {
         );
         assert_eq!(
             collection_page.base.base.id,
-            Some("http://example.org/foo?page=1".to_string())
+            Some("http://example.org/foo?page=1".parse::<Uri>().unwrap())
         );
         assert_eq!(
             collection_page.base.base.summary,
@@ -392,10 +392,10 @@ mod tests {
             .with_actor(|actor|
                 actor.with_base(|base_builder|
                     base_builder.object_type(Some("Person".into()))
-                    .id(Some("http://www.test.example/martin".into()))
+                    .id(Some("http://www.test.example/martin".parse::<Uri>().unwrap()))
                 )
             )
-            .with_object(|builder| builder.id(Some("http://example.org/foo.jpg".into())))
+            .with_object(|builder| builder.id(Some("http://example.org/foo.jpg".parse::<Uri>().unwrap())))
             .build().unwrap();
         let actual = Document::new(
             ContextBuilder::new().build().unwrap(),
@@ -433,7 +433,7 @@ mod tests {
             .with_actor(|actor|
                 actor.with_base(|base_builder|
                     base_builder.object_type(Some("Person".into()))
-                    .id(Some("http://www.test.example/martin".into()))
+                    .id(Some("http://www.test.example/martin".parse::<Uri>().unwrap()))
                     .name(Some("Martin Smith".into()))
                     .image(Some(Link::new(
                         "http://example.org/martin/image.jpg".into(),
@@ -445,13 +445,13 @@ mod tests {
             // TODO: figure out how to get a 'Z' on this. probably requires a time-zone (so not naive)
             .with_object(|builder|
                  builder.object_type(Some("Article".into()))
-                 .id(Some("http://www.test.example/blog/abc123/xyz".into()))
+                 .id(Some("http://www.test.example/blog/abc123/xyz".parse::<Uri>().unwrap()))
                  .name(Some("Why I love Activity Streams".into()))
                  .url(Some("http://example.org/blog/2011/02/entry".into()))
             )
             .with_target(|target|
                 target.object_type(Some("OrderedCollection".into()))
-                .id(Some("http://example.org/blog/".into()))
+                .id(Some("http://example.org/blog/".parse::<Uri>().unwrap()))
                 .name(Some("Martin's Blog".into()))
             )
             .build().unwrap();
@@ -498,13 +498,13 @@ mod tests {
     fn object_4_1_7() {
         let subject = ObjectBuilder::default()
             .object_type(Some("Person".into()))
-            .id(Some("http://joe.website.example/".into()))
+            .id(Some("http://joe.website.example/".parse::<Uri>().unwrap()))
             .name(Some("Joe Smith".into()))
             .build().unwrap();
         let actual = Document::new(
             ContextBuilder::new().build().unwrap(),
             ObjectBuilder::new()
-                .id(Some("http://example.org/foo".into()))
+                .id(Some("http://example.org/foo".parse::<Uri>().unwrap()))
                 .object_type(Some("Note".into()))
                 .name(Some("My favourite stew recipe".into()))
                 .published(Some(DateTime::<Utc>::from_utc(
