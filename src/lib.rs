@@ -434,7 +434,10 @@ mod tests {
                 b.object_type(Some("Add".into()))
                     .summary(Some("Martin added an article to his blog".into()))
                     .published(Some(DateTime::<Utc>::from_utc(
-                        NaiveDate::from_ymd(2015, 2, 10).and_hms(15, 4, 55),
+                        NaiveDate::from_ymd_opt(2015, 2, 10)
+                            .unwrap()
+                            .and_hms_opt(15, 4, 55)
+                            .unwrap(),
                         Utc,
                     )))
             })
@@ -523,7 +526,10 @@ mod tests {
                 .object_type(Some("Note".into()))
                 .name(Some("My favourite stew recipe".into()))
                 .published(Some(DateTime::<Utc>::from_utc(
-                    NaiveDate::from_ymd(2014, 8, 21).and_hms(12, 34, 56),
+                    NaiveDate::from_ymd_opt(2014, 8, 21)
+                        .unwrap()
+                        .and_hms_opt(12, 34, 56)
+                        .unwrap(),
                     Utc,
                 )))
                 .attributed_to(vec![AttributedTo::Object(subject)])

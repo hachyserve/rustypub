@@ -52,7 +52,7 @@ impl<T: DeserializeOwned + Serialize> Document<T> {
 /// done using a string, object, or array.
 /// <https://www.w3.org/TR/activitystreams-core/#jsonld>
 
-const NAMESPACE: &'static str = "https://www.w3.org/ns/activitystreams";
+const NAMESPACE: &str = "https://www.w3.org/ns/activitystreams";
 
 #[derive(Serialize, Deserialize, Debug, Clone, Builder)]
 #[builder(default)]

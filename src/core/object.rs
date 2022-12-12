@@ -293,7 +293,7 @@ mod tests {
 
     #[test]
     fn serialize_link() {
-        let href = Uri::from("http://example.org/abc".parse::<http::Uri>().unwrap());
+        let href = "http://example.org/abc".parse::<http::Uri>().unwrap();
         let actual = Document::new(
             ContextBuilder::new().build().unwrap(),
             LinkBuilder::new()
