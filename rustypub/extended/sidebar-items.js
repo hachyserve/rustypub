@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"struct":[["Actor",""],["ActorBuilder","Builder for an [Actor]."],["Note","https://www.w3.org/TR/activitystreams-vocabulary/#dfn-note"],["PublicKeyInfo",""]]};

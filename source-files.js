@@ -1,4 +1,4 @@
 var sourcesIndex = JSON.parse('{\
-"rustypub":["",[],["core.rs","extended.rs","lib.rs"]]\
+"rustypub":["",[["core",[],["activity.rs","actor.rs","collection.rs","mod.rs","object.rs"]]],["lib.rs"]]\
 }');
 createSourceSidebar();

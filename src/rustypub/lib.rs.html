@@ -535,67 +535,26 @@
 <span id="535">535</span>
 <span id="536">536</span>
 <span id="537">537</span>
-<span id="538">538</span>
-<span id="539">539</span>
-<span id="540">540</span>
-<span id="541">541</span>
-<span id="542">542</span>
-<span id="543">543</span>
-<span id="544">544</span>
-<span id="545">545</span>
-<span id="546">546</span>
-<span id="547">547</span>
-<span id="548">548</span>
-<span id="549">549</span>
-<span id="550">550</span>
-<span id="551">551</span>
-<span id="552">552</span>
-<span id="553">553</span>
-<span id="554">554</span>
-<span id="555">555</span>
-<span id="556">556</span>
-<span id="557">557</span>
-<span id="558">558</span>
-<span id="559">559</span>
-<span id="560">560</span>
-<span id="561">561</span>
-<span id="562">562</span>
-<span id="563">563</span>
-<span id="564">564</span>
 </pre><pre class="rust"><code><span class="kw">pub mod </span>core;
-<span class="kw">pub mod </span>extended;
 
-<span class="kw">use </span>serde::{de::DeserializeOwned, Serialize};
-<span class="kw">use </span>serde_json::Result;
+<span class="kw">extern crate </span>serde;
+<span class="kw">extern crate </span>derive_builder;
 
-<span class="kw">pub trait </span>Serde
-<span class="kw">where
-    </span><span class="self">Self</span>: Serialize + DeserializeOwned,
-{
-    <span class="kw">fn </span>to_json(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;String&gt; {
-        <span class="kw">let </span>serialized = serde_json::to_string(<span class="kw-2">&amp;</span><span class="self">self</span>);
-        <span class="macro">println!</span>(<span class="string">&quot;serialized = {:?}&quot;</span>, serialized);
-        serialized
-    }
-
-    <span class="kw">fn </span>to_json_pretty(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;String&gt; {
-        <span class="kw">let </span>serialized = serde_json::to_string_pretty(<span class="kw-2">&amp;</span><span class="self">self</span>);
-        <span class="macro">println!</span>(<span class="string">&quot;serialized = {:?}&quot;</span>, serialized);
-        serialized
-    }
-
-    <span class="kw">fn </span>from_json(json: String) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
-        serde_json::from_str(json.as_str())
-    }
-}
 
 <span class="attribute">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
-    <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span>chrono::{DateTime, NaiveDate, Utc};
     <span class="kw">use </span>pretty_assertions::assert_eq;
+    <span class="kw">use </span>http::Uri;
 
-    <span class="kw">use crate</span>::{core::<span class="kw-2">*</span>, extended::<span class="kw-2">*</span>};
+    <span class="kw">use </span><span class="kw">crate</span>::core::{
+        Document,
+        ContextBuilder,
+        collection::{ Collection, OrderedCollection, CollectionPage, OrderedCollectionPage },
+        activity::{ Activity, ActivityBuilder },
+        object::{ Object, ObjectBuilder, AttributedTo },
+        Link,
+    };
 
     <span class="comment">// A set of tests from https://www.w3.org/TR/activitystreams-vocabulary examples
     </span><span class="attribute">#[test]
@@ -606,15 +565,15 @@
           &quot;id&quot;: &quot;http://www.test.example/object/1&quot;,
           &quot;name&quot;: &quot;A Simple, non-specific object&quot;
         }&quot;#</span>;
-        <span class="kw">let </span>object: Object&lt;Null&gt; = Document::from_json(String::from(listing)).unwrap().object;
-        <span class="macro">assert_eq!</span>(object.object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Object&quot;</span>)));
+        <span class="kw">let </span>object: Object = Document::deserialize_string(listing.into()).unwrap().object;
+        <span class="macro">assert_eq!</span>(object.object_type, <span class="prelude-val">Some</span>(<span class="string">&quot;Object&quot;</span>.into()));
         <span class="macro">assert_eq!</span>(
             object.id,
-            <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;http://www.test.example/object/1&quot;</span>))
+            <span class="prelude-val">Some</span>(<span class="string">&quot;http://www.test.example/object/1&quot;</span>.parse::&lt;Uri&gt;().unwrap())
         );
         <span class="macro">assert_eq!</span>(
             object.name,
-            <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;A Simple, non-specific object&quot;</span>))
+            <span class="prelude-val">Some</span>(<span class="string">&quot;A Simple, non-specific object&quot;</span>.into())
         );
     }
 
@@ -631,12 +590,12 @@
       }
       &quot;#</span>;
 
-        <span class="kw">let </span>link: Link = Document::from_json(String::from(listing)).unwrap().object;
-        <span class="macro">assert_eq!</span>(link.link_type, <span class="string">&quot;Link&quot;</span>);
-        <span class="macro">assert_eq!</span>(link.href.href, <span class="string">&quot;http://example.org/abc&quot;</span>);
-        <span class="macro">assert_eq!</span>(link.hreflang, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;en&quot;</span>)));
-        <span class="macro">assert_eq!</span>(link.href.media_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;text/html&quot;</span>)));
-        <span class="macro">assert_eq!</span>(link.name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;An example link&quot;</span>)));
+        <span class="kw">let </span>link: Link = Document::deserialize_string(listing.into()).unwrap().object;
+        <span class="macro">assert_eq!</span>(link.link_type, <span class="prelude-val">Some</span>(<span class="string">&quot;Link&quot;</span>.into()));
+        <span class="macro">assert_eq!</span>(link.href, <span class="string">&quot;http://example.org/abc&quot;</span>.parse::&lt;http::Uri&gt;().unwrap());
+        <span class="macro">assert_eq!</span>(link.hreflang, <span class="prelude-val">Some</span>(<span class="string">&quot;en&quot;</span>.into()));
+        <span class="macro">assert_eq!</span>(link.media_type, <span class="prelude-val">Some</span>(<span class="string">&quot;text/html&quot;</span>.into()));
+        <span class="macro">assert_eq!</span>(link.name, <span class="prelude-val">Some</span>(<span class="string">&quot;An example link&quot;</span>.into()));
     }
 
     <span class="attribute">#[test]
@@ -657,22 +616,19 @@
       } 
       &quot;#</span>;
 
-        <span class="kw">let </span>activity: Activity = Document::from_json(String::from(listing)).unwrap().object;
-        <span class="macro">assert_eq!</span>(activity.object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Activity&quot;</span>)));
-        <span class="macro">assert_eq!</span>(
-            activity.summary,
-            <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Sally did something to a note&quot;</span>))
-        );
+        <span class="kw">let </span>activity: Activity = Document::deserialize_string(listing.into()).unwrap().object;
+        <span class="macro">assert_eq!</span>(activity.base.object_type, <span class="prelude-val">Some</span>(<span class="string">&quot;Activity&quot;</span>.into()));
+        <span class="macro">assert_eq!</span>( activity.base.summary, <span class="prelude-val">Some</span>(<span class="string">&quot;Sally did something to a note&quot;</span>.into()));
 
         <span class="macro">assert!</span>(activity.actor.is_some());
         <span class="kw">let </span>actor = activity.actor.unwrap();
-        <span class="macro">assert_eq!</span>(actor.object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Person&quot;</span>)));
-        <span class="macro">assert_eq!</span>(actor.name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Sally&quot;</span>)));
+        <span class="macro">assert_eq!</span>(actor.base.object_type, <span class="prelude-val">Some</span>(<span class="string">&quot;Person&quot;</span>.into()));
+        <span class="macro">assert_eq!</span>(actor.base.name, <span class="prelude-val">Some</span>(<span class="string">&quot;Sally&quot;</span>.into()));
 
         <span class="macro">assert!</span>(activity.object.is_some());
         <span class="kw">let </span>object = activity.object.unwrap();
-        <span class="macro">assert_eq!</span>(object.object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Note&quot;</span>)));
-        <span class="macro">assert_eq!</span>(object.name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;A Note&quot;</span>)));
+        <span class="macro">assert_eq!</span>(object.object_type, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>.into()));
+        <span class="macro">assert_eq!</span>(object.name, <span class="prelude-val">Some</span>(<span class="string">&quot;A Note&quot;</span>.into()));
     }
 
     <span class="attribute">#[test]
@@ -693,20 +649,20 @@
       }
       &quot;#</span>;
 
-        <span class="kw">let </span>activity: IntransitiveActivity =
-            Document::from_json(String::from(listing)).unwrap().object;
-        <span class="macro">assert_eq!</span>(activity.object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Travel&quot;</span>)));
-        <span class="macro">assert_eq!</span>(activity.summary, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Sally went to work&quot;</span>)));
+        <span class="kw">let </span>activity: Activity = Document::deserialize_string(listing.into()).unwrap().object;
+        <span class="macro">assert_eq!</span>(activity.base.object_type, <span class="prelude-val">Some</span>(<span class="string">&quot;Travel&quot;</span>.into()));
+        <span class="macro">assert_eq!</span>(activity.base.summary, <span class="prelude-val">Some</span>(<span class="string">&quot;Sally went to work&quot;</span>.into()));
+        <span class="macro">assert!</span>(activity.object.is_none());
 
         <span class="macro">assert!</span>(activity.actor.is_some());
         <span class="kw">let </span>actor = activity.actor.as_ref().unwrap();
-        <span class="macro">assert_eq!</span>(actor.object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Person&quot;</span>)));
-        <span class="macro">assert_eq!</span>(actor.name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Sally&quot;</span>)));
+        <span class="macro">assert_eq!</span>(actor.base.object_type, <span class="prelude-val">Some</span>(<span class="string">&quot;Person&quot;</span>.into()));
+        <span class="macro">assert_eq!</span>(actor.base.name, <span class="prelude-val">Some</span>(<span class="string">&quot;Sally&quot;</span>.into()));
 
         <span class="macro">assert!</span>(activity.target.is_some());
         <span class="kw">let </span>target = activity.target.as_ref().unwrap();
-        <span class="macro">assert_eq!</span>(target.object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Place&quot;</span>)));
-        <span class="macro">assert_eq!</span>(target.name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Work&quot;</span>)));
+        <span class="macro">assert_eq!</span>(target.object_type, <span class="prelude-val">Some</span>(<span class="string">&quot;Place&quot;</span>.into()));
+        <span class="macro">assert_eq!</span>(target.name, <span class="prelude-val">Some</span>(<span class="string">&quot;Work&quot;</span>.into()));
     }
 
     <span class="attribute">#[test]
@@ -730,18 +686,17 @@
         }
       &quot;#</span>;
 
-        <span class="kw">let </span>collection: Collection&lt;Object&lt;Null&gt;&gt; =
-            Document::from_json(String::from(listing)).unwrap().object;
-        <span class="macro">assert_eq!</span>(collection.object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Collection&quot;</span>)));
-        <span class="macro">assert_eq!</span>(collection.summary, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Sally&#39;s notes&quot;</span>)));
+        <span class="kw">let </span>collection: Collection&lt;Object&gt; = Document::deserialize_string(listing.into()).unwrap().object;
+        <span class="macro">assert_eq!</span>(collection.base.object_type, <span class="prelude-val">Some</span>(<span class="string">&quot;Collection&quot;</span>.into()));
+        <span class="macro">assert_eq!</span>(collection.base.summary, <span class="prelude-val">Some</span>(<span class="string">&quot;Sally&#39;s notes&quot;</span>.into()));
         <span class="macro">assert_eq!</span>(collection.total_items, <span class="prelude-val">Some</span>(<span class="number">2</span>));
 
         <span class="kw">let </span>items = <span class="kw-2">&amp;</span>collection.items;
         <span class="macro">assert_eq!</span>(items.len(), collection.total_items.unwrap());
-        <span class="macro">assert_eq!</span>(items[<span class="number">0</span>].object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Note&quot;</span>)));
-        <span class="macro">assert_eq!</span>(items[<span class="number">0</span>].name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;A Simple Note&quot;</span>)));
-        <span class="macro">assert_eq!</span>(items[<span class="number">1</span>].object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Note&quot;</span>)));
-        <span class="macro">assert_eq!</span>(items[<span class="number">1</span>].name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Another Simple Note&quot;</span>)));
+        <span class="macro">assert_eq!</span>(items[<span class="number">0</span>].object_type, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>.into()));
+        <span class="macro">assert_eq!</span>(items[<span class="number">0</span>].name, <span class="prelude-val">Some</span>(<span class="string">&quot;A Simple Note&quot;</span>.into()));
+        <span class="macro">assert_eq!</span>(items[<span class="number">1</span>].object_type, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>.into()));
+        <span class="macro">assert_eq!</span>(items[<span class="number">1</span>].name, <span class="prelude-val">Some</span>(<span class="string">&quot;Another Simple Note&quot;</span>.into()));
     }
 
     <span class="attribute">#[test]
@@ -764,21 +719,20 @@
         ]
       }
       &quot;#</span>;
-        <span class="kw">let </span>collection: OrderedCollection&lt;Object&lt;Null&gt;&gt; =
-            Document::from_json(String::from(listing)).unwrap().object;
+        <span class="kw">let </span>collection: OrderedCollection&lt;Object&gt; = Document::deserialize_string(listing.into()).unwrap().object;
         <span class="macro">assert_eq!</span>(
-            collection.object_type,
-            <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;OrderedCollection&quot;</span>))
+            collection.base.object_type,
+            <span class="prelude-val">Some</span>(<span class="string">&quot;OrderedCollection&quot;</span>.into())
         );
-        <span class="macro">assert_eq!</span>(collection.summary, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Sally&#39;s notes&quot;</span>)));
+        <span class="macro">assert_eq!</span>(collection.base.summary, <span class="prelude-val">Some</span>(<span class="string">&quot;Sally&#39;s notes&quot;</span>.into()));
         <span class="macro">assert_eq!</span>(collection.total_items, <span class="prelude-val">Some</span>(<span class="number">2</span>));
 
         <span class="kw">let </span>items = <span class="kw-2">&amp;</span>collection.ordered_items;
         <span class="macro">assert_eq!</span>(items.len(), collection.total_items.unwrap());
-        <span class="macro">assert_eq!</span>(items[<span class="number">0</span>].object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Note&quot;</span>)));
-        <span class="macro">assert_eq!</span>(items[<span class="number">0</span>].name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;A Simple Note&quot;</span>)));
-        <span class="macro">assert_eq!</span>(items[<span class="number">1</span>].object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Note&quot;</span>)));
-        <span class="macro">assert_eq!</span>(items[<span class="number">1</span>].name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Another Simple Note&quot;</span>)));
+        <span class="macro">assert_eq!</span>(items[<span class="number">0</span>].object_type, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>.into()));
+        <span class="macro">assert_eq!</span>(items[<span class="number">0</span>].name, <span class="prelude-val">Some</span>(<span class="string">&quot;A Simple Note&quot;</span>.into()));
+        <span class="macro">assert_eq!</span>(items[<span class="number">1</span>].object_type, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>.into()));
+        <span class="macro">assert_eq!</span>(items[<span class="number">1</span>].name, <span class="prelude-val">Some</span>(<span class="string">&quot;Another Simple Note&quot;</span>.into()));
     }
 
     <span class="attribute">#[test]
@@ -802,31 +756,31 @@
         ]
       }
       &quot;#</span>;
-        <span class="kw">let </span>collection_page: CollectionPage&lt;Object&lt;Null&gt;&gt; =
-            Document::from_json(String::from(listing)).unwrap().object;
+        <span class="kw">let </span>collection_page: CollectionPage&lt;Object&gt; =
+            Document::deserialize_string(listing.into()).unwrap().object;
         <span class="macro">assert_eq!</span>(
-            collection_page.object_type,
-            <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;CollectionPage&quot;</span>))
+            collection_page.base.base.object_type,
+            <span class="prelude-val">Some</span>(<span class="string">&quot;CollectionPage&quot;</span>.into())
         );
         <span class="macro">assert_eq!</span>(
-            collection_page.id,
-            <span class="prelude-val">Some</span>(<span class="string">&quot;http://example.org/foo?page=1&quot;</span>.to_string())
+            collection_page.base.base.id,
+            <span class="prelude-val">Some</span>(<span class="string">&quot;http://example.org/foo?page=1&quot;</span>.parse::&lt;Uri&gt;().unwrap())
         );
         <span class="macro">assert_eq!</span>(
-            collection_page.summary,
-            <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Page 1 of Sally&#39;s notes&quot;</span>))
+            collection_page.base.base.summary,
+            <span class="prelude-val">Some</span>(<span class="string">&quot;Page 1 of Sally&#39;s notes&quot;</span>.into())
         );
         <span class="macro">assert_eq!</span>(
             collection_page.part_of,
             <span class="string">&quot;http://example.org/foo&quot;</span>.to_string()
         );
-        <span class="macro">assert_eq!</span>(collection_page.total_items, <span class="prelude-val">None</span>);
+        <span class="macro">assert_eq!</span>(collection_page.base.total_items, <span class="prelude-val">None</span>);
 
-        <span class="kw">let </span>items = <span class="kw-2">&amp;</span>collection_page.items;
-        <span class="macro">assert_eq!</span>(items[<span class="number">0</span>].object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Note&quot;</span>)));
-        <span class="macro">assert_eq!</span>(items[<span class="number">0</span>].name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;A Simple Note&quot;</span>)));
-        <span class="macro">assert_eq!</span>(items[<span class="number">1</span>].object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Note&quot;</span>)));
-        <span class="macro">assert_eq!</span>(items[<span class="number">1</span>].name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Another Simple Note&quot;</span>)));
+        <span class="kw">let </span>items = <span class="kw-2">&amp;</span>collection_page.base.items;
+        <span class="macro">assert_eq!</span>(items[<span class="number">0</span>].object_type, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>.into()));
+        <span class="macro">assert_eq!</span>(items[<span class="number">0</span>].name, <span class="prelude-val">Some</span>(<span class="string">&quot;A Simple Note&quot;</span>.into()));
+        <span class="macro">assert_eq!</span>(items[<span class="number">1</span>].object_type, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>.into()));
+        <span class="macro">assert_eq!</span>(items[<span class="number">1</span>].name, <span class="prelude-val">Some</span>(<span class="string">&quot;Another Simple Note&quot;</span>.into()));
     }
 
     <span class="attribute">#[test]
@@ -850,31 +804,31 @@
   ]
 }
 &quot;#</span>;
-        <span class="kw">let </span>collection_page: OrderedCollectionPage&lt;Object&lt;Null&gt;&gt; =
-            Document::from_json(String::from(listing)).unwrap().object;
+        <span class="kw">let </span>collection_page: OrderedCollectionPage&lt;Object&gt; =
+            Document::deserialize_string(listing.into()).unwrap().object;
         <span class="macro">assert_eq!</span>(
-            collection_page.object_type,
-            <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;OrderedCollectionPage&quot;</span>))
+            collection_page.base.base.object_type,
+            <span class="prelude-val">Some</span>(<span class="string">&quot;OrderedCollectionPage&quot;</span>.into())
         );
         <span class="macro">assert_eq!</span>(
-            collection_page.id,
-            <span class="prelude-val">Some</span>(<span class="string">&quot;http://example.org/foo?page=1&quot;</span>.to_string())
+            collection_page.base.base.id,
+            <span class="prelude-val">Some</span>(<span class="string">&quot;http://example.org/foo?page=1&quot;</span>.parse::&lt;Uri&gt;().unwrap())
         );
         <span class="macro">assert_eq!</span>(
-            collection_page.summary,
-            <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Page 1 of Sally&#39;s notes&quot;</span>))
+            collection_page.base.base.summary,
+            <span class="prelude-val">Some</span>(<span class="string">&quot;Page 1 of Sally&#39;s notes&quot;</span>.into())
         );
         <span class="macro">assert_eq!</span>(
             collection_page.part_of,
             <span class="string">&quot;http://example.org/foo&quot;</span>.to_string()
         );
-        <span class="macro">assert_eq!</span>(collection_page.total_items, <span class="prelude-val">None</span>);
+        <span class="macro">assert_eq!</span>(collection_page.base.total_items, <span class="prelude-val">None</span>);
 
-        <span class="kw">let </span>items = <span class="kw-2">&amp;</span>collection_page.ordered_items;
-        <span class="macro">assert_eq!</span>(items[<span class="number">0</span>].object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Note&quot;</span>)));
-        <span class="macro">assert_eq!</span>(items[<span class="number">0</span>].name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;A Simple Note&quot;</span>)));
-        <span class="macro">assert_eq!</span>(items[<span class="number">1</span>].object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Note&quot;</span>)));
-        <span class="macro">assert_eq!</span>(items[<span class="number">1</span>].name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Another Simple Note&quot;</span>)));
+        <span class="kw">let </span>items = <span class="kw-2">&amp;</span>collection_page.base.ordered_items;
+        <span class="macro">assert_eq!</span>(items[<span class="number">0</span>].object_type, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>.into()));
+        <span class="macro">assert_eq!</span>(items[<span class="number">0</span>].name, <span class="prelude-val">Some</span>(<span class="string">&quot;A Simple Note&quot;</span>.into()));
+        <span class="macro">assert_eq!</span>(items[<span class="number">1</span>].object_type, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>.into()));
+        <span class="macro">assert_eq!</span>(items[<span class="number">1</span>].name, <span class="prelude-val">Some</span>(<span class="string">&quot;Another Simple Note&quot;</span>.into()));
     }
 
     <span class="attribute">#[test]
@@ -885,10 +839,10 @@
           &quot;name&quot;: &quot;A Word of Warning&quot;,
           &quot;content&quot;: &quot;Looks like it is going to rain today. Bring an umbrella!&quot;
         }&quot;#</span>;
-        <span class="kw">let </span>document: Document&lt;Note&gt; = Document::from_json(String::from(listing)).unwrap();
+        <span class="kw">let </span>document: Document&lt;Object&gt; = Document::deserialize_string(listing.into()).unwrap();
         <span class="kw">let </span>note = document.object;
-        <span class="macro">assert_eq!</span>(note.object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Note&quot;</span>)));
-        <span class="macro">assert_eq!</span>(note.name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;A Word of Warning&quot;</span>)));
+        <span class="macro">assert_eq!</span>(note.object_type, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>.into()));
+        <span class="macro">assert_eq!</span>(note.name, <span class="prelude-val">Some</span>(<span class="string">&quot;A Word of Warning&quot;</span>.into()));
         <span class="macro">assert_eq!</span>(
             note.content,
             <span class="prelude-val">Some</span>(String::from(
@@ -911,10 +865,10 @@
     &quot;name&quot;: &quot;ExampleCo LLC&quot;
   }
 }&quot;#</span>;
-        <span class="kw">let </span>document: Document&lt;Object&lt;Null&gt;&gt; = Document::from_json(String::from(listing)).unwrap();
+        <span class="kw">let </span>document: Document&lt;Object&gt; = Document::deserialize_string(listing.into()).unwrap();
         <span class="kw">let </span>object = document.object;
-        <span class="macro">assert_eq!</span>(object.name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Holiday announcement&quot;</span>)));
-        <span class="macro">assert_eq!</span>(object.object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Note&quot;</span>)));
+        <span class="macro">assert_eq!</span>(object.name, <span class="prelude-val">Some</span>(<span class="string">&quot;Holiday announcement&quot;</span>.into()));
+        <span class="macro">assert_eq!</span>(object.object_type, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>.into()));
         <span class="macro">assert_eq!</span>(
             object.content,
             <span class="prelude-val">Some</span>(String::from(
@@ -925,9 +879,9 @@
         <span class="kw">let </span>audience = object.audience.unwrap();
         <span class="macro">assert_eq!</span>(
             audience.object_type,
-            <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;http://example.org/Organization&quot;</span>))
+            <span class="prelude-val">Some</span>(<span class="string">&quot;http://example.org/Organization&quot;</span>.into())
         );
-        <span class="macro">assert_eq!</span>(audience.name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;ExampleCo LLC&quot;</span>)));
+        <span class="macro">assert_eq!</span>(audience.name, <span class="prelude-val">Some</span>(<span class="string">&quot;ExampleCo LLC&quot;</span>.into()));
     }
 
     <span class="attribute">#[test]
@@ -940,11 +894,11 @@
   &quot;type&quot;: &quot;Note&quot;,
   &quot;content&quot;: &quot;A &lt;em&gt;simple&lt;/em&gt; note&quot;
 }&quot;#</span>;
-        <span class="kw">let </span>document: Document&lt;Object&lt;Null&gt;&gt; = Document::from_json(String::from(listing)).unwrap();
+        <span class="kw">let </span>document: Document&lt;Object&gt; = Document::deserialize_string(listing.into()).unwrap();
         <span class="kw">let </span>object = document.object;
-        <span class="macro">assert_eq!</span>(object.summary, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;A simple note&quot;</span>)));
-        <span class="macro">assert_eq!</span>(object.object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Note&quot;</span>)));
-        <span class="macro">assert_eq!</span>(object.content, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;A &lt;em&gt;simple&lt;/em&gt; note&quot;</span>)));
+        <span class="macro">assert_eq!</span>(object.summary, <span class="prelude-val">Some</span>(<span class="string">&quot;A simple note&quot;</span>.into()));
+        <span class="macro">assert_eq!</span>(object.object_type, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>.into()));
+        <span class="macro">assert_eq!</span>(object.content, <span class="prelude-val">Some</span>(<span class="string">&quot;A &lt;em&gt;simple&lt;/em&gt; note&quot;</span>.into()));
     }
 
     <span class="attribute">#[test]
@@ -957,31 +911,32 @@
         &quot;type&quot;: &quot;Note&quot;,
         &quot;summary&quot;: &quot;A simple &lt;em&gt;note&lt;/em&gt;&quot;
       }&quot;#</span>;
-        <span class="kw">let </span>document: Document&lt;Object&lt;Null&gt;&gt; = Document::from_json(String::from(listing)).unwrap();
+        <span class="kw">let </span>document: Document&lt;Object&gt; = Document::deserialize_string(listing.into()).unwrap();
         <span class="kw">let </span>object = document.object;
-        <span class="macro">assert_eq!</span>(object.summary, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;A simple &lt;em&gt;note&lt;/em&gt;&quot;</span>)));
-        <span class="macro">assert_eq!</span>(object.object_type, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Note&quot;</span>)));
-        <span class="macro">assert_eq!</span>(object.name, <span class="prelude-val">Some</span>(String::from(<span class="string">&quot;Cane Sugar Processing&quot;</span>)));
+        <span class="macro">assert_eq!</span>(object.summary, <span class="prelude-val">Some</span>(<span class="string">&quot;A simple &lt;em&gt;note&lt;/em&gt;&quot;</span>.into()));
+        <span class="macro">assert_eq!</span>(object.object_type, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>.into()));
+        <span class="macro">assert_eq!</span>(object.name, <span class="prelude-val">Some</span>(<span class="string">&quot;Cane Sugar Processing&quot;</span>.into()));
     }
 
     <span class="comment">// A set of tests from https://www.w3.org/TR/activitystreams-core/ examples
     </span><span class="attribute">#[test]
     </span><span class="kw">fn </span>minimal_activity_3_1() {
+        <span class="kw">let </span>activity = ActivityBuilder::default()
+            .with_base(|builder|
+                  builder.object_type(<span class="prelude-val">Some</span>(<span class="string">&quot;Create&quot;</span>.into()))
+                  .summary(<span class="prelude-val">Some</span>(<span class="string">&quot;Martin created an image&quot;</span>.into()))
+            )
+            .with_actor(|actor|
+                actor.with_base(|base_builder|
+                    base_builder.object_type(<span class="prelude-val">Some</span>(<span class="string">&quot;Person&quot;</span>.into()))
+                    .id(<span class="prelude-val">Some</span>(<span class="string">&quot;http://www.test.example/martin&quot;</span>.parse::&lt;Uri&gt;().unwrap()))
+                )
+            )
+            .with_object(|builder| builder.id(<span class="prelude-val">Some</span>(<span class="string">&quot;http://example.org/foo.jpg&quot;</span>.parse::&lt;Uri&gt;().unwrap())))
+            .build().unwrap();
         <span class="kw">let </span>actual = Document::new(
-            ContextBuilder::new().build(),
-            ActivityBuilder::new(
-                String::from(<span class="string">&quot;Create&quot;</span>),
-                String::from(<span class="string">&quot;Martin created an image&quot;</span>),
-            )
-            .actor(
-                ActorBuilder::new(String::from(<span class="string">&quot;Person&quot;</span>)).id(<span class="string">&quot;http://www.test.example/martin&quot;
-                    </span>.parse::&lt;http::Uri&gt;()
-                    .unwrap()),
-            )
-            .object(
-                ObjectBuilder::new().id(<span class="string">&quot;http://example.org/foo.jpg&quot;</span>.parse::&lt;http::Uri&gt;().unwrap()),
-            )
-            .build(),
+            ContextBuilder::new().build().unwrap(),
+            activity
         );
         <span class="kw">let </span>expected = <span class="string">r#&quot;{
   &quot;@context&quot;: {
@@ -997,59 +952,50 @@
     &quot;id&quot;: &quot;http://example.org/foo.jpg&quot;
   }
 }&quot;#</span>;
-        <span class="macro">assert!</span>(actual.to_json_pretty().is_ok());
-        <span class="macro">assert_eq!</span>(actual.to_json_pretty().unwrap(), expected);
+        <span class="macro">assert!</span>(actual.serialize_pretty().is_ok());
+        <span class="macro">assert_eq!</span>(actual.serialize_pretty().unwrap(), expected);
     }
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>basic_activity_with_additional_detail_3_2() {
-        <span class="kw">let </span>actual = Document::new(
-            ContextBuilder::new().build(),
-            ActivityBuilder::new(
-                String::from(<span class="string">&quot;Add&quot;</span>),
-                String::from(<span class="string">&quot;Martin added an article to his blog&quot;</span>),
+        <span class="kw">let </span>activity = ActivityBuilder::default()
+            .with_base(|b|
+                b.object_type(<span class="prelude-val">Some</span>(<span class="string">&quot;Add&quot;</span>.into()))
+                .summary(<span class="prelude-val">Some</span>(<span class="string">&quot;Martin added an article to his blog&quot;</span>.into()))
+                .published(<span class="prelude-val">Some</span>(DateTime::&lt;Utc&gt;::from_utc(
+                    NaiveDate::from_ymd(<span class="number">2015</span>, <span class="number">2</span>, <span class="number">10</span>).and_hms(<span class="number">15</span>, <span class="number">4</span>, <span class="number">55</span>),
+                    Utc,
+                )))
+            )
+            .with_actor(|actor|
+                actor.with_base(|base_builder|
+                    base_builder.object_type(<span class="prelude-val">Some</span>(<span class="string">&quot;Person&quot;</span>.into()))
+                    .id(<span class="prelude-val">Some</span>(<span class="string">&quot;http://www.test.example/martin&quot;</span>.parse::&lt;Uri&gt;().unwrap()))
+                    .name(<span class="prelude-val">Some</span>(<span class="string">&quot;Martin Smith&quot;</span>.into()))
+                    .image(<span class="prelude-val">Some</span>(Link::new(
+                        <span class="string">&quot;http://example.org/martin/image.jpg&quot;</span>.into(),
+                        <span class="string">&quot;image/jpeg&quot;</span>.into(),
+                    )))
+                    .url(<span class="prelude-val">Some</span>(<span class="string">&quot;http://example.org/martin&quot;</span>.into()))
+                )
             )
             <span class="comment">// TODO: figure out how to get a &#39;Z&#39; on this. probably requires a time-zone (so not naive)
-            </span>.published(DateTime::&lt;Utc&gt;::from_utc(
-                NaiveDate::from_ymd(<span class="number">2015</span>, <span class="number">2</span>, <span class="number">10</span>).and_hms(<span class="number">15</span>, <span class="number">4</span>, <span class="number">55</span>),
-                Utc,
-            ))
-            .actor(
-                ActorBuilder::new(String::from(<span class="string">&quot;Person&quot;</span>))
-                    .id(<span class="string">&quot;http://www.test.example/martin&quot;
-                        </span>.parse::&lt;http::Uri&gt;()
-                        .unwrap())
-                    .name(String::from(<span class="string">&quot;Martin Smith&quot;</span>))
-                    .url(<span class="string">&quot;http://example.org/martin&quot;</span>.parse::&lt;http::Uri&gt;().unwrap())
-                    .image(LinkBuilder::new(
-                        UriBuilder::new(
-                            <span class="string">&quot;http://example.org/martin/image.jpg&quot;
-                                </span>.parse::&lt;http::Uri&gt;()
-                                .unwrap(),
-                        )
-                        .media_type(String::from(<span class="string">&quot;image/jpeg&quot;</span>)),
-                    )),
+            </span>.with_object(|builder|
+                 builder.object_type(<span class="prelude-val">Some</span>(<span class="string">&quot;Article&quot;</span>.into()))
+                 .id(<span class="prelude-val">Some</span>(<span class="string">&quot;http://www.test.example/blog/abc123/xyz&quot;</span>.parse::&lt;Uri&gt;().unwrap()))
+                 .name(<span class="prelude-val">Some</span>(<span class="string">&quot;Why I love Activity Streams&quot;</span>.into()))
+                 .url(<span class="prelude-val">Some</span>(<span class="string">&quot;http://example.org/blog/2011/02/entry&quot;</span>.into()))
             )
-            .object(
-                ObjectBuilder::new()
-                    .object_type(String::from(<span class="string">&quot;Article&quot;</span>))
-                    .id(<span class="string">&quot;http://www.test.example/blog/abc123/xyz&quot;
-                        </span>.parse::&lt;http::Uri&gt;()
-                        .unwrap())
-                    .name(String::from(<span class="string">&quot;Why I love Activity Streams&quot;</span>))
-                    .url(
-                        <span class="string">&quot;http://example.org/blog/2011/02/entry&quot;
-                            </span>.parse::&lt;http::Uri&gt;()
-                            .unwrap(),
-                    ),
+            .with_target(|target|
+                target.object_type(<span class="prelude-val">Some</span>(<span class="string">&quot;OrderedCollection&quot;</span>.into()))
+                .id(<span class="prelude-val">Some</span>(<span class="string">&quot;http://example.org/blog/&quot;</span>.parse::&lt;Uri&gt;().unwrap()))
+                .name(<span class="prelude-val">Some</span>(<span class="string">&quot;Martin&#39;s Blog&quot;</span>.into()))
             )
-            .target(
-                ObjectBuilder::new()
-                    .object_type(String::from(<span class="string">&quot;OrderedCollection&quot;</span>))
-                    .id(<span class="string">&quot;http://example.org/blog/&quot;</span>.parse::&lt;http::Uri&gt;().unwrap())
-                    .name(String::from(<span class="string">&quot;Martin&#39;s Blog&quot;</span>)),
-            )
-            .build(),
+            .build().unwrap();
+
+        <span class="kw">let </span>actual = Document::new(
+            ContextBuilder::new().build().unwrap(),
+            activity
         );
         <span class="kw">let </span>expected = <span class="string">r#&quot;{
   &quot;@context&quot;: {
@@ -1081,29 +1027,29 @@
     &quot;name&quot;: &quot;Martin&#39;s Blog&quot;
   }
 }&quot;#</span>;
-        <span class="macro">assert!</span>(actual.to_json_pretty().is_ok());
-        <span class="macro">assert_eq!</span>(actual.to_json_pretty().unwrap(), expected);
+        <span class="macro">assert!</span>(actual.serialize_pretty().is_ok());
+        <span class="macro">assert_eq!</span>(actual.serialize_pretty().unwrap(), expected);
     }
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>object_4_1_7() {
+        <span class="kw">let </span>subject = ObjectBuilder::default()
+            .object_type(<span class="prelude-val">Some</span>(<span class="string">&quot;Person&quot;</span>.into()))
+            .id(<span class="prelude-val">Some</span>(<span class="string">&quot;http://joe.website.example/&quot;</span>.parse::&lt;Uri&gt;().unwrap()))
+            .name(<span class="prelude-val">Some</span>(<span class="string">&quot;Joe Smith&quot;</span>.into()))
+            .build().unwrap();
         <span class="kw">let </span>actual = Document::new(
-            ContextBuilder::new().build(),
+            ContextBuilder::new().build().unwrap(),
             ObjectBuilder::new()
-                .id(<span class="string">&quot;http://example.org/foo&quot;</span>.parse::&lt;http::Uri&gt;().unwrap())
-                .object_type(String::from(<span class="string">&quot;Note&quot;</span>))
-                .name(String::from(<span class="string">&quot;My favourite stew recipe&quot;</span>))
-                .published(DateTime::&lt;Utc&gt;::from_utc(
+                .id(<span class="prelude-val">Some</span>(<span class="string">&quot;http://example.org/foo&quot;</span>.parse::&lt;Uri&gt;().unwrap()))
+                .object_type(<span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>.into()))
+                .name(<span class="prelude-val">Some</span>(<span class="string">&quot;My favourite stew recipe&quot;</span>.into()))
+                .published(<span class="prelude-val">Some</span>(DateTime::&lt;Utc&gt;::from_utc(
                     NaiveDate::from_ymd(<span class="number">2014</span>, <span class="number">8</span>, <span class="number">21</span>).and_hms(<span class="number">12</span>, <span class="number">34</span>, <span class="number">56</span>),
                     Utc,
-                ))
-                .add_attributed_to(
-                    ActorBuilder::new(String::from(<span class="string">&quot;Person&quot;</span>))
-                        .id(<span class="string">&quot;http://joe.website.example/&quot;</span>.parse::&lt;http::Uri&gt;().unwrap())
-                        .name(String::from(<span class="string">&quot;Joe Smith&quot;</span>))
-                        .build(),
-                )
-                .build(),
+                )))
+                .attributed_to(<span class="macro">vec!</span>[AttributedTo::Object(subject)])
+                .build().unwrap()
         );
 
         <span class="kw">let </span>expected = <span class="string">r#&quot;{
@@ -1122,8 +1068,8 @@
     }
   ]
 }&quot;#</span>;
-        <span class="macro">assert!</span>(actual.to_json_pretty().is_ok());
-        <span class="macro">assert_eq!</span>(actual.to_json_pretty().unwrap(), expected);
+        <span class="macro">assert!</span>(actual.serialize_pretty().is_ok());
+        <span class="macro">assert_eq!</span>(actual.serialize_pretty().unwrap(), expected);
     }
 }
 </code></pre></div>
