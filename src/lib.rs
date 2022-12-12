@@ -11,13 +11,9 @@ mod tests {
 
     use crate::core::{
         Document,
-        LinkBuilder,
         ContextBuilder,
-        Collection,
-        OrderedCollection,
-        CollectionPage,
-        OrderedCollectionPage,
-        actor::{ Actor, ActorBuilder },
+        collection::{ Collection, OrderedCollection, CollectionPage, OrderedCollectionPage },
+        actor::ActorBuilder,
         activity::{ Activity, ActivityBuilder },
         object::{ Object, ObjectBuilder, AttributedTo },
         Link,
@@ -388,22 +384,18 @@ mod tests {
     // A set of tests from https://www.w3.org/TR/activitystreams-core/ examples
     #[test]
     fn minimal_activity_3_1() {
-        let object = ObjectBuilder::new()
-            .object_type(Some("Create".into()))
-            .summary(Some("Martin created an image".into()))
-            .build().unwrap();
-        let target_object = ObjectBuilder::new()
-            .id(Some("http://example.org/foo.jpg".into()))
-            .build().unwrap();
-        let source_actor = ActorBuilder::default()
-            .with_base(|base_builder|
-                base_builder.object_type(Some("Person".into()))
-                .id(Some("http://www.test.example/martin".into()))
-            ).build().unwrap();
         let activity = ActivityBuilder::default()
-            .base(object)
-            .actor(Some(source_actor))
-            .object(Some(target_object))
+            .with_base(|builder|
+                  builder.object_type(Some("Create".into()))
+                  .summary(Some("Martin created an image".into()))
+            )
+            .with_actor(|actor|
+                actor.with_base(|base_builder|
+                    base_builder.object_type(Some("Person".into()))
+                    .id(Some("http://www.test.example/martin".into()))
+                )
+            )
+            .with_object(|builder| builder.id(Some("http://example.org/foo.jpg".into())))
             .build().unwrap();
         let actual = Document::new(
             ContextBuilder::new().build().unwrap(),
@@ -429,43 +421,39 @@ mod tests {
 
     #[test]
     fn basic_activity_with_additional_detail_3_2() {
-        let source_actor = ActorBuilder::default()
-            .with_base(|base_builder|
-                base_builder.object_type(Some("Person".into()))
-                .id(Some("http://www.test.example/martin".into()))
-                .name(Some("Martin Smith".into()))
-                .image(Some(Link::new(
-                    "http://example.org/martin/image.jpg".into(),
-                    "image/jpeg".into(),
-                )))
-                .url(Some("http://example.org/martin".into()))
-        ).build().unwrap();
-        let base = ObjectBuilder::default()
-            .object_type(Some("Add".into()))
-            .summary(Some("Martin added an article to his blog".into()))
-            .published(Some(DateTime::<Utc>::from_utc(
-                NaiveDate::from_ymd(2015, 2, 10).and_hms(15, 4, 55),
-                Utc,
-            )))
-            .build().unwrap();
-
         let activity = ActivityBuilder::default()
-            .base(base)
-            .actor(Some(source_actor))
+            .with_base(|b|
+                b.object_type(Some("Add".into()))
+                .summary(Some("Martin added an article to his blog".into()))
+                .published(Some(DateTime::<Utc>::from_utc(
+                    NaiveDate::from_ymd(2015, 2, 10).and_hms(15, 4, 55),
+                    Utc,
+                )))
+            )
+            .with_actor(|actor|
+                actor.with_base(|base_builder|
+                    base_builder.object_type(Some("Person".into()))
+                    .id(Some("http://www.test.example/martin".into()))
+                    .name(Some("Martin Smith".into()))
+                    .image(Some(Link::new(
+                        "http://example.org/martin/image.jpg".into(),
+                        "image/jpeg".into(),
+                    )))
+                    .url(Some("http://example.org/martin".into()))
+                )
+            )
             // TODO: figure out how to get a 'Z' on this. probably requires a time-zone (so not naive)
-            .object(Some(ObjectBuilder::default()
-                    .object_type(Some("Article".into()))
-                    .id(Some("http://www.test.example/blog/abc123/xyz".into()))
-                    .name(Some("Why I love Activity Streams".into()))
-                    .url(Some("http://example.org/blog/2011/02/entry".into()))
-                    .build().unwrap()
-            ))
-            .target(Some(ObjectBuilder::default()
-                    .object_type(Some("OrderedCollection".into()))
-                    .id(Some("http://example.org/blog/".into()))
-                    .name(Some("Martin's Blog".into()))
-                    .build().unwrap()
-            ))
+            .with_object(|builder|
+                 builder.object_type(Some("Article".into()))
+                 .id(Some("http://www.test.example/blog/abc123/xyz".into()))
+                 .name(Some("Why I love Activity Streams".into()))
+                 .url(Some("http://example.org/blog/2011/02/entry".into()))
+            )
+            .with_target(|target|
+                target.object_type(Some("OrderedCollection".into()))
+                .id(Some("http://example.org/blog/".into()))
+                .name(Some("Martin's Blog".into()))
+            )
             .build().unwrap();
 
         let actual = Document::new(
