@@ -399,14 +399,12 @@ mod tests {
             })
             .with_actor(|actor| {
                 actor.with_base(|base_builder| {
-                    base_builder.object_type(Some("Person".into())).id(Some(
-                        "http://www.test.example/martin".parse::<Uri>().unwrap(),
-                    ))
+                    base_builder
+                        .object_type(Some("Person".into()))
+                        .id(Some("http://www.test.example/martin".parse().unwrap()))
                 })
             })
-            .with_object(|builder| {
-                builder.id(Some("http://example.org/foo.jpg".parse::<Uri>().unwrap()))
-            })
+            .with_object(|builder| builder.id(Some("http://example.org/foo.jpg".parse().unwrap())))
             .build()
             .unwrap();
         let actual = Document::new(ContextBuilder::new().build().unwrap(), activity);
