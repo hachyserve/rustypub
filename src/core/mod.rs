@@ -1,19 +1,19 @@
-pub mod object;
 pub mod activity;
 pub mod actor;
 pub mod collection;
+pub mod object;
 
 pub use object::*;
 
-use serde::{de::DeserializeOwned, Deserializer, Deserialize, Serialize};
 use derive_builder::Builder;
+use serde::{de::DeserializeOwned, Deserialize, Deserializer, Serialize};
 
 // TODO: rename to something else as there's a [Document] in the Activity
 // Streams spec.
 /// Outer object for serialization and deserialization. Not an Activity Streams
 /// 2.0 object.
 #[derive(Serialize, Deserialize, Debug, Clone, Builder)]
-pub struct Document<T> where {
+pub struct Document<T> {
     #[serde(rename = "@context", deserialize_with = "context_deserializer")]
     pub context: Context,
 
@@ -21,12 +21,12 @@ pub struct Document<T> where {
     pub object: T,
 }
 
-impl<T : DeserializeOwned + Serialize > Document<T> {
+impl<T: DeserializeOwned + Serialize> Document<T> {
     pub fn new(context: Context, object: T) -> Self {
         Document { context, object }
     }
 
-    pub fn serialize_pretty(&self) -> serde_json::Result<String>  {
+    pub fn serialize_pretty(&self) -> serde_json::Result<String> {
         let serialized = serde_json::to_string_pretty(&self);
         println!("serialized = {:?}", serialized);
         serialized
@@ -40,7 +40,7 @@ impl<T: DeserializeOwned + Serialize> Document<T> {
 }
 
 ///////////////////////////
-// Context 
+// Context
 ///////////////////////////
 /// JSON-LD uses the special @context property to define the processing context.
 /// The value of the @context property is defined by the [JSON-LD]
@@ -52,7 +52,7 @@ impl<T: DeserializeOwned + Serialize> Document<T> {
 /// done using a string, object, or array.
 /// <https://www.w3.org/TR/activitystreams-core/#jsonld>
 
-const NAMESPACE: &'static str = "https://www.w3.org/ns/activitystreams";
+const NAMESPACE: &str = "https://www.w3.org/ns/activitystreams";
 
 #[derive(Serialize, Deserialize, Debug, Clone, Builder)]
 #[builder(default)]
@@ -106,33 +106,38 @@ impl ContextBuilder {
 
 #[cfg(test)]
 mod tests {
+    use serde_json::json;
+
     use super::*;
 
     #[test]
     fn serialize_context() {
         let ctx: Context = ContextBuilder::default()
             .language(Some("en".into()))
-            .build().unwrap();
+            .build()
+            .unwrap();
 
-        let expected = r#"{
-  "@vocab": "https://www.w3.org/ns/activitystreams",
-  "@language": "en"
-}"#;
-        let serialize_pretty = serde_json::to_string_pretty(&ctx);
-        assert!(serialize_pretty.is_ok());
-        assert_eq!(serialize_pretty.ok().unwrap(), expected)
+        let expected = json!({
+          "@vocab": "https://www.w3.org/ns/activitystreams",
+          "@language": "en"
+        });
+        let value = serde_json::to_value(&ctx);
+        assert_eq!(value.unwrap(), expected)
     }
 
     #[test]
     fn deserialize_context() {
-        let actual = String::from(r#"{
-    "@vocab": "https://www.w3.org/ns/activitystreams",
-    "@language": "en"
-}"#,
-        );
+        let actual = json!(
+                    {
+            "@vocab": "https://www.w3.org/ns/activitystreams",
+            "@language": "en"
+        })
+        .to_string();
         let ctx: Context = serde_json::from_str(&actual).unwrap();
         assert_eq!(ctx.language, Some("en".into()));
-        assert_eq!(ctx.namespace, "https://www.w3.org/ns/activitystreams".to_string());
-}
-
+        assert_eq!(
+            ctx.namespace,
+            "https://www.w3.org/ns/activitystreams".to_string()
+        );
+    }
 }

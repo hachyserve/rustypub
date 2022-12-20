@@ -1,7 +1,7 @@
-use serde::{ Deserialize, Serialize };
+use crate::core::actor::{Actor, ActorBuilder};
+use crate::core::object::{Object, ObjectBuilder};
 use derive_builder::Builder;
-use crate::core::object::{ Object, ObjectBuilder };
-use crate::core::actor::{ Actor, ActorBuilder };
+use serde::{Deserialize, Serialize};
 
 ///////////////////////////////
 // Activity
@@ -39,31 +39,34 @@ pub struct Activity {
 }
 
 impl ActivityBuilder {
-
     // TODO: macro
     pub fn with_base<F>(&mut self, build_fn: F) -> &mut Self
-        where F: FnOnce(&mut ObjectBuilder) -> &mut ObjectBuilder
+    where
+        F: FnOnce(&mut ObjectBuilder) -> &mut ObjectBuilder,
     {
         let mut base_builder = ObjectBuilder::default();
         self.base(build_fn(&mut base_builder).build().unwrap())
     }
 
     pub fn with_object<F>(&mut self, build_fn: F) -> &mut Self
-        where F: FnOnce(&mut ObjectBuilder) -> &mut ObjectBuilder
+    where
+        F: FnOnce(&mut ObjectBuilder) -> &mut ObjectBuilder,
     {
         let mut base_builder = ObjectBuilder::default();
         self.object(Some(build_fn(&mut base_builder).build().unwrap()))
     }
 
     pub fn with_actor<F>(&mut self, build_fn: F) -> &mut Self
-        where F: FnOnce(&mut ActorBuilder) -> &mut ActorBuilder
+    where
+        F: FnOnce(&mut ActorBuilder) -> &mut ActorBuilder,
     {
         let mut base_builder = ActorBuilder::default();
         self.actor(Some(build_fn(&mut base_builder).build().unwrap()))
     }
 
     pub fn with_target<F>(&mut self, build_fn: F) -> &mut Self
-        where F: FnOnce(&mut ObjectBuilder) -> &mut ObjectBuilder
+    where
+        F: FnOnce(&mut ObjectBuilder) -> &mut ObjectBuilder,
     {
         let mut base_builder = ObjectBuilder::default();
         self.target(Some(build_fn(&mut base_builder).build().unwrap()))
@@ -74,78 +77,78 @@ impl ActivityBuilder {
     pub fn intransitive_activity(object_type: String) -> Self {
         let obj = ObjectBuilder::default()
             .object_type(Some(object_type))
-            .build().unwrap();
-        ActivityBuilder::default()
-            .base(obj)
-            .object(None).to_owned()
+            .build()
+            .unwrap();
+        ActivityBuilder::default().base(obj).object(None).to_owned()
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::core::{ContextBuilder, Document};
     use pretty_assertions::assert_eq;
-    use crate::core::{ Document, ContextBuilder };
+    use serde_json::json;
 
     #[test]
     fn serialize_activity() {
         let activity = ActivityBuilder::default()
-            .with_base(|builder|
-                builder.object_type(Some("Activity".into()))
-                .summary(Some("Sally did something to a note".into()))
-            )
-            .with_object(|builder|
-                builder.object_type(Some("Note".into()))
-                .name(Some("A Note".into()))
-            )
-            .with_actor(|actor|
-                actor.with_base(|builder|
-                    builder.object_type(Some("Person".into()))
-                    .name(Some("Sally".into()))
-                )
-            )
-            .build().unwrap();
+            .with_base(|builder| {
+                builder
+                    .object_type(Some("Activity".into()))
+                    .summary(Some("Sally did something to a note".into()))
+            })
+            .with_object(|builder| {
+                builder
+                    .object_type(Some("Note".into()))
+                    .name(Some("A Note".into()))
+            })
+            .with_actor(|actor| {
+                actor.with_base(|builder| {
+                    builder
+                        .object_type(Some("Person".into()))
+                        .name(Some("Sally".into()))
+                })
+            })
+            .build()
+            .unwrap();
         let actual = Document::new(ContextBuilder::default().build().unwrap(), activity);
-        let expected = String::from(
-            r#"{
-  "@context": {
-    "@vocab": "https://www.w3.org/ns/activitystreams"
-  },
-  "type": "Activity",
-  "summary": "Sally did something to a note",
-  "actor": {
-    "type": "Person",
-    "name": "Sally"
-  },
-  "object": {
-    "type": "Note",
-    "name": "A Note"
-  }
-}"#,
-        );
-        assert!(actual.serialize_pretty().is_ok());
-        assert_eq!(actual.serialize_pretty().unwrap(), expected);
+        let expected = json!({
+          "@context": {
+            "@vocab": "https://www.w3.org/ns/activitystreams"
+          },
+          "type": "Activity",
+          "summary": "Sally did something to a note",
+          "actor": {
+            "type": "Person",
+            "name": "Sally"
+          },
+          "object": {
+            "type": "Note",
+            "name": "A Note"
+          }
+        });
+        assert_eq!(serde_json::to_value(actual).unwrap(), expected);
     }
 
     #[test]
     fn deserialize_activity() {
-        let actual = String::from(
-            r#"{
-  "@context": {
-    "@vocab": "https://www.w3.org/ns/activitystreams"
-  },
-  "type": "Activity",
-  "summary": "Sally did something to a note",
-  "actor": {
-    "type": "Person",
-    "name": "Sally"
-  },
-  "object": {
-    "type": "Note",
-    "name": "A Note"
-  }
-}"#,
-        );
+        let actual = json!({
+          "@context": {
+            "@vocab": "https://www.w3.org/ns/activitystreams"
+          },
+          "type": "Activity",
+          "summary": "Sally did something to a note",
+          "actor": {
+            "type": "Person",
+            "name": "Sally"
+          },
+          "object": {
+            "type": "Note",
+            "name": "A Note"
+          }
+        })
+        .to_string();
         let document: Document<Activity> = Document::deserialize_string(actual).unwrap();
         let activity = document.object as Activity;
         assert_eq!(activity.base.object_type, Some("Activity".into()));
