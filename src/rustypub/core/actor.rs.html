@@ -99,9 +99,17 @@
 <span id="99">99</span>
 <span id="100">100</span>
 <span id="101">101</span>
-</pre><pre class="rust"><code><span class="kw">use </span>serde::{ Deserialize, Serialize };
-<span class="kw">use </span><span class="kw">crate</span>::core::object::{ Object, ObjectBuilder };
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::core::object::{Object, ObjectBuilder};
 <span class="kw">use </span>derive_builder::Builder;
+<span class="kw">use </span>serde::{Deserialize, Serialize};
 
 <span class="comment">// TODO: expand to actor types: https://www.w3.org/TR/activitystreams-vocabulary/#actor-types
 </span><span class="attribute">#[derive(Serialize, Deserialize, Default, Debug, Clone, Builder)]
@@ -131,9 +139,9 @@
 }
 
 <span class="kw">impl </span>ActorBuilder {
-
     <span class="kw">pub fn </span>with_base&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, build_fn: F) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self
-        </span><span class="kw">where </span>F: FnOnce(<span class="kw-2">&amp;mut </span>ObjectBuilder) -&gt; <span class="kw-2">&amp;mut </span>ObjectBuilder
+    </span><span class="kw">where
+        </span>F: FnOnce(<span class="kw-2">&amp;mut </span>ObjectBuilder) -&gt; <span class="kw-2">&amp;mut </span>ObjectBuilder,
     {
         <span class="kw">let </span><span class="kw-2">mut </span>base_builder = ObjectBuilder::default();
         <span class="self">self</span>.base(build_fn(<span class="kw-2">&amp;mut </span>base_builder).build().unwrap())
@@ -152,50 +160,58 @@
 </span><span class="kw">mod </span>tests {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::core::{ContextBuilder, Document};
-    <span class="kw">use </span>pretty_assertions::assert_eq;
     <span class="kw">use </span>http::Uri;
+    <span class="kw">use </span>pretty_assertions::assert_eq;
+    <span class="kw">use </span>serde_json::json;
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>serialize_actor() {
         <span class="kw">let </span>person = ActorBuilder::default()
-            .with_base(|base|
+            .with_base(|base| {
                 base.object_type(<span class="prelude-val">Some</span>(<span class="string">&quot;Person&quot;</span>.into()))
-                .id(<span class="prelude-val">Some</span>(<span class="string">&quot;https://example.com/person/1234&quot;</span>.parse::&lt;Uri&gt;().unwrap()))
-                .name(<span class="prelude-val">Some</span>(<span class="string">&quot;name&quot;</span>.into()))
-            )
+                    .id(<span class="prelude-val">Some</span>(
+                        <span class="string">&quot;https://example.com/person/1234&quot;</span>.parse::&lt;Uri&gt;().unwrap(),
+                    ))
+                    .name(<span class="prelude-val">Some</span>(<span class="string">&quot;name&quot;</span>.into()))
+            })
             .preferred_username(<span class="prelude-val">Some</span>(<span class="string">&quot;dma&quot;</span>.into()))
-            .build().unwrap();
+            .build()
+            .unwrap();
         <span class="kw">let </span>context = ContextBuilder::new().build().unwrap();
         <span class="kw">let </span>actual = Document::new(context, person);
-        <span class="kw">let </span>expected = <span class="string">r#&quot;{
-  &quot;@context&quot;: {
-    &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;
-  },
-  &quot;type&quot;: &quot;Person&quot;,
-  &quot;id&quot;: &quot;https://example.com/person/1234&quot;,
-  &quot;name&quot;: &quot;name&quot;,
-  &quot;preferredUsername&quot;: &quot;dma&quot;
-}&quot;#</span>;
-        <span class="kw">let </span>s = serde_json::to_string_pretty(<span class="kw-2">&amp;</span>actual);
-        <span class="macro">assert!</span>(s.is_ok());
-        <span class="macro">assert_eq!</span>(s.unwrap(), expected)
+        <span class="kw">let </span>expected = <span class="macro">json!</span>({
+          <span class="string">&quot;@context&quot;</span>: {
+            <span class="string">&quot;@vocab&quot;</span>: <span class="string">&quot;https://www.w3.org/ns/activitystreams&quot;
+          </span>},
+          <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Person&quot;</span>,
+          <span class="string">&quot;id&quot;</span>: <span class="string">&quot;https://example.com/person/1234&quot;</span>,
+          <span class="string">&quot;name&quot;</span>: <span class="string">&quot;name&quot;</span>,
+          <span class="string">&quot;preferredUsername&quot;</span>: <span class="string">&quot;dma&quot;
+        </span>});
+
+        <span class="kw">let </span>v = serde_json::to_value(<span class="kw-2">&amp;</span>actual);
+        <span class="macro">assert_eq!</span>(v.unwrap(), expected)
     }
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>deserialize_actor() {
-        <span class="kw">let </span>actual = <span class="string">r#&quot;{
-  &quot;@context&quot;: {
-    &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;
-  },
-  &quot;type&quot;: &quot;Person&quot;,
-  &quot;id&quot;: &quot;https://example.com/person/1234&quot;,
-  &quot;name&quot;: &quot;name&quot;,
-  &quot;preferredUsername&quot;: &quot;dma&quot;
-}&quot;#</span>;
-        <span class="kw">let </span>document: Document&lt;Actor&gt; = Document::deserialize_string(actual.into()).unwrap();
+        <span class="kw">let </span>actual = <span class="macro">json!</span>({
+          <span class="string">&quot;@context&quot;</span>: {
+            <span class="string">&quot;@vocab&quot;</span>: <span class="string">&quot;https://www.w3.org/ns/activitystreams&quot;
+          </span>},
+          <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Person&quot;</span>,
+          <span class="string">&quot;id&quot;</span>: <span class="string">&quot;https://example.com/person/1234&quot;</span>,
+          <span class="string">&quot;name&quot;</span>: <span class="string">&quot;name&quot;</span>,
+          <span class="string">&quot;preferredUsername&quot;</span>: <span class="string">&quot;dma&quot;
+        </span>})
+        .to_string();
+        <span class="kw">let </span>document: Document&lt;Actor&gt; = Document::deserialize_string(actual).unwrap();
         <span class="kw">let </span>actor = document.object;
         <span class="macro">assert_eq!</span>(actor.base.object_type, <span class="prelude-val">Some</span>(<span class="string">&quot;Person&quot;</span>.into()));
-        <span class="macro">assert_eq!</span>(actor.base.id, <span class="prelude-val">Some</span>(<span class="string">&quot;https://example.com/person/1234&quot;</span>.parse::&lt;Uri&gt;().unwrap()));
+        <span class="macro">assert_eq!</span>(
+            actor.base.id,
+            <span class="prelude-val">Some</span>(<span class="string">&quot;https://example.com/person/1234&quot;</span>.parse::&lt;Uri&gt;().unwrap())
+        );
         <span class="macro">assert_eq!</span>(actor.base.name, <span class="prelude-val">Some</span>(<span class="string">&quot;name&quot;</span>.into()));
         <span class="macro">assert_eq!</span>(actor.preferred_username, <span class="prelude-val">Some</span>(<span class="string">&quot;dma&quot;</span>.into()));
     }

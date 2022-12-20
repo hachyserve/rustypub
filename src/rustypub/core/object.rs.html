@@ -458,13 +458,10 @@
 <span id="458">458</span>
 <span id="459">459</span>
 <span id="460">460</span>
-<span id="461">461</span>
-<span id="462">462</span>
-<span id="463">463</span>
-</pre><pre class="rust"><code><span class="kw">use </span>serde::{ Deserialize, Serialize };
-<span class="kw">use </span>chrono::{ DateTime, Utc };
+</pre><pre class="rust"><code><span class="kw">use </span>chrono::{DateTime, Utc};
 <span class="kw">use </span>derive_builder::Builder;
 <span class="kw">use </span>http::Uri;
+<span class="kw">use </span>serde::{Deserialize, Serialize};
 
 <span class="comment">///////////////////////////
 // Object
@@ -505,8 +502,8 @@
     <span class="attribute">#[serde(
         rename = <span class="string">&quot;attributedTo&quot;</span>,
         skip_serializing_if = <span class="string">&quot;Vec::is_empty&quot;</span>,
-        default = <span class="string">&quot;Vec::new&quot;</span>,
-    )]
+        default = <span class="string">&quot;Vec::new&quot;
+    </span>)]
     </span><span class="kw">pub </span>attributed_to: Vec&lt;AttributedTo&gt;,
 
     <span class="attribute">#[serde(skip_serializing_if = <span class="string">&quot;Option::is_none&quot;</span>)]
@@ -541,10 +538,10 @@
 </span><span class="kw">pub struct </span>Service(Object);
 
 <span class="attribute">#[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(untagged)] 
+#[serde(untagged)]
 </span><span class="kw">pub enum </span>AttributedTo {
     Object(Object),
-    Link(Link)
+    Link(Link),
 }
 
 <span class="kw">impl </span>ObjectBuilder {
@@ -553,14 +550,14 @@
     }
 
     <span class="kw">pub fn </span>of_object_type(t: String) -&gt; <span class="self">Self </span>{
-        ObjectBuilder::default()
-            .object_type(<span class="prelude-val">Some</span>(t)).to_owned()
+        ObjectBuilder::default().object_type(<span class="prelude-val">Some</span>(t)).to_owned()
     }
 
     <span class="kw">pub fn </span>note(name: String, content: String) -&gt; <span class="self">Self </span>{
         ObjectBuilder::of_object_type(<span class="string">&quot;Note&quot;</span>.into())
-             .name(<span class="prelude-val">Some</span>(name))
-             .content(<span class="prelude-val">Some</span>(content)).to_owned()
+            .name(<span class="prelude-val">Some</span>(name))
+            .content(<span class="prelude-val">Some</span>(content))
+            .to_owned()
     }
 }
 
@@ -571,7 +568,7 @@
 // https://github.com/serde-rs/serde/issues/723#issuecomment-423299411
 </span><span class="kw">mod </span>opt_uri {
     <span class="kw">use </span>http::uri::Uri;
-    <span class="kw">use </span>serde::{Serialize, Serializer, Deserialize, Deserializer};
+    <span class="kw">use </span>serde::{Deserialize, Deserializer, Serialize, Serializer};
 
     <span class="kw">pub fn </span>serialize&lt;S&gt;(value: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;Uri&gt;, serializer: S) -&gt; <span class="prelude-ty">Result</span>&lt;S::Ok, S::Error&gt;
     <span class="kw">where
@@ -649,8 +646,8 @@
             hreflang: <span class="prelude-val">None</span>,
             height: <span class="prelude-val">None</span>,
             width: <span class="prelude-val">None</span>,
-            preview: <span class="prelude-val">None
-        </span>}
+            preview: <span class="prelude-val">None</span>,
+        }
     }
 }
 
@@ -691,50 +688,49 @@
     }
 }
 
-
 <span class="attribute">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
+    <span class="kw">use </span><span class="kw">crate</span>::core::{Context, ContextBuilder, Document, DocumentBuilder};
     <span class="kw">use </span>pretty_assertions::assert_eq;
-    <span class="kw">use </span>serde_json::Result;
-    <span class="kw">use </span><span class="kw">crate</span>::core::{ Context, ContextBuilder, Document, DocumentBuilder };
+    <span class="kw">use </span>serde_json::{json, <span class="prelude-ty">Result</span>};
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>serialize_object() {
         <span class="kw">let </span>object: Object = ObjectBuilder::default()
             .name(<span class="prelude-val">Some</span>(<span class="string">&quot;name&quot;</span>.into()))
-            .build().unwrap();
+            .build()
+            .unwrap();
         <span class="kw">let </span>context: Context = ContextBuilder::new()
             .language(<span class="prelude-val">Some</span>(<span class="string">&quot;en&quot;</span>.into()))
-            .build().unwrap();
+            .build()
+            .unwrap();
         <span class="kw">let </span>actual = DocumentBuilder::default()
             .object(<span class="prelude-val">Some</span>(object))
             .context(context)
-            .build().unwrap();
+            .build()
+            .unwrap();
 
-        <span class="kw">let </span>expected = <span class="string">r#&quot;{
-  &quot;@context&quot;: {
-    &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;,
-    &quot;@language&quot;: &quot;en&quot;
-  },
-  &quot;name&quot;: &quot;name&quot;
-}&quot;#</span>;
-        <span class="kw">let </span>serialize_pretty = serde_json::to_string_pretty(<span class="kw-2">&amp;</span>actual);
-        <span class="macro">assert!</span>(serialize_pretty.is_ok());
-        <span class="macro">assert_eq!</span>(serialize_pretty.ok().unwrap(), expected)
+        <span class="kw">let </span>expected = <span class="macro">json!</span>({
+          <span class="string">&quot;@context&quot;</span>: {
+            <span class="string">&quot;@vocab&quot;</span>: <span class="string">&quot;https://www.w3.org/ns/activitystreams&quot;</span>,
+            <span class="string">&quot;@language&quot;</span>: <span class="string">&quot;en&quot;
+          </span>},
+          <span class="string">&quot;name&quot;</span>: <span class="string">&quot;name&quot;
+        </span>});
+        <span class="macro">assert_eq!</span>(serde_json::to_value(<span class="kw-2">&amp;</span>actual).unwrap(), expected)
     }
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>deserialize_object() {
-        <span class="kw">let </span>actual = String::from(
-            <span class="string">r#&quot;{
-  &quot;@context&quot;: {
-    &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;,
-    &quot;@language&quot;: &quot;en&quot;
-  },
-  &quot;name&quot;: &quot;name&quot;
-}&quot;#</span>,
-        );
+        <span class="kw">let </span>actual = <span class="macro">json!</span>({
+          <span class="string">&quot;@context&quot;</span>: {
+            <span class="string">&quot;@vocab&quot;</span>: <span class="string">&quot;https://www.w3.org/ns/activitystreams&quot;</span>,
+            <span class="string">&quot;@language&quot;</span>: <span class="string">&quot;en&quot;
+          </span>},
+          <span class="string">&quot;name&quot;</span>: <span class="string">&quot;name&quot;
+        </span>})
+        .to_string();
         <span class="kw">let </span>document: Document&lt;Object&gt; = Document::deserialize_string(actual).unwrap();
         <span class="macro">assert_eq!</span>(document.context.language, <span class="prelude-val">Some</span>(<span class="string">&quot;en&quot;</span>.into()));
         <span class="kw">let </span>object = document.object <span class="kw">as </span>Object;
@@ -745,11 +741,11 @@
     </span><span class="kw">fn </span>deserialize_object_malformed() {
         <span class="kw">let </span>actual = String::from(
             <span class="string">r#&quot;{
-  &quot;@context&quot;: {
-    &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;,
-    &quot;@language&quot;: &quot;en&quot;
-  },
-}&quot;#</span>,
+              &quot;@context&quot;: {
+                &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;,
+                &quot;@language&quot;: &quot;en&quot;
+              },
+            }&quot;#</span>,
         );
         <span class="kw">let </span>result: <span class="prelude-ty">Result</span>&lt;Document&lt;Object&gt;&gt; = Document::deserialize_string(actual);
         <span class="macro">assert!</span>(result.is_err());
@@ -757,48 +753,43 @@
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>serialize_link() {
-        <span class="kw">let </span>href = Uri::from(
-            <span class="string">&quot;http://example.org/abc&quot;</span>.parse::&lt;http::Uri&gt;().unwrap(),
-        );
+        <span class="kw">let </span>href = <span class="string">&quot;http://example.org/abc&quot;</span>.parse::&lt;http::Uri&gt;().unwrap();
         <span class="kw">let </span>actual = Document::new(
             ContextBuilder::new().build().unwrap(),
             LinkBuilder::new()
-            .href(href)
-            .name(<span class="prelude-val">Some</span>(<span class="string">&quot;An example link&quot;</span>.into()))
-            .hreflang(<span class="prelude-val">Some</span>(<span class="string">&quot;en&quot;</span>.into()))
-            .link_type(<span class="prelude-val">Some</span>(<span class="string">&quot;Link&quot;</span>.into()))
-            .media_type(<span class="prelude-val">Some</span>(<span class="string">&quot;text/html&quot;</span>.into()))
-            .build().unwrap(),
+                .href(href)
+                .name(<span class="prelude-val">Some</span>(<span class="string">&quot;An example link&quot;</span>.into()))
+                .hreflang(<span class="prelude-val">Some</span>(<span class="string">&quot;en&quot;</span>.into()))
+                .link_type(<span class="prelude-val">Some</span>(<span class="string">&quot;Link&quot;</span>.into()))
+                .media_type(<span class="prelude-val">Some</span>(<span class="string">&quot;text/html&quot;</span>.into()))
+                .build()
+                .unwrap(),
         );
-        <span class="kw">let </span>expected = String::from(
-            <span class="string">r#&quot;{
-  &quot;@context&quot;: {
-    &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;
-  },
-  &quot;type&quot;: &quot;Link&quot;,
-  &quot;href&quot;: &quot;http://example.org/abc&quot;,
-  &quot;mediaType&quot;: &quot;text/html&quot;,
-  &quot;name&quot;: &quot;An example link&quot;,
-  &quot;hreflang&quot;: &quot;en&quot;
-}&quot;#
-        </span>);
-        <span class="macro">assert!</span>(actual.serialize_pretty().is_ok());
-        <span class="macro">assert_eq!</span>(actual.serialize_pretty().unwrap(), expected);
+        <span class="kw">let </span>expected = <span class="macro">json!</span>({
+          <span class="string">&quot;@context&quot;</span>: {
+            <span class="string">&quot;@vocab&quot;</span>: <span class="string">&quot;https://www.w3.org/ns/activitystreams&quot;
+          </span>},
+          <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Link&quot;</span>,
+          <span class="string">&quot;href&quot;</span>: <span class="string">&quot;http://example.org/abc&quot;</span>,
+          <span class="string">&quot;mediaType&quot;</span>: <span class="string">&quot;text/html&quot;</span>,
+          <span class="string">&quot;name&quot;</span>: <span class="string">&quot;An example link&quot;</span>,
+          <span class="string">&quot;hreflang&quot;</span>: <span class="string">&quot;en&quot;
+        </span>});
+        <span class="macro">assert_eq!</span>(serde_json::to_value(actual).unwrap(), expected);
     }
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>deserialize_link() {
-        <span class="kw">let </span>actual = String::from(
-            <span class="string">r#&quot;{
-  &quot;@context&quot;: {
-    &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;
-  },
-  &quot;type&quot;: &quot;Link&quot;,
-  &quot;href&quot;: &quot;http://example.org/abc&quot;,
-  &quot;name&quot;: &quot;An example link&quot;,
-  &quot;hreflang&quot;: &quot;en&quot;
-}&quot;#</span>,
-        );
+        <span class="kw">let </span>actual = <span class="macro">json!</span>({
+          <span class="string">&quot;@context&quot;</span>: {
+            <span class="string">&quot;@vocab&quot;</span>: <span class="string">&quot;https://www.w3.org/ns/activitystreams&quot;
+          </span>},
+          <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Link&quot;</span>,
+          <span class="string">&quot;href&quot;</span>: <span class="string">&quot;http://example.org/abc&quot;</span>,
+          <span class="string">&quot;name&quot;</span>: <span class="string">&quot;An example link&quot;</span>,
+          <span class="string">&quot;hreflang&quot;</span>: <span class="string">&quot;en&quot;
+        </span>})
+        .to_string();
         <span class="kw">let </span>document: Document&lt;Link&gt; = Document::deserialize_string(actual).unwrap();
         <span class="kw">let </span>link = document.object <span class="kw">as </span>Link;
         <span class="macro">assert_eq!</span>(link.link_type, <span class="prelude-val">Some</span>(<span class="string">&quot;Link&quot;</span>.into()));
@@ -809,71 +800,66 @@
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>serialize_preview() {
-         <span class="kw">let </span>trailer_preview = Link::new(
-            <span class="string">&quot;http://example.org/trailer.mkv&quot;</span>.into(),
-            <span class="string">&quot;video/mkv&quot;</span>.into()
-        );
+        <span class="kw">let </span>trailer_preview =
+            Link::new(<span class="string">&quot;http://example.org/trailer.mkv&quot;</span>.into(), <span class="string">&quot;video/mkv&quot;</span>.into());
         <span class="kw">let </span>preview = PreviewBuilder::default()
             .duration(<span class="prelude-val">Some</span>(<span class="string">&quot;PT1M&quot;</span>.into()))
             .object_type(<span class="prelude-val">Some</span>(<span class="string">&quot;Video&quot;</span>.into()))
             .url(<span class="prelude-val">Some</span>(Box::new(trailer_preview)))
             .name(<span class="prelude-val">Some</span>(<span class="string">&quot;Trailer&quot;</span>.into()))
-            .build().unwrap();
+            .build()
+            .unwrap();
 
         <span class="kw">let </span>object = ObjectBuilder::default()
             .duration(<span class="prelude-val">Some</span>(<span class="string">&quot;PT2H30M&quot;</span>.into()))
             .name(<span class="prelude-val">Some</span>(<span class="string">&quot;Cool New Movie&quot;</span>.into()))
             .preview(<span class="prelude-val">Some</span>(Box::new(preview)))
             .object_type(<span class="prelude-val">Some</span>(<span class="string">&quot;Video&quot;</span>.into()))
-            .build().unwrap();
-        <span class="kw">let </span>context = ContextBuilder::new()
-            .build().unwrap();
+            .build()
+            .unwrap();
+        <span class="kw">let </span>context = ContextBuilder::new().build().unwrap();
         <span class="kw">let </span>actual = Document::new(context, object);
-        <span class="kw">let </span>expected = String::from(
-            <span class="string">r#&quot;{
-  &quot;@context&quot;: {
-    &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;
-  },
-  &quot;type&quot;: &quot;Video&quot;,
-  &quot;name&quot;: &quot;Cool New Movie&quot;,
-  &quot;duration&quot;: &quot;PT2H30M&quot;,
-  &quot;preview&quot;: {
-    &quot;type&quot;: &quot;Video&quot;,
-    &quot;name&quot;: &quot;Trailer&quot;,
-    &quot;duration&quot;: &quot;PT1M&quot;,
-    &quot;url&quot;: {
-      &quot;type&quot;: &quot;Link&quot;,
-      &quot;href&quot;: &quot;http://example.org/trailer.mkv&quot;,
-      &quot;mediaType&quot;: &quot;video/mkv&quot;
-    }
-  }
-}&quot;#</span>,
-        );
-        <span class="macro">assert!</span>(actual.serialize_pretty().is_ok());
-        <span class="macro">assert_eq!</span>(actual.serialize_pretty().unwrap(), expected);
+        <span class="kw">let </span>expected = <span class="macro">json!</span>({
+          <span class="string">&quot;@context&quot;</span>: {
+            <span class="string">&quot;@vocab&quot;</span>: <span class="string">&quot;https://www.w3.org/ns/activitystreams&quot;
+          </span>},
+          <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Video&quot;</span>,
+          <span class="string">&quot;name&quot;</span>: <span class="string">&quot;Cool New Movie&quot;</span>,
+          <span class="string">&quot;duration&quot;</span>: <span class="string">&quot;PT2H30M&quot;</span>,
+          <span class="string">&quot;preview&quot;</span>: {
+            <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Video&quot;</span>,
+            <span class="string">&quot;name&quot;</span>: <span class="string">&quot;Trailer&quot;</span>,
+            <span class="string">&quot;duration&quot;</span>: <span class="string">&quot;PT1M&quot;</span>,
+            <span class="string">&quot;url&quot;</span>: {
+              <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Link&quot;</span>,
+              <span class="string">&quot;href&quot;</span>: <span class="string">&quot;http://example.org/trailer.mkv&quot;</span>,
+              <span class="string">&quot;mediaType&quot;</span>: <span class="string">&quot;video/mkv&quot;
+            </span>}
+          }
+        });
+        <span class="macro">assert_eq!</span>(serde_json::to_value(actual).unwrap(), expected);
     }
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>deserialize_preview() {
-        <span class="kw">let </span>actual = String::from(
-            <span class="string">r#&quot;{
-  &quot;@context&quot;: {
-    &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;
-  },
-  &quot;type&quot;: &quot;Video&quot;,
-  &quot;name&quot;: &quot;Cool New Movie&quot;,
-  &quot;duration&quot;: &quot;PT2H30M&quot;,
-  &quot;preview&quot;: {
-    &quot;type&quot;: &quot;Video&quot;,
-    &quot;name&quot;: &quot;Trailer&quot;,
-    &quot;duration&quot;: &quot;PT1M&quot;,
-    &quot;url&quot;: {
-      &quot;href&quot;: &quot;http://example.org/trailer.mkv&quot;,
-      &quot;mediaType&quot;: &quot;video/mkv&quot;
-    }
-  }
-}&quot;#</span>,
-        );
+        <span class="kw">let </span>actual = <span class="macro">json!</span>({
+          <span class="string">&quot;@context&quot;</span>: {
+            <span class="string">&quot;@vocab&quot;</span>: <span class="string">&quot;https://www.w3.org/ns/activitystreams&quot;
+          </span>},
+          <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Video&quot;</span>,
+          <span class="string">&quot;name&quot;</span>: <span class="string">&quot;Cool New Movie&quot;</span>,
+          <span class="string">&quot;duration&quot;</span>: <span class="string">&quot;PT2H30M&quot;</span>,
+          <span class="string">&quot;preview&quot;</span>: {
+            <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Video&quot;</span>,
+            <span class="string">&quot;name&quot;</span>: <span class="string">&quot;Trailer&quot;</span>,
+            <span class="string">&quot;duration&quot;</span>: <span class="string">&quot;PT1M&quot;</span>,
+            <span class="string">&quot;url&quot;</span>: {
+              <span class="string">&quot;href&quot;</span>: <span class="string">&quot;http://example.org/trailer.mkv&quot;</span>,
+              <span class="string">&quot;mediaType&quot;</span>: <span class="string">&quot;video/mkv&quot;
+            </span>}
+          }
+        })
+        .to_string();
         <span class="kw">let </span>document: Document&lt;Object&gt; = Document::deserialize_string(actual).unwrap();
         <span class="kw">let </span>object = document.object;
         <span class="macro">assert_eq!</span>(object.object_type, <span class="prelude-val">Some</span>(<span class="string">&quot;Video&quot;</span>.into()));
@@ -887,36 +873,44 @@
 
         <span class="kw">let </span>url = preview.url.as_ref().unwrap();
         <span class="macro">assert_eq!</span>(url.media_type, <span class="prelude-val">Some</span>(<span class="string">&quot;video/mkv&quot;</span>.into()));
-        <span class="macro">assert_eq!</span>(url.href, <span class="string">&quot;http://example.org/trailer.mkv&quot;</span>.parse::&lt;http::Uri&gt;().unwrap());
+        <span class="macro">assert_eq!</span>(
+            url.href,
+            <span class="string">&quot;http://example.org/trailer.mkv&quot;
+                </span>.parse::&lt;http::Uri&gt;()
+                .unwrap()
+        );
     }
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>serialize_note() {
         <span class="kw">let </span>context = ContextBuilder::new().build().unwrap();
-        <span class="kw">let </span>note = ObjectBuilder::note(<span class="string">&quot;Name&quot;</span>.into(), <span class="string">&quot;Content&quot;</span>.into()).build().unwrap();
+        <span class="kw">let </span>note = ObjectBuilder::note(<span class="string">&quot;Name&quot;</span>.into(), <span class="string">&quot;Content&quot;</span>.into())
+            .build()
+            .unwrap();
         <span class="kw">let </span>document: Document&lt;Object&gt; = Document::new(context, note);
-        <span class="kw">let </span>expected = <span class="string">r#&quot;{
-  &quot;@context&quot;: {
-    &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;
-  },
-  &quot;type&quot;: &quot;Note&quot;,
-  &quot;name&quot;: &quot;Name&quot;,
-  &quot;content&quot;: &quot;Content&quot;
-}&quot;#</span>;
-        <span class="macro">assert!</span>(document.serialize_pretty().is_ok());
-        <span class="macro">assert_eq!</span>(document.serialize_pretty().unwrap(), expected)
+        <span class="kw">let </span>expected = <span class="macro">json!</span>({
+          <span class="string">&quot;@context&quot;</span>: {
+            <span class="string">&quot;@vocab&quot;</span>: <span class="string">&quot;https://www.w3.org/ns/activitystreams&quot;
+          </span>},
+          <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Note&quot;</span>,
+          <span class="string">&quot;name&quot;</span>: <span class="string">&quot;Name&quot;</span>,
+          <span class="string">&quot;content&quot;</span>: <span class="string">&quot;Content&quot;
+        </span>});
+
+        <span class="macro">assert_eq!</span>(serde_json::to_value(document).unwrap(), expected)
     }
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>deserialize_note() {
-        <span class="kw">let </span>actual = <span class="string">r#&quot;{
-  &quot;@context&quot;: {
-    &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;
-  },
-  &quot;type&quot;: &quot;Note&quot;,
-  &quot;name&quot;: &quot;Name&quot;,
-  &quot;content&quot;: &quot;Content&quot;
-}&quot;#</span>.into();
+        <span class="kw">let </span>actual = <span class="macro">json!</span>({
+          <span class="string">&quot;@context&quot;</span>: {
+            <span class="string">&quot;@vocab&quot;</span>: <span class="string">&quot;https://www.w3.org/ns/activitystreams&quot;
+          </span>},
+          <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Note&quot;</span>,
+          <span class="string">&quot;name&quot;</span>: <span class="string">&quot;Name&quot;</span>,
+          <span class="string">&quot;content&quot;</span>: <span class="string">&quot;Content&quot;
+        </span>})
+        .to_string();
         <span class="kw">let </span>document: Document&lt;Object&gt; = Document::deserialize_string(actual).unwrap();
         <span class="kw">let </span>note: Object = document.object;
         <span class="macro">assert_eq!</span>(note.object_type, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>.into()));

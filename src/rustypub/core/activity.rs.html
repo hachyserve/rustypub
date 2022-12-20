@@ -165,10 +165,13 @@
 <span id="165">165</span>
 <span id="166">166</span>
 <span id="167">167</span>
-</pre><pre class="rust"><code><span class="kw">use </span>serde::{ Deserialize, Serialize };
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::core::actor::{Actor, ActorBuilder};
+<span class="kw">use </span><span class="kw">crate</span>::core::object::{Object, ObjectBuilder};
 <span class="kw">use </span>derive_builder::Builder;
-<span class="kw">use </span><span class="kw">crate</span>::core::object::{ Object, ObjectBuilder };
-<span class="kw">use </span><span class="kw">crate</span>::core::actor::{ Actor, ActorBuilder };
+<span class="kw">use </span>serde::{Deserialize, Serialize};
 
 <span class="comment">///////////////////////////////
 // Activity
@@ -206,31 +209,34 @@
 </span>}
 
 <span class="kw">impl </span>ActivityBuilder {
-
     <span class="comment">// TODO: macro
     </span><span class="kw">pub fn </span>with_base&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, build_fn: F) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self
-        </span><span class="kw">where </span>F: FnOnce(<span class="kw-2">&amp;mut </span>ObjectBuilder) -&gt; <span class="kw-2">&amp;mut </span>ObjectBuilder
+    </span><span class="kw">where
+        </span>F: FnOnce(<span class="kw-2">&amp;mut </span>ObjectBuilder) -&gt; <span class="kw-2">&amp;mut </span>ObjectBuilder,
     {
         <span class="kw">let </span><span class="kw-2">mut </span>base_builder = ObjectBuilder::default();
         <span class="self">self</span>.base(build_fn(<span class="kw-2">&amp;mut </span>base_builder).build().unwrap())
     }
 
     <span class="kw">pub fn </span>with_object&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, build_fn: F) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self
-        </span><span class="kw">where </span>F: FnOnce(<span class="kw-2">&amp;mut </span>ObjectBuilder) -&gt; <span class="kw-2">&amp;mut </span>ObjectBuilder
+    </span><span class="kw">where
+        </span>F: FnOnce(<span class="kw-2">&amp;mut </span>ObjectBuilder) -&gt; <span class="kw-2">&amp;mut </span>ObjectBuilder,
     {
         <span class="kw">let </span><span class="kw-2">mut </span>base_builder = ObjectBuilder::default();
         <span class="self">self</span>.object(<span class="prelude-val">Some</span>(build_fn(<span class="kw-2">&amp;mut </span>base_builder).build().unwrap()))
     }
 
     <span class="kw">pub fn </span>with_actor&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, build_fn: F) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self
-        </span><span class="kw">where </span>F: FnOnce(<span class="kw-2">&amp;mut </span>ActorBuilder) -&gt; <span class="kw-2">&amp;mut </span>ActorBuilder
+    </span><span class="kw">where
+        </span>F: FnOnce(<span class="kw-2">&amp;mut </span>ActorBuilder) -&gt; <span class="kw-2">&amp;mut </span>ActorBuilder,
     {
         <span class="kw">let </span><span class="kw-2">mut </span>base_builder = ActorBuilder::default();
         <span class="self">self</span>.actor(<span class="prelude-val">Some</span>(build_fn(<span class="kw-2">&amp;mut </span>base_builder).build().unwrap()))
     }
 
     <span class="kw">pub fn </span>with_target&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, build_fn: F) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self
-        </span><span class="kw">where </span>F: FnOnce(<span class="kw-2">&amp;mut </span>ObjectBuilder) -&gt; <span class="kw-2">&amp;mut </span>ObjectBuilder
+    </span><span class="kw">where
+        </span>F: FnOnce(<span class="kw-2">&amp;mut </span>ObjectBuilder) -&gt; <span class="kw-2">&amp;mut </span>ObjectBuilder,
     {
         <span class="kw">let </span><span class="kw-2">mut </span>base_builder = ObjectBuilder::default();
         <span class="self">self</span>.target(<span class="prelude-val">Some</span>(build_fn(<span class="kw-2">&amp;mut </span>base_builder).build().unwrap()))
@@ -241,78 +247,78 @@
     </span><span class="kw">pub fn </span>intransitive_activity(object_type: String) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>obj = ObjectBuilder::default()
             .object_type(<span class="prelude-val">Some</span>(object_type))
-            .build().unwrap();
-        ActivityBuilder::default()
-            .base(obj)
-            .object(<span class="prelude-val">None</span>).to_owned()
+            .build()
+            .unwrap();
+        ActivityBuilder::default().base(obj).object(<span class="prelude-val">None</span>).to_owned()
     }
 }
 
 <span class="attribute">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
+    <span class="kw">use </span><span class="kw">crate</span>::core::{ContextBuilder, Document};
     <span class="kw">use </span>pretty_assertions::assert_eq;
-    <span class="kw">use </span><span class="kw">crate</span>::core::{ Document, ContextBuilder };
+    <span class="kw">use </span>serde_json::json;
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>serialize_activity() {
         <span class="kw">let </span>activity = ActivityBuilder::default()
-            .with_base(|builder|
-                builder.object_type(<span class="prelude-val">Some</span>(<span class="string">&quot;Activity&quot;</span>.into()))
-                .summary(<span class="prelude-val">Some</span>(<span class="string">&quot;Sally did something to a note&quot;</span>.into()))
-            )
-            .with_object(|builder|
-                builder.object_type(<span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>.into()))
-                .name(<span class="prelude-val">Some</span>(<span class="string">&quot;A Note&quot;</span>.into()))
-            )
-            .with_actor(|actor|
-                actor.with_base(|builder|
-                    builder.object_type(<span class="prelude-val">Some</span>(<span class="string">&quot;Person&quot;</span>.into()))
-                    .name(<span class="prelude-val">Some</span>(<span class="string">&quot;Sally&quot;</span>.into()))
-                )
-            )
-            .build().unwrap();
+            .with_base(|builder| {
+                builder
+                    .object_type(<span class="prelude-val">Some</span>(<span class="string">&quot;Activity&quot;</span>.into()))
+                    .summary(<span class="prelude-val">Some</span>(<span class="string">&quot;Sally did something to a note&quot;</span>.into()))
+            })
+            .with_object(|builder| {
+                builder
+                    .object_type(<span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>.into()))
+                    .name(<span class="prelude-val">Some</span>(<span class="string">&quot;A Note&quot;</span>.into()))
+            })
+            .with_actor(|actor| {
+                actor.with_base(|builder| {
+                    builder
+                        .object_type(<span class="prelude-val">Some</span>(<span class="string">&quot;Person&quot;</span>.into()))
+                        .name(<span class="prelude-val">Some</span>(<span class="string">&quot;Sally&quot;</span>.into()))
+                })
+            })
+            .build()
+            .unwrap();
         <span class="kw">let </span>actual = Document::new(ContextBuilder::default().build().unwrap(), activity);
-        <span class="kw">let </span>expected = String::from(
-            <span class="string">r#&quot;{
-  &quot;@context&quot;: {
-    &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;
-  },
-  &quot;type&quot;: &quot;Activity&quot;,
-  &quot;summary&quot;: &quot;Sally did something to a note&quot;,
-  &quot;actor&quot;: {
-    &quot;type&quot;: &quot;Person&quot;,
-    &quot;name&quot;: &quot;Sally&quot;
-  },
-  &quot;object&quot;: {
-    &quot;type&quot;: &quot;Note&quot;,
-    &quot;name&quot;: &quot;A Note&quot;
-  }
-}&quot;#</span>,
-        );
-        <span class="macro">assert!</span>(actual.serialize_pretty().is_ok());
-        <span class="macro">assert_eq!</span>(actual.serialize_pretty().unwrap(), expected);
+        <span class="kw">let </span>expected = <span class="macro">json!</span>({
+          <span class="string">&quot;@context&quot;</span>: {
+            <span class="string">&quot;@vocab&quot;</span>: <span class="string">&quot;https://www.w3.org/ns/activitystreams&quot;
+          </span>},
+          <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Activity&quot;</span>,
+          <span class="string">&quot;summary&quot;</span>: <span class="string">&quot;Sally did something to a note&quot;</span>,
+          <span class="string">&quot;actor&quot;</span>: {
+            <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Person&quot;</span>,
+            <span class="string">&quot;name&quot;</span>: <span class="string">&quot;Sally&quot;
+          </span>},
+          <span class="string">&quot;object&quot;</span>: {
+            <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Note&quot;</span>,
+            <span class="string">&quot;name&quot;</span>: <span class="string">&quot;A Note&quot;
+          </span>}
+        });
+        <span class="macro">assert_eq!</span>(serde_json::to_value(actual).unwrap(), expected);
     }
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>deserialize_activity() {
-        <span class="kw">let </span>actual = String::from(
-            <span class="string">r#&quot;{
-  &quot;@context&quot;: {
-    &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;
-  },
-  &quot;type&quot;: &quot;Activity&quot;,
-  &quot;summary&quot;: &quot;Sally did something to a note&quot;,
-  &quot;actor&quot;: {
-    &quot;type&quot;: &quot;Person&quot;,
-    &quot;name&quot;: &quot;Sally&quot;
-  },
-  &quot;object&quot;: {
-    &quot;type&quot;: &quot;Note&quot;,
-    &quot;name&quot;: &quot;A Note&quot;
-  }
-}&quot;#</span>,
-        );
+        <span class="kw">let </span>actual = <span class="macro">json!</span>({
+          <span class="string">&quot;@context&quot;</span>: {
+            <span class="string">&quot;@vocab&quot;</span>: <span class="string">&quot;https://www.w3.org/ns/activitystreams&quot;
+          </span>},
+          <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Activity&quot;</span>,
+          <span class="string">&quot;summary&quot;</span>: <span class="string">&quot;Sally did something to a note&quot;</span>,
+          <span class="string">&quot;actor&quot;</span>: {
+            <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Person&quot;</span>,
+            <span class="string">&quot;name&quot;</span>: <span class="string">&quot;Sally&quot;
+          </span>},
+          <span class="string">&quot;object&quot;</span>: {
+            <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Note&quot;</span>,
+            <span class="string">&quot;name&quot;</span>: <span class="string">&quot;A Note&quot;
+          </span>}
+        })
+        .to_string();
         <span class="kw">let </span>document: Document&lt;Activity&gt; = Document::deserialize_string(actual).unwrap();
         <span class="kw">let </span>activity = document.object <span class="kw">as </span>Activity;
         <span class="macro">assert_eq!</span>(activity.base.object_type, <span class="prelude-val">Some</span>(<span class="string">&quot;Activity&quot;</span>.into()));

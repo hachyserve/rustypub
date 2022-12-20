@@ -136,22 +136,27 @@
 <span id="136">136</span>
 <span id="137">137</span>
 <span id="138">138</span>
-</pre><pre class="rust"><code><span class="kw">pub mod </span>object;
-<span class="kw">pub mod </span>activity;
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+</pre><pre class="rust"><code><span class="kw">pub mod </span>activity;
 <span class="kw">pub mod </span>actor;
 <span class="kw">pub mod </span>collection;
+<span class="kw">pub mod </span>object;
 
 <span class="kw">pub use </span>object::<span class="kw-2">*</span>;
 
-<span class="kw">use </span>serde::{de::DeserializeOwned, Deserializer, Deserialize, Serialize};
 <span class="kw">use </span>derive_builder::Builder;
+<span class="kw">use </span>serde::{de::DeserializeOwned, Deserialize, Deserializer, Serialize};
 
 <span class="comment">// TODO: rename to something else as there&#39;s a [Document] in the Activity
 // Streams spec.
 </span><span class="doccomment">/// Outer object for serialization and deserialization. Not an Activity Streams
 /// 2.0 object.
 </span><span class="attribute">#[derive(Serialize, Deserialize, Debug, Clone, Builder)]
-</span><span class="kw">pub struct </span>Document&lt;T&gt; <span class="kw">where </span>{
+</span><span class="kw">pub struct </span>Document&lt;T&gt; {
     <span class="attribute">#[serde(rename = <span class="string">&quot;@context&quot;</span>, deserialize_with = <span class="string">&quot;context_deserializer&quot;</span>)]
     </span><span class="kw">pub </span>context: Context,
 
@@ -159,12 +164,12 @@
     </span><span class="kw">pub </span>object: T,
 }
 
-<span class="kw">impl</span>&lt;T : DeserializeOwned + Serialize &gt; Document&lt;T&gt; {
+<span class="kw">impl</span>&lt;T: DeserializeOwned + Serialize&gt; Document&lt;T&gt; {
     <span class="kw">pub fn </span>new(context: Context, object: T) -&gt; <span class="self">Self </span>{
         Document { context, object }
     }
 
-    <span class="kw">pub fn </span>serialize_pretty(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; serde_json::Result&lt;String&gt;  {
+    <span class="kw">pub fn </span>serialize_pretty(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; serde_json::Result&lt;String&gt; {
         <span class="kw">let </span>serialized = serde_json::to_string_pretty(<span class="kw-2">&amp;</span><span class="self">self</span>);
         <span class="macro">println!</span>(<span class="string">&quot;serialized = {:?}&quot;</span>, serialized);
         serialized
@@ -178,7 +183,7 @@
 }
 
 <span class="comment">///////////////////////////
-// Context 
+// Context
 ///////////////////////////
 </span><span class="doccomment">/// JSON-LD uses the special @context property to define the processing context.
 /// The value of the @context property is defined by the [JSON-LD]
@@ -190,7 +195,7 @@
 /// done using a string, object, or array.
 /// &lt;https://www.w3.org/TR/activitystreams-core/#jsonld&gt;
 
-</span><span class="kw">const </span>NAMESPACE: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str = <span class="string">&quot;https://www.w3.org/ns/activitystreams&quot;</span>;
+</span><span class="kw">const </span>NAMESPACE: <span class="kw-2">&amp;</span>str = <span class="string">&quot;https://www.w3.org/ns/activitystreams&quot;</span>;
 
 <span class="attribute">#[derive(Serialize, Deserialize, Debug, Clone, Builder)]
 #[builder(default)]
@@ -244,35 +249,40 @@
 
 <span class="attribute">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
+    <span class="kw">use </span>serde_json::json;
+
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>serialize_context() {
         <span class="kw">let </span>ctx: Context = ContextBuilder::default()
             .language(<span class="prelude-val">Some</span>(<span class="string">&quot;en&quot;</span>.into()))
-            .build().unwrap();
+            .build()
+            .unwrap();
 
-        <span class="kw">let </span>expected = <span class="string">r#&quot;{
-  &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;,
-  &quot;@language&quot;: &quot;en&quot;
-}&quot;#</span>;
-        <span class="kw">let </span>serialize_pretty = serde_json::to_string_pretty(<span class="kw-2">&amp;</span>ctx);
-        <span class="macro">assert!</span>(serialize_pretty.is_ok());
-        <span class="macro">assert_eq!</span>(serialize_pretty.ok().unwrap(), expected)
+        <span class="kw">let </span>expected = <span class="macro">json!</span>({
+          <span class="string">&quot;@vocab&quot;</span>: <span class="string">&quot;https://www.w3.org/ns/activitystreams&quot;</span>,
+          <span class="string">&quot;@language&quot;</span>: <span class="string">&quot;en&quot;
+        </span>});
+        <span class="kw">let </span>value = serde_json::to_value(<span class="kw-2">&amp;</span>ctx);
+        <span class="macro">assert_eq!</span>(value.unwrap(), expected)
     }
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>deserialize_context() {
-        <span class="kw">let </span>actual = String::from(<span class="string">r#&quot;{
-    &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;,
-    &quot;@language&quot;: &quot;en&quot;
-}&quot;#</span>,
-        );
+        <span class="kw">let </span>actual = <span class="macro">json!</span>(
+                    {
+            <span class="string">&quot;@vocab&quot;</span>: <span class="string">&quot;https://www.w3.org/ns/activitystreams&quot;</span>,
+            <span class="string">&quot;@language&quot;</span>: <span class="string">&quot;en&quot;
+        </span>})
+        .to_string();
         <span class="kw">let </span>ctx: Context = serde_json::from_str(<span class="kw-2">&amp;</span>actual).unwrap();
         <span class="macro">assert_eq!</span>(ctx.language, <span class="prelude-val">Some</span>(<span class="string">&quot;en&quot;</span>.into()));
-        <span class="macro">assert_eq!</span>(ctx.namespace, <span class="string">&quot;https://www.w3.org/ns/activitystreams&quot;</span>.to_string());
-}
-
+        <span class="macro">assert_eq!</span>(
+            ctx.namespace,
+            <span class="string">&quot;https://www.w3.org/ns/activitystreams&quot;</span>.to_string()
+        );
+    }
 }
 </code></pre></div>
 </section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="rustypub" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

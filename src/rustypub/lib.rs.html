@@ -535,64 +535,81 @@
 <span id="535">535</span>
 <span id="536">536</span>
 <span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
 </pre><pre class="rust"><code><span class="kw">pub mod </span>core;
 
-<span class="kw">extern crate </span>serde;
 <span class="kw">extern crate </span>derive_builder;
-
+<span class="kw">extern crate </span>serde;
 
 <span class="attribute">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span>chrono::{DateTime, NaiveDate, Utc};
-    <span class="kw">use </span>pretty_assertions::assert_eq;
     <span class="kw">use </span>http::Uri;
+    <span class="kw">use </span>pretty_assertions::assert_eq;
+    <span class="kw">use </span>serde_json::json;
 
     <span class="kw">use </span><span class="kw">crate</span>::core::{
-        Document,
-        ContextBuilder,
-        collection::{ Collection, OrderedCollection, CollectionPage, OrderedCollectionPage },
-        activity::{ Activity, ActivityBuilder },
-        object::{ Object, ObjectBuilder, AttributedTo },
-        Link,
+        activity::{Activity, ActivityBuilder},
+        collection::{Collection, CollectionPage, OrderedCollection, OrderedCollectionPage},
+        object::{AttributedTo, Object, ObjectBuilder},
+        ContextBuilder, Document, Link,
     };
 
     <span class="comment">// A set of tests from https://www.w3.org/TR/activitystreams-vocabulary examples
     </span><span class="attribute">#[test]
     </span><span class="kw">fn </span>example_1() {
-        <span class="kw">let </span>listing = <span class="string">r#&quot;{
-          &quot;@context&quot;: { &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot; },
-          &quot;type&quot;: &quot;Object&quot;,
-          &quot;id&quot;: &quot;http://www.test.example/object/1&quot;,
-          &quot;name&quot;: &quot;A Simple, non-specific object&quot;
-        }&quot;#</span>;
-        <span class="kw">let </span>object: Object = Document::deserialize_string(listing.into()).unwrap().object;
+        <span class="kw">let </span>listing = <span class="macro">json!</span>({
+          <span class="string">&quot;@context&quot;</span>: { <span class="string">&quot;@vocab&quot;</span>: <span class="string">&quot;https://www.w3.org/ns/activitystreams&quot; </span>},
+          <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Object&quot;</span>,
+          <span class="string">&quot;id&quot;</span>: <span class="string">&quot;http://www.test.example/object/1&quot;</span>,
+          <span class="string">&quot;name&quot;</span>: <span class="string">&quot;A Simple, non-specific object&quot;
+        </span>})
+        .to_string();
+        <span class="kw">let </span>object: Object = Document::deserialize_string(listing).unwrap().object;
         <span class="macro">assert_eq!</span>(object.object_type, <span class="prelude-val">Some</span>(<span class="string">&quot;Object&quot;</span>.into()));
         <span class="macro">assert_eq!</span>(
             object.id,
             <span class="prelude-val">Some</span>(<span class="string">&quot;http://www.test.example/object/1&quot;</span>.parse::&lt;Uri&gt;().unwrap())
         );
-        <span class="macro">assert_eq!</span>(
-            object.name,
-            <span class="prelude-val">Some</span>(<span class="string">&quot;A Simple, non-specific object&quot;</span>.into())
-        );
+        <span class="macro">assert_eq!</span>(object.name, <span class="prelude-val">Some</span>(<span class="string">&quot;A Simple, non-specific object&quot;</span>.into()));
     }
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>example_2() {
-        <span class="kw">let </span>listing = <span class="string">r#&quot;
-      {
-        &quot;@context&quot;: {&quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;},
-        &quot;type&quot;: &quot;Link&quot;,
-        &quot;href&quot;: &quot;http://example.org/abc&quot;,
-        &quot;hreflang&quot;: &quot;en&quot;,
-        &quot;mediaType&quot;: &quot;text/html&quot;,
-        &quot;name&quot;: &quot;An example link&quot;
-      }
-      &quot;#</span>;
+        <span class="kw">let </span>listing = <span class="macro">json!</span>({
+          <span class="string">&quot;@context&quot;</span>: {<span class="string">&quot;@vocab&quot;</span>: <span class="string">&quot;https://www.w3.org/ns/activitystreams&quot;</span>},
+          <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Link&quot;</span>,
+          <span class="string">&quot;href&quot;</span>: <span class="string">&quot;http://example.org/abc&quot;</span>,
+          <span class="string">&quot;hreflang&quot;</span>: <span class="string">&quot;en&quot;</span>,
+          <span class="string">&quot;mediaType&quot;</span>: <span class="string">&quot;text/html&quot;</span>,
+          <span class="string">&quot;name&quot;</span>: <span class="string">&quot;An example link&quot;
+        </span>})
+        .to_string();
 
-        <span class="kw">let </span>link: Link = Document::deserialize_string(listing.into()).unwrap().object;
+        <span class="kw">let </span>link: Link = Document::deserialize_string(listing).unwrap().object;
         <span class="macro">assert_eq!</span>(link.link_type, <span class="prelude-val">Some</span>(<span class="string">&quot;Link&quot;</span>.into()));
-        <span class="macro">assert_eq!</span>(link.href, <span class="string">&quot;http://example.org/abc&quot;</span>.parse::&lt;http::Uri&gt;().unwrap());
+        <span class="macro">assert_eq!</span>(
+            link.href,
+            <span class="string">&quot;http://example.org/abc&quot;</span>.parse::&lt;http::Uri&gt;().unwrap()
+        );
         <span class="macro">assert_eq!</span>(link.hreflang, <span class="prelude-val">Some</span>(<span class="string">&quot;en&quot;</span>.into()));
         <span class="macro">assert_eq!</span>(link.media_type, <span class="prelude-val">Some</span>(<span class="string">&quot;text/html&quot;</span>.into()));
         <span class="macro">assert_eq!</span>(link.name, <span class="prelude-val">Some</span>(<span class="string">&quot;An example link&quot;</span>.into()));
@@ -600,25 +617,27 @@
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>example_3() {
-        <span class="kw">let </span>listing = <span class="string">r#&quot;
-      {
-        &quot;@context&quot;: { &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot; },
-        &quot;type&quot;: &quot;Activity&quot;,
-        &quot;summary&quot;: &quot;Sally did something to a note&quot;,
-        &quot;actor&quot;: {
-          &quot;type&quot;: &quot;Person&quot;,
-          &quot;name&quot;: &quot;Sally&quot;
-        },
-        &quot;object&quot;: {
-          &quot;type&quot;: &quot;Note&quot;,
-          &quot;name&quot;: &quot;A Note&quot;
-        }
-      } 
-      &quot;#</span>;
+        <span class="kw">let </span>listing = <span class="macro">json!</span>({
+          <span class="string">&quot;@context&quot;</span>: { <span class="string">&quot;@vocab&quot;</span>: <span class="string">&quot;https://www.w3.org/ns/activitystreams&quot; </span>},
+          <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Activity&quot;</span>,
+          <span class="string">&quot;summary&quot;</span>: <span class="string">&quot;Sally did something to a note&quot;</span>,
+          <span class="string">&quot;actor&quot;</span>: {
+            <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Person&quot;</span>,
+            <span class="string">&quot;name&quot;</span>: <span class="string">&quot;Sally&quot;
+          </span>},
+          <span class="string">&quot;object&quot;</span>: {
+            <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Note&quot;</span>,
+            <span class="string">&quot;name&quot;</span>: <span class="string">&quot;A Note&quot;
+          </span>}
+        })
+        .to_string();
 
-        <span class="kw">let </span>activity: Activity = Document::deserialize_string(listing.into()).unwrap().object;
+        <span class="kw">let </span>activity: Activity = Document::deserialize_string(listing).unwrap().object;
         <span class="macro">assert_eq!</span>(activity.base.object_type, <span class="prelude-val">Some</span>(<span class="string">&quot;Activity&quot;</span>.into()));
-        <span class="macro">assert_eq!</span>( activity.base.summary, <span class="prelude-val">Some</span>(<span class="string">&quot;Sally did something to a note&quot;</span>.into()));
+        <span class="macro">assert_eq!</span>(
+            activity.base.summary,
+            <span class="prelude-val">Some</span>(<span class="string">&quot;Sally did something to a note&quot;</span>.into())
+        );
 
         <span class="macro">assert!</span>(activity.actor.is_some());
         <span class="kw">let </span>actor = activity.actor.unwrap();
@@ -633,23 +652,22 @@
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>example_4() {
-        <span class="kw">let </span>listing = <span class="string">r#&quot;
-      {
-        &quot;@context&quot;: { &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot; },
-        &quot;type&quot;: &quot;Travel&quot;,
-        &quot;summary&quot;: &quot;Sally went to work&quot;,
-        &quot;actor&quot;: {
-          &quot;type&quot;: &quot;Person&quot;,
-          &quot;name&quot;: &quot;Sally&quot;
-        },
-        &quot;target&quot;: {
-          &quot;type&quot;: &quot;Place&quot;,
-          &quot;name&quot;: &quot;Work&quot;
-        }
-      }
-      &quot;#</span>;
+        <span class="kw">let </span>listing = <span class="macro">json!</span>({
+          <span class="string">&quot;@context&quot;</span>: { <span class="string">&quot;@vocab&quot;</span>: <span class="string">&quot;https://www.w3.org/ns/activitystreams&quot; </span>},
+          <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Travel&quot;</span>,
+          <span class="string">&quot;summary&quot;</span>: <span class="string">&quot;Sally went to work&quot;</span>,
+          <span class="string">&quot;actor&quot;</span>: {
+            <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Person&quot;</span>,
+            <span class="string">&quot;name&quot;</span>: <span class="string">&quot;Sally&quot;
+          </span>},
+          <span class="string">&quot;target&quot;</span>: {
+            <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Place&quot;</span>,
+            <span class="string">&quot;name&quot;</span>: <span class="string">&quot;Work&quot;
+          </span>}
+        })
+        .to_string();
 
-        <span class="kw">let </span>activity: Activity = Document::deserialize_string(listing.into()).unwrap().object;
+        <span class="kw">let </span>activity: Activity = Document::deserialize_string(listing).unwrap().object;
         <span class="macro">assert_eq!</span>(activity.base.object_type, <span class="prelude-val">Some</span>(<span class="string">&quot;Travel&quot;</span>.into()));
         <span class="macro">assert_eq!</span>(activity.base.summary, <span class="prelude-val">Some</span>(<span class="string">&quot;Sally went to work&quot;</span>.into()));
         <span class="macro">assert!</span>(activity.object.is_none());
@@ -667,26 +685,25 @@
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>example_5() {
-        <span class="kw">let </span>listing = <span class="string">r#&quot;
-        {
-          &quot;@context&quot;: { &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot; },
-          &quot;summary&quot;: &quot;Sally&#39;s notes&quot;,
-          &quot;type&quot;: &quot;Collection&quot;,
-          &quot;totalItems&quot;: 2,
-          &quot;items&quot;: [
+        <span class="kw">let </span>listing = <span class="macro">json!</span>({
+          <span class="string">&quot;@context&quot;</span>: { <span class="string">&quot;@vocab&quot;</span>: <span class="string">&quot;https://www.w3.org/ns/activitystreams&quot; </span>},
+          <span class="string">&quot;summary&quot;</span>: <span class="string">&quot;Sally&#39;s notes&quot;</span>,
+          <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Collection&quot;</span>,
+          <span class="string">&quot;totalItems&quot;</span>: <span class="number">2</span>,
+          <span class="string">&quot;items&quot;</span>: [
             {
-              &quot;type&quot;: &quot;Note&quot;,
-              &quot;name&quot;: &quot;A Simple Note&quot;
-            },
+              <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Note&quot;</span>,
+              <span class="string">&quot;name&quot;</span>: <span class="string">&quot;A Simple Note&quot;
+            </span>},
             {
-              &quot;type&quot;: &quot;Note&quot;,
-              &quot;name&quot;: &quot;Another Simple Note&quot;
-            }
+              <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Note&quot;</span>,
+              <span class="string">&quot;name&quot;</span>: <span class="string">&quot;Another Simple Note&quot;
+            </span>}
           ]
-        }
-      &quot;#</span>;
+        })
+        .to_string();
 
-        <span class="kw">let </span>collection: Collection&lt;Object&gt; = Document::deserialize_string(listing.into()).unwrap().object;
+        <span class="kw">let </span>collection: Collection&lt;Object&gt; = Document::deserialize_string(listing).unwrap().object;
         <span class="macro">assert_eq!</span>(collection.base.object_type, <span class="prelude-val">Some</span>(<span class="string">&quot;Collection&quot;</span>.into()));
         <span class="macro">assert_eq!</span>(collection.base.summary, <span class="prelude-val">Some</span>(<span class="string">&quot;Sally&#39;s notes&quot;</span>.into()));
         <span class="macro">assert_eq!</span>(collection.total_items, <span class="prelude-val">Some</span>(<span class="number">2</span>));
@@ -701,25 +718,26 @@
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>example_6() {
-        <span class="kw">let </span>listing = <span class="string">r#&quot;
-      {
-        &quot;@context&quot;: { &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot; },
-        &quot;summary&quot;: &quot;Sally&#39;s notes&quot;,
-        &quot;type&quot;: &quot;OrderedCollection&quot;,
-        &quot;totalItems&quot;: 2,
-        &quot;orderedItems&quot;: [
-          {
-            &quot;type&quot;: &quot;Note&quot;,
-            &quot;name&quot;: &quot;A Simple Note&quot;
-          },
-          {
-            &quot;type&quot;: &quot;Note&quot;,
-            &quot;name&quot;: &quot;Another Simple Note&quot;
-          }
-        ]
-      }
-      &quot;#</span>;
-        <span class="kw">let </span>collection: OrderedCollection&lt;Object&gt; = Document::deserialize_string(listing.into()).unwrap().object;
+        <span class="kw">let </span>listing = <span class="macro">json!</span>({
+          <span class="string">&quot;@context&quot;</span>: { <span class="string">&quot;@vocab&quot;</span>: <span class="string">&quot;https://www.w3.org/ns/activitystreams&quot; </span>},
+          <span class="string">&quot;summary&quot;</span>: <span class="string">&quot;Sally&#39;s notes&quot;</span>,
+          <span class="string">&quot;type&quot;</span>: <span class="string">&quot;OrderedCollection&quot;</span>,
+          <span class="string">&quot;totalItems&quot;</span>: <span class="number">2</span>,
+          <span class="string">&quot;orderedItems&quot;</span>: [
+            {
+              <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Note&quot;</span>,
+              <span class="string">&quot;name&quot;</span>: <span class="string">&quot;A Simple Note&quot;
+            </span>},
+            {
+              <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Note&quot;</span>,
+              <span class="string">&quot;name&quot;</span>: <span class="string">&quot;Another Simple Note&quot;
+            </span>}
+          ]
+        })
+        .to_string();
+
+        <span class="kw">let </span>collection: OrderedCollection&lt;Object&gt; =
+            Document::deserialize_string(listing).unwrap().object;
         <span class="macro">assert_eq!</span>(
             collection.base.object_type,
             <span class="prelude-val">Some</span>(<span class="string">&quot;OrderedCollection&quot;</span>.into())
@@ -737,27 +755,27 @@
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>example_7() {
-        <span class="kw">let </span>listing = <span class="string">r#&quot;
-      {
-        &quot;@context&quot;: { &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot; },
-        &quot;summary&quot;: &quot;Page 1 of Sally&#39;s notes&quot;,
-        &quot;type&quot;: &quot;CollectionPage&quot;,
-        &quot;id&quot;: &quot;http://example.org/foo?page=1&quot;,
-        &quot;partOf&quot;: &quot;http://example.org/foo&quot;,
-        &quot;items&quot;: [
-          {
-            &quot;type&quot;: &quot;Note&quot;,
-            &quot;name&quot;: &quot;A Simple Note&quot;
-          },
-          {
-            &quot;type&quot;: &quot;Note&quot;,
-            &quot;name&quot;: &quot;Another Simple Note&quot;
-          }
-        ]
-      }
-      &quot;#</span>;
+        <span class="kw">let </span>listing = <span class="macro">json!</span>({
+          <span class="string">&quot;@context&quot;</span>: { <span class="string">&quot;@vocab&quot;</span>: <span class="string">&quot;https://www.w3.org/ns/activitystreams&quot; </span>},
+          <span class="string">&quot;summary&quot;</span>: <span class="string">&quot;Page 1 of Sally&#39;s notes&quot;</span>,
+          <span class="string">&quot;type&quot;</span>: <span class="string">&quot;CollectionPage&quot;</span>,
+          <span class="string">&quot;id&quot;</span>: <span class="string">&quot;http://example.org/foo?page=1&quot;</span>,
+          <span class="string">&quot;partOf&quot;</span>: <span class="string">&quot;http://example.org/foo&quot;</span>,
+          <span class="string">&quot;items&quot;</span>: [
+            {
+              <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Note&quot;</span>,
+              <span class="string">&quot;name&quot;</span>: <span class="string">&quot;A Simple Note&quot;
+            </span>},
+            {
+              <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Note&quot;</span>,
+              <span class="string">&quot;name&quot;</span>: <span class="string">&quot;Another Simple Note&quot;
+            </span>}
+          ]
+        })
+        .to_string();
+
         <span class="kw">let </span>collection_page: CollectionPage&lt;Object&gt; =
-            Document::deserialize_string(listing.into()).unwrap().object;
+            Document::deserialize_string(listing).unwrap().object;
         <span class="macro">assert_eq!</span>(
             collection_page.base.base.object_type,
             <span class="prelude-val">Some</span>(<span class="string">&quot;CollectionPage&quot;</span>.into())
@@ -785,27 +803,27 @@
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>example_8() {
-        <span class="kw">let </span>listing = <span class="string">r#&quot;
-{
-  &quot;@context&quot;: {&quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;},
-  &quot;summary&quot;: &quot;Page 1 of Sally&#39;s notes&quot;,
-  &quot;type&quot;: &quot;OrderedCollectionPage&quot;,
-  &quot;id&quot;: &quot;http://example.org/foo?page=1&quot;,
-  &quot;partOf&quot;: &quot;http://example.org/foo&quot;,
-  &quot;orderedItems&quot;: [
-    {
-      &quot;type&quot;: &quot;Note&quot;,
-      &quot;name&quot;: &quot;A Simple Note&quot;
-    },
-    {
-      &quot;type&quot;: &quot;Note&quot;,
-      &quot;name&quot;: &quot;Another Simple Note&quot;
-    }
-  ]
-}
-&quot;#</span>;
+        <span class="kw">let </span>listing = <span class="macro">json!</span>({
+          <span class="string">&quot;@context&quot;</span>: {<span class="string">&quot;@vocab&quot;</span>: <span class="string">&quot;https://www.w3.org/ns/activitystreams&quot;</span>},
+          <span class="string">&quot;summary&quot;</span>: <span class="string">&quot;Page 1 of Sally&#39;s notes&quot;</span>,
+          <span class="string">&quot;type&quot;</span>: <span class="string">&quot;OrderedCollectionPage&quot;</span>,
+          <span class="string">&quot;id&quot;</span>: <span class="string">&quot;http://example.org/foo?page=1&quot;</span>,
+          <span class="string">&quot;partOf&quot;</span>: <span class="string">&quot;http://example.org/foo&quot;</span>,
+          <span class="string">&quot;orderedItems&quot;</span>: [
+            {
+              <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Note&quot;</span>,
+              <span class="string">&quot;name&quot;</span>: <span class="string">&quot;A Simple Note&quot;
+            </span>},
+            {
+              <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Note&quot;</span>,
+              <span class="string">&quot;name&quot;</span>: <span class="string">&quot;Another Simple Note&quot;
+            </span>}
+          ]
+        })
+        .to_string();
+
         <span class="kw">let </span>collection_page: OrderedCollectionPage&lt;Object&gt; =
-            Document::deserialize_string(listing.into()).unwrap().object;
+            Document::deserialize_string(listing).unwrap().object;
         <span class="macro">assert_eq!</span>(
             collection_page.base.base.object_type,
             <span class="prelude-val">Some</span>(<span class="string">&quot;OrderedCollectionPage&quot;</span>.into())
@@ -833,13 +851,15 @@
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>example_53() {
-        <span class="kw">let </span>listing = <span class="string">r#&quot;{
-          &quot;@context&quot;: { &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot; },
-          &quot;type&quot;: &quot;Note&quot;,
-          &quot;name&quot;: &quot;A Word of Warning&quot;,
-          &quot;content&quot;: &quot;Looks like it is going to rain today. Bring an umbrella!&quot;
-        }&quot;#</span>;
-        <span class="kw">let </span>document: Document&lt;Object&gt; = Document::deserialize_string(listing.into()).unwrap();
+        <span class="kw">let </span>listing = <span class="macro">json!</span>({
+          <span class="string">&quot;@context&quot;</span>: { <span class="string">&quot;@vocab&quot;</span>: <span class="string">&quot;https://www.w3.org/ns/activitystreams&quot; </span>},
+          <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Note&quot;</span>,
+          <span class="string">&quot;name&quot;</span>: <span class="string">&quot;A Word of Warning&quot;</span>,
+          <span class="string">&quot;content&quot;</span>: <span class="string">&quot;Looks like it is going to rain today. Bring an umbrella!&quot;
+        </span>})
+        .to_string();
+
+        <span class="kw">let </span>document: Document&lt;Object&gt; = Document::deserialize_string(listing).unwrap();
         <span class="kw">let </span>note = document.object;
         <span class="macro">assert_eq!</span>(note.object_type, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>.into()));
         <span class="macro">assert_eq!</span>(note.name, <span class="prelude-val">Some</span>(<span class="string">&quot;A Word of Warning&quot;</span>.into()));
@@ -853,19 +873,21 @@
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>example_69() {
-        <span class="kw">let </span>listing = <span class="string">r#&quot;{
-  &quot;@context&quot;: {
-    &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;
-  },
-  &quot;name&quot;: &quot;Holiday announcement&quot;,
-  &quot;type&quot;: &quot;Note&quot;,
-  &quot;content&quot;: &quot;Thursday will be a company-wide holiday. Enjoy your day off!&quot;,
-  &quot;audience&quot;: {
-    &quot;type&quot;: &quot;http://example.org/Organization&quot;,
-    &quot;name&quot;: &quot;ExampleCo LLC&quot;
-  }
-}&quot;#</span>;
-        <span class="kw">let </span>document: Document&lt;Object&gt; = Document::deserialize_string(listing.into()).unwrap();
+        <span class="kw">let </span>listing = <span class="macro">json!</span>({
+          <span class="string">&quot;@context&quot;</span>: {
+            <span class="string">&quot;@vocab&quot;</span>: <span class="string">&quot;https://www.w3.org/ns/activitystreams&quot;
+          </span>},
+          <span class="string">&quot;name&quot;</span>: <span class="string">&quot;Holiday announcement&quot;</span>,
+          <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Note&quot;</span>,
+          <span class="string">&quot;content&quot;</span>: <span class="string">&quot;Thursday will be a company-wide holiday. Enjoy your day off!&quot;</span>,
+          <span class="string">&quot;audience&quot;</span>: {
+            <span class="string">&quot;type&quot;</span>: <span class="string">&quot;http://example.org/Organization&quot;</span>,
+            <span class="string">&quot;name&quot;</span>: <span class="string">&quot;ExampleCo LLC&quot;
+          </span>}
+        })
+        .to_string();
+
+        <span class="kw">let </span>document: Document&lt;Object&gt; = Document::deserialize_string(listing).unwrap();
         <span class="kw">let </span>object = document.object;
         <span class="macro">assert_eq!</span>(object.name, <span class="prelude-val">Some</span>(<span class="string">&quot;Holiday announcement&quot;</span>.into()));
         <span class="macro">assert_eq!</span>(object.object_type, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>.into()));
@@ -886,15 +908,17 @@
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>example_114() {
-        <span class="kw">let </span>listing = <span class="string">r#&quot;{
-  &quot;@context&quot;: {
-    &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;
-  },
-  &quot;summary&quot;: &quot;A simple note&quot;,
-  &quot;type&quot;: &quot;Note&quot;,
-  &quot;content&quot;: &quot;A &lt;em&gt;simple&lt;/em&gt; note&quot;
-}&quot;#</span>;
-        <span class="kw">let </span>document: Document&lt;Object&gt; = Document::deserialize_string(listing.into()).unwrap();
+        <span class="kw">let </span>listing = <span class="macro">json!</span>({
+          <span class="string">&quot;@context&quot;</span>: {
+            <span class="string">&quot;@vocab&quot;</span>: <span class="string">&quot;https://www.w3.org/ns/activitystreams&quot;
+          </span>},
+          <span class="string">&quot;summary&quot;</span>: <span class="string">&quot;A simple note&quot;</span>,
+          <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Note&quot;</span>,
+          <span class="string">&quot;content&quot;</span>: <span class="string">&quot;A &lt;em&gt;simple&lt;/em&gt; note&quot;
+        </span>})
+        .to_string();
+
+        <span class="kw">let </span>document: Document&lt;Object&gt; = Document::deserialize_string(listing).unwrap();
         <span class="kw">let </span>object = document.object;
         <span class="macro">assert_eq!</span>(object.summary, <span class="prelude-val">Some</span>(<span class="string">&quot;A simple note&quot;</span>.into()));
         <span class="macro">assert_eq!</span>(object.object_type, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>.into()));
@@ -903,15 +927,17 @@
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>example_133() {
-        <span class="kw">let </span>listing = <span class="string">r#&quot;{
-        &quot;@context&quot;: {
-          &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;
-        },
-        &quot;name&quot;: &quot;Cane Sugar Processing&quot;,
-        &quot;type&quot;: &quot;Note&quot;,
-        &quot;summary&quot;: &quot;A simple &lt;em&gt;note&lt;/em&gt;&quot;
-      }&quot;#</span>;
-        <span class="kw">let </span>document: Document&lt;Object&gt; = Document::deserialize_string(listing.into()).unwrap();
+        <span class="kw">let </span>listing = <span class="macro">json!</span>({
+          <span class="string">&quot;@context&quot;</span>: {
+            <span class="string">&quot;@vocab&quot;</span>: <span class="string">&quot;https://www.w3.org/ns/activitystreams&quot;
+          </span>},
+          <span class="string">&quot;name&quot;</span>: <span class="string">&quot;Cane Sugar Processing&quot;</span>,
+          <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Note&quot;</span>,
+          <span class="string">&quot;summary&quot;</span>: <span class="string">&quot;A simple &lt;em&gt;note&lt;/em&gt;&quot;
+        </span>})
+        .to_string();
+
+        <span class="kw">let </span>document: Document&lt;Object&gt; = Document::deserialize_string(listing).unwrap();
         <span class="kw">let </span>object = document.object;
         <span class="macro">assert_eq!</span>(object.summary, <span class="prelude-val">Some</span>(<span class="string">&quot;A simple &lt;em&gt;note&lt;/em&gt;&quot;</span>.into()));
         <span class="macro">assert_eq!</span>(object.object_type, <span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>.into()));
@@ -922,113 +948,121 @@
     </span><span class="attribute">#[test]
     </span><span class="kw">fn </span>minimal_activity_3_1() {
         <span class="kw">let </span>activity = ActivityBuilder::default()
-            .with_base(|builder|
-                  builder.object_type(<span class="prelude-val">Some</span>(<span class="string">&quot;Create&quot;</span>.into()))
-                  .summary(<span class="prelude-val">Some</span>(<span class="string">&quot;Martin created an image&quot;</span>.into()))
-            )
-            .with_actor(|actor|
-                actor.with_base(|base_builder|
-                    base_builder.object_type(<span class="prelude-val">Some</span>(<span class="string">&quot;Person&quot;</span>.into()))
-                    .id(<span class="prelude-val">Some</span>(<span class="string">&quot;http://www.test.example/martin&quot;</span>.parse::&lt;Uri&gt;().unwrap()))
-                )
-            )
-            .with_object(|builder| builder.id(<span class="prelude-val">Some</span>(<span class="string">&quot;http://example.org/foo.jpg&quot;</span>.parse::&lt;Uri&gt;().unwrap())))
-            .build().unwrap();
-        <span class="kw">let </span>actual = Document::new(
-            ContextBuilder::new().build().unwrap(),
-            activity
-        );
-        <span class="kw">let </span>expected = <span class="string">r#&quot;{
-  &quot;@context&quot;: {
-    &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;
-  },
-  &quot;type&quot;: &quot;Create&quot;,
-  &quot;summary&quot;: &quot;Martin created an image&quot;,
-  &quot;actor&quot;: {
-    &quot;type&quot;: &quot;Person&quot;,
-    &quot;id&quot;: &quot;http://www.test.example/martin&quot;
-  },
-  &quot;object&quot;: {
-    &quot;id&quot;: &quot;http://example.org/foo.jpg&quot;
-  }
-}&quot;#</span>;
-        <span class="macro">assert!</span>(actual.serialize_pretty().is_ok());
-        <span class="macro">assert_eq!</span>(actual.serialize_pretty().unwrap(), expected);
+            .with_base(|builder| {
+                builder
+                    .object_type(<span class="prelude-val">Some</span>(<span class="string">&quot;Create&quot;</span>.into()))
+                    .summary(<span class="prelude-val">Some</span>(<span class="string">&quot;Martin created an image&quot;</span>.into()))
+            })
+            .with_actor(|actor| {
+                actor.with_base(|base_builder| {
+                    base_builder
+                        .object_type(<span class="prelude-val">Some</span>(<span class="string">&quot;Person&quot;</span>.into()))
+                        .id(<span class="prelude-val">Some</span>(<span class="string">&quot;http://www.test.example/martin&quot;</span>.parse().unwrap()))
+                })
+            })
+            .with_object(|builder| builder.id(<span class="prelude-val">Some</span>(<span class="string">&quot;http://example.org/foo.jpg&quot;</span>.parse().unwrap())))
+            .build()
+            .unwrap();
+        <span class="kw">let </span>actual = Document::new(ContextBuilder::new().build().unwrap(), activity);
+        <span class="kw">let </span>expected = <span class="macro">json!</span>({
+          <span class="string">&quot;@context&quot;</span>: {
+            <span class="string">&quot;@vocab&quot;</span>: <span class="string">&quot;https://www.w3.org/ns/activitystreams&quot;
+          </span>},
+          <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Create&quot;</span>,
+          <span class="string">&quot;summary&quot;</span>: <span class="string">&quot;Martin created an image&quot;</span>,
+          <span class="string">&quot;actor&quot;</span>: {
+            <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Person&quot;</span>,
+            <span class="string">&quot;id&quot;</span>: <span class="string">&quot;http://www.test.example/martin&quot;
+          </span>},
+          <span class="string">&quot;object&quot;</span>: {
+            <span class="string">&quot;id&quot;</span>: <span class="string">&quot;http://example.org/foo.jpg&quot;
+          </span>}
+        });
+        <span class="macro">assert_eq!</span>(serde_json::to_value(actual).unwrap(), expected);
     }
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>basic_activity_with_additional_detail_3_2() {
         <span class="kw">let </span>activity = ActivityBuilder::default()
-            .with_base(|b|
+            .with_base(|b| {
                 b.object_type(<span class="prelude-val">Some</span>(<span class="string">&quot;Add&quot;</span>.into()))
-                .summary(<span class="prelude-val">Some</span>(<span class="string">&quot;Martin added an article to his blog&quot;</span>.into()))
-                .published(<span class="prelude-val">Some</span>(DateTime::&lt;Utc&gt;::from_utc(
-                    NaiveDate::from_ymd(<span class="number">2015</span>, <span class="number">2</span>, <span class="number">10</span>).and_hms(<span class="number">15</span>, <span class="number">4</span>, <span class="number">55</span>),
-                    Utc,
-                )))
-            )
-            .with_actor(|actor|
-                actor.with_base(|base_builder|
-                    base_builder.object_type(<span class="prelude-val">Some</span>(<span class="string">&quot;Person&quot;</span>.into()))
-                    .id(<span class="prelude-val">Some</span>(<span class="string">&quot;http://www.test.example/martin&quot;</span>.parse::&lt;Uri&gt;().unwrap()))
-                    .name(<span class="prelude-val">Some</span>(<span class="string">&quot;Martin Smith&quot;</span>.into()))
-                    .image(<span class="prelude-val">Some</span>(Link::new(
-                        <span class="string">&quot;http://example.org/martin/image.jpg&quot;</span>.into(),
-                        <span class="string">&quot;image/jpeg&quot;</span>.into(),
+                    .summary(<span class="prelude-val">Some</span>(<span class="string">&quot;Martin added an article to his blog&quot;</span>.into()))
+                    .published(<span class="prelude-val">Some</span>(DateTime::&lt;Utc&gt;::from_utc(
+                        NaiveDate::from_ymd_opt(<span class="number">2015</span>, <span class="number">2</span>, <span class="number">10</span>)
+                            .unwrap()
+                            .and_hms_opt(<span class="number">15</span>, <span class="number">4</span>, <span class="number">55</span>)
+                            .unwrap(),
+                        Utc,
                     )))
-                    .url(<span class="prelude-val">Some</span>(<span class="string">&quot;http://example.org/martin&quot;</span>.into()))
-                )
-            )
+            })
+            .with_actor(|actor| {
+                actor.with_base(|base_builder| {
+                    base_builder
+                        .object_type(<span class="prelude-val">Some</span>(<span class="string">&quot;Person&quot;</span>.into()))
+                        .id(<span class="prelude-val">Some</span>(
+                            <span class="string">&quot;http://www.test.example/martin&quot;</span>.parse::&lt;Uri&gt;().unwrap(),
+                        ))
+                        .name(<span class="prelude-val">Some</span>(<span class="string">&quot;Martin Smith&quot;</span>.into()))
+                        .image(<span class="prelude-val">Some</span>(Link::new(
+                            <span class="string">&quot;http://example.org/martin/image.jpg&quot;</span>.into(),
+                            <span class="string">&quot;image/jpeg&quot;</span>.into(),
+                        )))
+                        .url(<span class="prelude-val">Some</span>(<span class="string">&quot;http://example.org/martin&quot;</span>.into()))
+                })
+            })
             <span class="comment">// TODO: figure out how to get a &#39;Z&#39; on this. probably requires a time-zone (so not naive)
-            </span>.with_object(|builder|
-                 builder.object_type(<span class="prelude-val">Some</span>(<span class="string">&quot;Article&quot;</span>.into()))
-                 .id(<span class="prelude-val">Some</span>(<span class="string">&quot;http://www.test.example/blog/abc123/xyz&quot;</span>.parse::&lt;Uri&gt;().unwrap()))
-                 .name(<span class="prelude-val">Some</span>(<span class="string">&quot;Why I love Activity Streams&quot;</span>.into()))
-                 .url(<span class="prelude-val">Some</span>(<span class="string">&quot;http://example.org/blog/2011/02/entry&quot;</span>.into()))
-            )
-            .with_target(|target|
-                target.object_type(<span class="prelude-val">Some</span>(<span class="string">&quot;OrderedCollection&quot;</span>.into()))
-                .id(<span class="prelude-val">Some</span>(<span class="string">&quot;http://example.org/blog/&quot;</span>.parse::&lt;Uri&gt;().unwrap()))
-                .name(<span class="prelude-val">Some</span>(<span class="string">&quot;Martin&#39;s Blog&quot;</span>.into()))
-            )
-            .build().unwrap();
+            </span>.with_object(|builder| {
+                builder
+                    .object_type(<span class="prelude-val">Some</span>(<span class="string">&quot;Article&quot;</span>.into()))
+                    .id(<span class="prelude-val">Some</span>(
+                        <span class="string">&quot;http://www.test.example/blog/abc123/xyz&quot;
+                            </span>.parse::&lt;Uri&gt;()
+                            .unwrap(),
+                    ))
+                    .name(<span class="prelude-val">Some</span>(<span class="string">&quot;Why I love Activity Streams&quot;</span>.into()))
+                    .url(<span class="prelude-val">Some</span>(<span class="string">&quot;http://example.org/blog/2011/02/entry&quot;</span>.into()))
+            })
+            .with_target(|target| {
+                target
+                    .object_type(<span class="prelude-val">Some</span>(<span class="string">&quot;OrderedCollection&quot;</span>.into()))
+                    .id(<span class="prelude-val">Some</span>(<span class="string">&quot;http://example.org/blog/&quot;</span>.parse::&lt;Uri&gt;().unwrap()))
+                    .name(<span class="prelude-val">Some</span>(<span class="string">&quot;Martin&#39;s Blog&quot;</span>.into()))
+            })
+            .build()
+            .unwrap();
 
-        <span class="kw">let </span>actual = Document::new(
-            ContextBuilder::new().build().unwrap(),
-            activity
-        );
-        <span class="kw">let </span>expected = <span class="string">r#&quot;{
-  &quot;@context&quot;: {
-    &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;
-  },
-  &quot;type&quot;: &quot;Add&quot;,
-  &quot;published&quot;: &quot;2015-02-10T15:04:55Z&quot;,
-  &quot;summary&quot;: &quot;Martin added an article to his blog&quot;,
-  &quot;actor&quot;: {
-    &quot;type&quot;: &quot;Person&quot;,
-    &quot;id&quot;: &quot;http://www.test.example/martin&quot;,
-    &quot;name&quot;: &quot;Martin Smith&quot;,
-    &quot;url&quot;: &quot;http://example.org/martin&quot;,
-    &quot;image&quot;: {
-      &quot;type&quot;: &quot;Link&quot;,
-      &quot;href&quot;: &quot;http://example.org/martin/image.jpg&quot;,
-      &quot;mediaType&quot;: &quot;image/jpeg&quot;
-    }
-  },
-  &quot;object&quot;: {
-    &quot;type&quot;: &quot;Article&quot;,
-    &quot;id&quot;: &quot;http://www.test.example/blog/abc123/xyz&quot;,
-    &quot;name&quot;: &quot;Why I love Activity Streams&quot;,
-    &quot;url&quot;: &quot;http://example.org/blog/2011/02/entry&quot;
-  },
-  &quot;target&quot;: {
-    &quot;type&quot;: &quot;OrderedCollection&quot;,
-    &quot;id&quot;: &quot;http://example.org/blog/&quot;,
-    &quot;name&quot;: &quot;Martin&#39;s Blog&quot;
-  }
-}&quot;#</span>;
-        <span class="macro">assert!</span>(actual.serialize_pretty().is_ok());
-        <span class="macro">assert_eq!</span>(actual.serialize_pretty().unwrap(), expected);
+        <span class="kw">let </span>actual = Document::new(ContextBuilder::new().build().unwrap(), activity);
+        <span class="kw">let </span>expected = <span class="macro">json!</span>({
+          <span class="string">&quot;@context&quot;</span>: {
+            <span class="string">&quot;@vocab&quot;</span>: <span class="string">&quot;https://www.w3.org/ns/activitystreams&quot;
+          </span>},
+          <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Add&quot;</span>,
+          <span class="string">&quot;published&quot;</span>: <span class="string">&quot;2015-02-10T15:04:55Z&quot;</span>,
+          <span class="string">&quot;summary&quot;</span>: <span class="string">&quot;Martin added an article to his blog&quot;</span>,
+          <span class="string">&quot;actor&quot;</span>: {
+            <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Person&quot;</span>,
+            <span class="string">&quot;id&quot;</span>: <span class="string">&quot;http://www.test.example/martin&quot;</span>,
+            <span class="string">&quot;name&quot;</span>: <span class="string">&quot;Martin Smith&quot;</span>,
+            <span class="string">&quot;url&quot;</span>: <span class="string">&quot;http://example.org/martin&quot;</span>,
+            <span class="string">&quot;image&quot;</span>: {
+              <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Link&quot;</span>,
+              <span class="string">&quot;href&quot;</span>: <span class="string">&quot;http://example.org/martin/image.jpg&quot;</span>,
+              <span class="string">&quot;mediaType&quot;</span>: <span class="string">&quot;image/jpeg&quot;
+            </span>}
+          },
+          <span class="string">&quot;object&quot;</span>: {
+            <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Article&quot;</span>,
+            <span class="string">&quot;id&quot;</span>: <span class="string">&quot;http://www.test.example/blog/abc123/xyz&quot;</span>,
+            <span class="string">&quot;name&quot;</span>: <span class="string">&quot;Why I love Activity Streams&quot;</span>,
+            <span class="string">&quot;url&quot;</span>: <span class="string">&quot;http://example.org/blog/2011/02/entry&quot;
+          </span>},
+          <span class="string">&quot;target&quot;</span>: {
+            <span class="string">&quot;type&quot;</span>: <span class="string">&quot;OrderedCollection&quot;</span>,
+            <span class="string">&quot;id&quot;</span>: <span class="string">&quot;http://example.org/blog/&quot;</span>,
+            <span class="string">&quot;name&quot;</span>: <span class="string">&quot;Martin&#39;s Blog&quot;
+          </span>}
+        });
+        <span class="macro">assert_eq!</span>(serde_json::to_value(actual).unwrap(), expected);
     }
 
     <span class="attribute">#[test]
@@ -1037,7 +1071,8 @@
             .object_type(<span class="prelude-val">Some</span>(<span class="string">&quot;Person&quot;</span>.into()))
             .id(<span class="prelude-val">Some</span>(<span class="string">&quot;http://joe.website.example/&quot;</span>.parse::&lt;Uri&gt;().unwrap()))
             .name(<span class="prelude-val">Some</span>(<span class="string">&quot;Joe Smith&quot;</span>.into()))
-            .build().unwrap();
+            .build()
+            .unwrap();
         <span class="kw">let </span>actual = Document::new(
             ContextBuilder::new().build().unwrap(),
             ObjectBuilder::new()
@@ -1045,31 +1080,34 @@
                 .object_type(<span class="prelude-val">Some</span>(<span class="string">&quot;Note&quot;</span>.into()))
                 .name(<span class="prelude-val">Some</span>(<span class="string">&quot;My favourite stew recipe&quot;</span>.into()))
                 .published(<span class="prelude-val">Some</span>(DateTime::&lt;Utc&gt;::from_utc(
-                    NaiveDate::from_ymd(<span class="number">2014</span>, <span class="number">8</span>, <span class="number">21</span>).and_hms(<span class="number">12</span>, <span class="number">34</span>, <span class="number">56</span>),
+                    NaiveDate::from_ymd_opt(<span class="number">2014</span>, <span class="number">8</span>, <span class="number">21</span>)
+                        .unwrap()
+                        .and_hms_opt(<span class="number">12</span>, <span class="number">34</span>, <span class="number">56</span>)
+                        .unwrap(),
                     Utc,
                 )))
                 .attributed_to(<span class="macro">vec!</span>[AttributedTo::Object(subject)])
-                .build().unwrap()
+                .build()
+                .unwrap(),
         );
 
-        <span class="kw">let </span>expected = <span class="string">r#&quot;{
-  &quot;@context&quot;: {
-    &quot;@vocab&quot;: &quot;https://www.w3.org/ns/activitystreams&quot;
-  },
-  &quot;type&quot;: &quot;Note&quot;,
-  &quot;id&quot;: &quot;http://example.org/foo&quot;,
-  &quot;name&quot;: &quot;My favourite stew recipe&quot;,
-  &quot;published&quot;: &quot;2014-08-21T12:34:56Z&quot;,
-  &quot;attributedTo&quot;: [
-    {
-      &quot;type&quot;: &quot;Person&quot;,
-      &quot;id&quot;: &quot;http://joe.website.example/&quot;,
-      &quot;name&quot;: &quot;Joe Smith&quot;
-    }
-  ]
-}&quot;#</span>;
-        <span class="macro">assert!</span>(actual.serialize_pretty().is_ok());
-        <span class="macro">assert_eq!</span>(actual.serialize_pretty().unwrap(), expected);
+        <span class="kw">let </span>expected = <span class="macro">json!</span>({
+          <span class="string">&quot;@context&quot;</span>: {
+            <span class="string">&quot;@vocab&quot;</span>: <span class="string">&quot;https://www.w3.org/ns/activitystreams&quot;
+          </span>},
+          <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Note&quot;</span>,
+          <span class="string">&quot;id&quot;</span>: <span class="string">&quot;http://example.org/foo&quot;</span>,
+          <span class="string">&quot;name&quot;</span>: <span class="string">&quot;My favourite stew recipe&quot;</span>,
+          <span class="string">&quot;published&quot;</span>: <span class="string">&quot;2014-08-21T12:34:56Z&quot;</span>,
+          <span class="string">&quot;attributedTo&quot;</span>: [
+            {
+              <span class="string">&quot;type&quot;</span>: <span class="string">&quot;Person&quot;</span>,
+              <span class="string">&quot;id&quot;</span>: <span class="string">&quot;http://joe.website.example/&quot;</span>,
+              <span class="string">&quot;name&quot;</span>: <span class="string">&quot;Joe Smith&quot;
+            </span>}
+          ]
+        });
+        <span class="macro">assert_eq!</span>(serde_json::to_value(actual).unwrap(), expected);
     }
 }
 </code></pre></div>
